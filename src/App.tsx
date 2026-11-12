@@ -11,6 +11,7 @@ import Login from './pages/Login'
 import Members from './pages/Members'
 import Pending from './pages/Pending'
 import Placeholder from './pages/Placeholder'
+import Polls from './pages/Polls'
 import Register from './pages/Register'
 
 export default function App() {
@@ -28,10 +29,7 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="announcements" element={<Announcements />} />
               <Route path="events" element={<Events />} />
-              <Route
-                path="polls"
-                element={<Placeholder title="Polls" description="Vote on organization decisions." />}
-              />
+              <Route path="polls" element={<Polls />} />
               <Route
                 path="chat"
                 element={<Placeholder title="Chat rooms" description="Talk with other members." />}

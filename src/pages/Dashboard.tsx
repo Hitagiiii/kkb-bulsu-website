@@ -13,6 +13,7 @@ export default function Dashboard() {
   const { profile } = useAuth()
   const [latest, setLatest] = useState<Latest[] | null>(null)
   const [events, setEvents] = useState<EventRow[] | null>(null)
+  const [pollsWaiting, setPollsWaiting] = useState<number | null>(null)
 
   useEffect(() => {
     supabase
@@ -29,6 +30,16 @@ export default function Dashboard() {
       .order('starts_at')
       .limit(3)
       .then(({ data }) => setEvents((data ?? []) as EventRow[]))
+    Promise.all([
+      supabase.from('polls').select('id, closes_at'),
+      supabase.from('poll_votes').select('poll_id'),
+    ]).then(([p, v]) => {
+      const voted = new Set(((v.data ?? []) as { poll_id: string }[]).map((r) => r.poll_id))
+      const open = ((p.data ?? []) as { id: string; closes_at: string | null }[]).filter(
+        (r) => !r.closes_at || new Date(r.closes_at).getTime() > Date.now(),
+      )
+      setPollsWaiting(open.filter((r) => !voted.has(r.id)).length)
+    })
   }, [])
 
   const firstName = profile?.full_name.split(' ')[0] || 'there'
@@ -42,6 +53,15 @@ export default function Dashboard() {
       <p className="mt-2 text-slate-600">
         You're signed in as {profile ? ROLE_LABEL[profile.role].toLowerCase() : 'a member'}.
       </p>
+
+      {pollsWaiting !== null && pollsWaiting > 0 && (
+        <Link
+          to="/polls"
+          className="mt-8 block rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-950 hover:bg-amber-100"
+        >
+          {pollsWaiting === 1 ? "1 poll is" : `${pollsWaiting} polls are`} waiting for your vote
+        </Link>
+      )}
 
       <section className="mt-10" aria-label="Latest announcements">
         <div className="flex items-baseline justify-between gap-4">
