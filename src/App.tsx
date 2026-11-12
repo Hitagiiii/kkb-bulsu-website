@@ -2,7 +2,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
 import RequireAuth from './auth/RequireAuth'
 import Layout from './components/Layout'
+import Announcements from './pages/Announcements'
+import BudgetDetail from './pages/BudgetDetail'
 import Dashboard from './pages/Dashboard'
+import Finance from './pages/Finance'
 import Login from './pages/Login'
 import Members from './pages/Members'
 import Pending from './pages/Pending'
@@ -22,10 +25,7 @@ export default function App() {
           <Route element={<RequireAuth />}>
             <Route element={<Layout />}>
               <Route index element={<Dashboard />} />
-              <Route
-                path="announcements"
-                element={<Placeholder title="Announcements" description="News and notices from the officers." />}
-              />
+              <Route path="announcements" element={<Announcements />} />
               <Route
                 path="events"
                 element={<Placeholder title="Events" description="Calendar, meeting places and call links." />}
@@ -39,12 +39,10 @@ export default function App() {
                 element={<Placeholder title="Chat rooms" description="Talk with other members." />}
               />
 
-              {/* Officers, treasurer and admin */}
+              {/* Officers, treasurer and admin can view. Only treasurer and admin can edit (enforced by the database). */}
               <Route element={<RequireAuth minRole="officer" />}>
-                <Route
-                  path="finance"
-                  element={<Placeholder title="Finance" description="Budgets, expenses and receipts." />}
-                />
+                <Route path="finance" element={<Finance />} />
+                <Route path="finance/:budgetId" element={<BudgetDetail />} />
               </Route>
 
               {/* Admin only */}

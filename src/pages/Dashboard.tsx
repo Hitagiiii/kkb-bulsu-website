@@ -1,10 +1,27 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { supabase } from '../lib/supabase'
 import { hasRole, ROLE_LABEL } from '../lib/types'
+import { formatDateTime, formatEventTime, type Announcement } from '../lib/announcements'
 import { NAV_ITEMS } from '../nav'
+
+type Latest = Pick<Announcement, 'id' | 'title' | 'body' | 'pinned' | 'created_at' | 'event_at'>
 
 export default function Dashboard() {
   const { profile } = useAuth()
+  const [latest, setLatest] = useState<Latest[] | null>(null)
+
+  useEffect(() => {
+    supabase
+      .from('announcements')
+      .select('id, title, body, pinned, created_at, event_at')
+      .order('pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setLatest((data ?? []) as Latest[]))
+  }, [])
+
   const firstName = profile?.full_name.split(' ')[0] || 'there'
   const links = NAV_ITEMS.filter(
     (i) => i.to !== '/' && (!i.minRole || hasRole(profile?.role, i.minRole)),
@@ -12,20 +29,50 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-display text-4xl font-semibold">Hello, {firstName}</h1>
+      <h1 className="font-display text-3xl font-semibold sm:text-4xl">Hello, {firstName}</h1>
       <p className="mt-2 text-slate-600">
         You're signed in as {profile ? ROLE_LABEL[profile.role].toLowerCase() : 'a member'}.
       </p>
+
+      <section className="mt-10" aria-label="Latest announcements">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-xl font-semibold">Latest announcements</h2>
+          <Link to="/announcements" className="py-1 text-sm font-medium text-brand-700 hover:underline">
+            See all
+          </Link>
+        </div>
+        {latest === null && <p className="mt-3 text-sm text-slate-500">Loading…</p>}
+        {latest && latest.length === 0 && <p className="mt-3 text-sm text-slate-500">Nothing has been posted yet.</p>}
+        {latest && latest.length > 0 && (
+          <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
+            {latest.map((a) => (
+              <li key={a.id}>
+                <Link to="/announcements" className="block py-4 transition-colors hover:text-brand-700">
+                  <p className="font-medium break-words">
+                    {a.pinned && <span className="mr-2 text-xs font-semibold text-brand-700">Pinned</span>}
+                    {a.title}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm break-words text-slate-600">{a.body}</p>
+                  {a.event_at && (
+                    <p className="mt-1 text-sm font-medium text-brand-800">Event: {formatEventTime(a.event_at)}</p>
+                  )}
+                  <p className="mt-1 text-xs text-slate-500">Posted {formatDateTime(a.created_at)}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <ul className="mt-10 divide-y divide-slate-200 border-y border-slate-200">
         {links.map((item) => (
           <li key={item.to}>
             <Link
               to={item.to}
-              className="flex items-baseline justify-between gap-4 py-4 transition-colors hover:text-brand-700"
+              className="flex flex-col gap-1 py-4 transition-colors hover:text-brand-700 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
             >
               <span className="font-display text-lg font-semibold">{item.label}</span>
-              <span className="text-right text-sm text-slate-500">{item.description}</span>
+              <span className="text-sm text-slate-500 sm:text-right">{item.description}</span>
             </Link>
           </li>
         ))}
