@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Announcements from './pages/Announcements'
 import BudgetDetail from './pages/BudgetDetail'
 import Dashboard from './pages/Dashboard'
+import Events from './pages/Events'
 import Finance from './pages/Finance'
 import Login from './pages/Login'
 import Members from './pages/Members'
@@ -26,10 +27,7 @@ export default function App() {
             <Route element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="announcements" element={<Announcements />} />
-              <Route
-                path="events"
-                element={<Placeholder title="Events" description="Calendar, meeting places and call links." />}
-              />
+              <Route path="events" element={<Events />} />
               <Route
                 path="polls"
                 element={<Placeholder title="Polls" description="Vote on organization decisions." />}

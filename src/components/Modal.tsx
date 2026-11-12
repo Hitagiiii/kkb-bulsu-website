@@ -4,10 +4,13 @@ import { useEffect, useRef, type ReactNode } from 'react'
 export default function Modal({
   label,
   onClose,
+  dismissOnBackdrop = true,
   children,
 }: {
   label: string
   onClose: () => void
+  /** Turn off for forms, so a stray tap outside doesn't throw away what was typed */
+  dismissOnBackdrop?: boolean
   children: ReactNode
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
@@ -35,7 +38,7 @@ export default function Modal({
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-6"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (dismissOnBackdrop && e.target === e.currentTarget) onClose()
       }}
     >
       <div

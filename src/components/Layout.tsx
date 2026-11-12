@@ -52,6 +52,12 @@ export default function Layout() {
 
   const items = NAV_ITEMS.filter((i) => !i.minRole || hasRole(profile?.role, i.minRole))
   const name = profile?.full_name || session?.user.email || 'Member'
+  const badgeFor = (to: string) =>
+    to === '/announcements'
+      ? upcoming.filter((u) => u.source === 'announcement').length
+      : to === '/events'
+        ? upcoming.filter((u) => u.source === 'event').length
+        : 0
 
   function setCollapsedAndRemember(value: boolean) {
     setCollapsed(value)
@@ -132,10 +138,10 @@ export default function Layout() {
               }
             >
               {item.label}
-              {item.to === '/announcements' && upcoming.length > 0 && (
+              {badgeFor(item.to) > 0 && (
                 <span className="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-semibold text-brand-900">
-                  {upcoming.length}
-                  <span className="sr-only"> events starting within 24 hours</span>
+                  {badgeFor(item.to)}
+                  <span className="sr-only"> starting within 24 hours</span>
                 </span>
               )}
             </NavLink>
@@ -181,13 +187,13 @@ export default function Layout() {
           >
             <ul className="space-y-2">
               {upcoming.map((u) => (
-                <li key={`${u.id}@${u.event_at}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <li key={`${u.source}:${u.id}@${u.at}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                   <span className="min-w-0 break-words">
-                    <strong>Starts {u.event_at ? timeUntil(u.event_at) : 'soon'}:</strong>{' '}
-                    <Link to="/announcements" className="underline underline-offset-2">
+                    <strong>Starts {timeUntil(u.at)}:</strong>{' '}
+                    <Link to={u.to} className="underline underline-offset-2">
                       {u.title}
                     </Link>
-                    {u.event_at && <span className="text-amber-900/80"> ({formatEventTime(u.event_at)})</span>}
+                    <span className="text-amber-900/80"> ({formatEventTime(u.at)})</span>
                   </span>
                   <button type="button" onClick={() => dismiss(u)} className="py-1 underline underline-offset-2">
                     Dismiss

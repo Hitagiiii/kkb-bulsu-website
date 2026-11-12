@@ -1,14 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './supabase'
-import { DAY_MS, formatEventTime, type Announcement } from './announcements'
+import { DAY_MS, formatEventTime } from './announcements'
 
-export type UpcomingItem = Pick<Announcement, 'id' | 'title' | 'event_at'>
+export interface UpcomingItem {
+  id: string
+  title: string
+  at: string // ISO start time
+  source: 'announcement' | 'event'
+  to: string // where the banner link goes
+}
 
 const DISMISSED_KEY = 'kkb.dismissed.events'
 const NOTIFIED_KEY = 'kkb.notified.events'
 
 // An event that gets rescheduled counts as new, so its reminder shows again
-const keyOf = (i: UpcomingItem) => `${i.id}@${i.event_at}`
+const keyOf = (i: UpcomingItem) => `${i.source}:${i.id}@${i.at}`
 
 function readSet(key: string): Set<string> {
   try {
@@ -29,8 +35,8 @@ function writeSet(key: string, set: Set<string>) {
 type Permission = NotificationPermission | 'unsupported'
 
 /**
- * Announcements whose event starts within the next 24 hours.
- * Refreshes every 5 minutes, when the tab regains focus, and when announcements change.
+ * Events and announced events that start within the next 24 hours.
+ * Refreshes every 5 minutes, when the tab regains focus, and when the data changes.
  */
 export function useUpcoming() {
   const [items, setItems] = useState<UpcomingItem[]>([])
@@ -41,13 +47,26 @@ export function useUpcoming() {
 
   const load = useCallback(async () => {
     const now = Date.now()
-    const { data } = await supabase
-      .from('announcements')
-      .select('id, title, event_at')
-      .gte('event_at', new Date(now).toISOString())
-      .lte('event_at', new Date(now + DAY_MS).toISOString())
-      .order('event_at')
-    setItems((data ?? []) as UpcomingItem[])
+    const from = new Date(now).toISOString()
+    const to = new Date(now + DAY_MS).toISOString()
+    const [a, e] = await Promise.all([
+      supabase.from('announcements').select('id, title, event_at').gte('event_at', from).lte('event_at', to),
+      supabase.from('events').select('id, title, starts_at').gte('starts_at', from).lte('starts_at', to),
+    ])
+
+    const events: UpcomingItem[] = ((e.data ?? []) as { id: string; title: string; starts_at: string }[]).map(
+      (r) => ({ id: r.id, title: r.title, at: r.starts_at, source: 'event', to: '/events' }),
+    )
+
+    // If an announcement and an event start at the same moment, only show the event
+    const eventTimes = new Set(events.map((x) => new Date(x.at).getTime()))
+    const announced: UpcomingItem[] = ((a.data ?? []) as { id: string; title: string; event_at: string | null }[])
+      .filter((r) => r.event_at && !eventTimes.has(new Date(r.event_at).getTime()))
+      .map((r) => ({ id: r.id, title: r.title, at: r.event_at!, source: 'announcement', to: '/announcements' }))
+
+    setItems(
+      [...events, ...announced].sort((x, y) => new Date(x.at).getTime() - new Date(y.at).getTime()),
+    )
   }, [])
 
   useEffect(() => {
@@ -56,8 +75,9 @@ export function useUpcoming() {
     const onFocus = () => void load()
     window.addEventListener('focus', onFocus)
     const channel = supabase
-      .channel('upcoming-events')
+      .channel('upcoming-reminders')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'announcements' }, () => void load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => void load())
       .subscribe()
     return () => {
       window.clearInterval(timer)
@@ -78,7 +98,7 @@ export function useUpcoming() {
       changed = true
       try {
         new Notification(`Coming up: ${item.title}`, {
-          body: item.event_at ? `Starts ${formatEventTime(item.event_at)}` : undefined,
+          body: `Starts ${formatEventTime(item.at)}`,
           tag: key,
         })
       } catch {
