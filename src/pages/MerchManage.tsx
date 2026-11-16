@@ -23,6 +23,8 @@ import {
 import Chip from '../components/Chip'
 import OrderRow from '../components/OrderRow'
 import PaymentInfoCard from '../components/PaymentInfoCard'
+import StatCard from '../components/StatCard'
+import { CheckIcon } from '../components/Icons'
 import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
 
 interface Person {
@@ -140,25 +142,11 @@ export default function MerchManage() {
       {loading && <p className="mt-10 text-sm text-slate-500">Loading…</p>}
 
       {!loading && (
-        <section aria-label="Totals" className="mt-8 border-y border-slate-200 py-5">
-          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div>
-              <dt className="text-sm text-slate-500">Expected</dt>
-              <dd className="font-display text-xl font-semibold">{peso(expected)}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-slate-500">Collected</dt>
-              <dd className="font-display text-xl font-semibold">{peso(collected)}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-slate-500">Still to collect</dt>
-              <dd className="font-display text-xl font-semibold">{peso(expected - collected)}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-slate-500">Refunds due</dt>
-              <dd className={'font-display text-xl font-semibold ' + (refunds > 0 ? 'text-amber-800' : '')}>{peso(refunds)}</dd>
-            </div>
-          </dl>
+        <section aria-label="Totals" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatCard label="Expected" value={peso(expected)} />
+          <StatCard label="Collected" value={peso(collected)} tone="good" />
+          <StatCard label="Still to collect" value={peso(expected - collected)} tone={expected - collected > 0 ? 'warn' : 'default'} />
+          <StatCard label="Refunds due" value={peso(refunds)} tone={refunds > 0 ? 'bad' : 'default'} />
         </section>
       )}
 
@@ -309,6 +297,29 @@ function FolderBar({
         </div>
       )}
     </div>
+  )
+}
+
+/* ---------- where the item is in its life ---------- */
+function StageSteps({ stage }: { stage: Stage }) {
+  const idx = STAGES.indexOf(stage)
+  return (
+    <ol className="mt-5 flex items-start" aria-label="Sale stage">
+      {STAGES.map((s, i) => (
+        <li key={s} className="relative flex flex-1 flex-col items-center text-center" aria-current={i === idx ? 'step' : undefined}>
+          {i > 0 && <span aria-hidden="true" className={'absolute top-3 -left-1/2 h-0.5 w-full ' + (i <= idx ? 'bg-brand-700' : 'bg-slate-200')} />}
+          <span
+            className={
+              'relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-white ' +
+              (i < idx ? 'bg-brand-700' : i === idx ? 'border-2 border-gold-400 bg-white' : 'bg-slate-200')
+            }
+          >
+            {i < idx && <CheckIcon size={14} />}
+          </span>
+          <span className={'mt-1.5 text-xs ' + (i <= idx ? 'font-medium text-ink' : 'text-slate-500')}>{STAGE_LABEL[s]}</span>
+        </li>
+      ))}
+    </ol>
   )
 }
 
@@ -509,7 +520,7 @@ function ItemSection({
   }
 
   return (
-    <section aria-label={item.name}>
+    <section aria-label={item.name} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="font-display text-xl font-semibold break-words">{item.name}</h2>
         <span className="font-display text-lg font-semibold">{peso(item.price)}</span>
@@ -519,6 +530,8 @@ function ItemSection({
         <Chip tone={item.stage === 'open' ? 'brand' : item.stage === 'arrived' ? 'green' : 'slate'}>{STAGE_LABEL[item.stage]}</Chip>
         {item.order_deadline && <span>Deadline {formatDateTime(item.order_deadline)}</span>}
       </p>
+
+      <StageSteps stage={item.stage} />
 
       <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
         <div>

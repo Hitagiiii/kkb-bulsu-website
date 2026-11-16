@@ -50,12 +50,25 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
     }
   }
 
+  const dark = !(editing && editable)
+  const lightBtn = 'rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/25'
+
   return (
-    <section aria-label="How to pay" className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="font-display text-xl font-semibold">How to pay (GCash)</h2>
+    <section
+      aria-label="How to pay"
+      className={
+        'relative overflow-hidden rounded-2xl p-5 shadow-sm sm:p-6 ' +
+        (dark ? 'bg-linear-to-br from-brand-900 via-brand-800 to-brand-700 text-white' : 'border border-slate-200 bg-white')
+      }
+    >
+      {dark && <span aria-hidden="true" className="absolute -top-14 -right-10 h-44 w-44 rounded-full bg-white/10" />}
+      <div className="relative flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className={'text-xs font-semibold tracking-wide uppercase ' + (dark ? 'text-gold-400' : 'text-brand-700')}>Pay with GCash</p>
+          <h2 className="font-display text-xl font-semibold">How to pay</h2>
+        </div>
         {editable && !editing && (
-          <button onClick={() => setEditing(true)} className={subtleButtonClass}>
+          <button onClick={() => setEditing(true)} className={lightBtn}>
             {hasInfo ? 'Edit payment details' : 'Add payment details'}
           </button>
         )}
@@ -72,29 +85,29 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
           onCancel={() => setEditing(false)}
         />
       ) : hasInfo ? (
-        <div className="mt-3 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-start">
+        <div className="relative mt-4 grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
           {qrUrl && (
-            <a href={qrUrl} target="_blank" rel="noreferrer" title="Open full size to save it">
-              <img src={qrUrl} alt="GCash QR code" className="h-44 w-44 rounded-lg border border-slate-200 bg-white object-contain" />
+            <a href={qrUrl} target="_blank" rel="noreferrer" title="Open full size to save it" className="justify-self-start rounded-xl bg-white p-2 shadow">
+              <img src={qrUrl} alt="GCash QR code" className="h-40 w-40 object-contain" />
             </a>
           )}
           <div className="min-w-0">
             {settings?.gcash_number && (
               <p className="flex flex-wrap items-center gap-3">
-                <span className="font-display text-2xl font-semibold tracking-wide">{settings.gcash_number}</span>
-                <button type="button" onClick={() => void copyNumber()} className={subtleButtonClass}>
+                <span className="font-display text-3xl font-semibold tracking-wide text-gold-400">{settings.gcash_number}</span>
+                <button type="button" onClick={() => void copyNumber()} className={lightBtn}>
                   {copied ? 'Copied' : 'Copy number'}
                 </button>
               </p>
             )}
-            {settings?.gcash_name && <p className="mt-1 text-sm text-slate-600">Account name: {settings.gcash_name}</p>}
+            {settings?.gcash_name && <p className="mt-1 text-sm text-white/80">Account name: {settings.gcash_name}</p>}
             {settings?.instructions && (
-              <p className="mt-3 text-sm break-words whitespace-pre-wrap text-slate-700">{settings.instructions}</p>
+              <p className="mt-3 text-sm break-words whitespace-pre-wrap text-white/85">{settings.instructions}</p>
             )}
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="relative mt-3 text-sm text-white/75">
           Members will see these details when they order. Add your GCash number, a QR image, or both.
         </p>
       )}

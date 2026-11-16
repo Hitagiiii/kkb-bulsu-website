@@ -20,6 +20,8 @@ import Modal from '../components/Modal'
 import PrintBill from '../components/PrintBill'
 import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
 
+const CAT_COLORS = ['bg-brand-800', 'bg-gold-400', 'bg-brand-600', 'bg-slate-500', 'bg-amber-600', 'bg-rose-400', 'bg-slate-300']
+
 export default function BudgetDetail() {
   const { budgetId } = useParams<{ budgetId: string }>()
   const { profile } = useAuth()
@@ -107,6 +109,13 @@ export default function BudgetDetail() {
   const selected = expenses.find((x) => x.id === selectedId) ?? null
   const hasVoided = expenses.length !== active.length
 
+  const catMap = new Map<string, number>()
+  for (const x of active) {
+    const key = x.category || 'General'
+    catMap.set(key, (catMap.get(key) ?? 0) + Math.round(x.amount * 100))
+  }
+  const categories = [...catMap.entries()].sort((a, b) => b[1] - a[1])
+
   async function printBill() {
     const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('#print-bill img'))
     await Promise.all(
@@ -160,35 +169,66 @@ export default function BudgetDetail() {
           </p>
         )}
 
-        <section aria-label="Budget summary" className="mt-6 border-y border-slate-200 py-5 sm:mt-8 sm:py-6">
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-[1fr_1fr_1.4fr] sm:gap-6">
-            <div className="col-span-2 order-first sm:order-last sm:col-span-1">
-              <dt className="text-sm text-slate-500">{over ? 'Over budget by' : 'Money left'}</dt>
-              <dd
-                className={
-                  'font-display text-4xl font-bold tracking-tight break-words ' +
-                  (over ? 'text-red-700' : 'text-brand-800')
-                }
-              >
-                {peso(Math.abs(left))}
-              </dd>
+        <section aria-label="Budget summary" className="mt-6">
+          <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-brand-900 via-brand-800 to-brand-700 p-5 text-white shadow-sm sm:p-7">
+            <span aria-hidden="true" className="absolute -top-16 -right-10 h-52 w-52 rounded-full bg-white/10" />
+            <p className="relative text-sm text-white/70">{over ? 'Over budget by' : 'Money left'}</p>
+            <p className={'font-display relative text-5xl font-bold tracking-tight tabular-nums break-words sm:text-6xl ' + (over ? 'text-red-200' : '')}>
+              {peso(Math.abs(left))}
+            </p>
+            <div className="relative mt-5 h-2.5 overflow-hidden rounded-full bg-white/20" aria-hidden="true">
+              <div
+                className={'h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none ' + (over ? 'bg-red-300' : 'bg-gold-400')}
+                style={{ width: `${pct}%` }}
+              />
             </div>
-            <div>
+            <p className="relative mt-2 text-sm text-white/70">{Math.round(pct)}% of the budget used</p>
+          </div>
+
+          <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <dt className="text-sm text-slate-500">Total budget</dt>
-              <dd className="font-display text-xl font-semibold break-words sm:text-2xl">{peso(budget.total_budget)}</dd>
+              <dd className="font-display mt-1 text-2xl font-semibold tabular-nums break-words">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
             </div>
-            <div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <dt className="text-sm text-slate-500">Spent</dt>
-              <dd className="font-display text-xl font-semibold break-words sm:text-2xl">{peso(spent)}</dd>
+              <dd className="font-display mt-1 text-2xl font-semibold tabular-nums break-words">{peso(spent)}</dd>
+            </div>
+            <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-1">
+              <dt className="text-sm text-slate-500">Receipts missing</dt>
+              <dd className={'font-display mt-1 text-2xl font-semibold ' + (missingCount > 0 ? 'text-amber-800' : 'text-brand-800')}>
+                {missingCount}
+              </dd>
             </div>
           </dl>
-          <div className="mt-6 h-2 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
-            <div
-              className={'h-full rounded-full ' + (over ? 'bg-red-600' : 'bg-brand-700')}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+
+          {categories.length > 0 && spentCents > 0 && (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+              <h3 className="font-display text-lg font-semibold">Where the money went</h3>
+              <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-slate-100" role="img" aria-label="Spending by category">
+                {categories.map(([cat, cents], i) => (
+                  <span
+                    key={cat}
+                    className={CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]}
+                    style={{ width: `${(cents / spentCents) * 100}%` }}
+                    title={`${cat}: ${peso(cents / 100)}`}
+                  />
+                ))}
+              </div>
+              <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
+                {categories.map(([cat, cents], i) => (
+                  <li key={cat} className="flex items-center justify-between gap-3">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className={'h-2.5 w-2.5 shrink-0 rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} />
+                      <span className="truncate">{cat}</span>
+                    </span>
+                    <span className="tabular-nums text-slate-600">{peso(cents / 100)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         <BudgetFolderPicker budgetId={budget.id} />
@@ -226,45 +266,45 @@ export default function BudgetDetail() {
             </p>
           )}
 
-          <ul className="mt-4 grid gap-3 sm:flex sm:flex-wrap">
+          <ul className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             {visible.map((x) => {
               const isSelected = x.id === selectedId
               const voided = !!x.voided_at
               const thumb = x.receipt_path ? urls[x.receipt_path] : undefined
               return (
-                <li key={x.id} className="sm:w-auto">
+                <li key={x.id}>
                   <button
                     type="button"
                     onClick={() => setSelectedId(isSelected ? null : x.id)}
                     aria-pressed={isSelected}
                     className={
-                      'flex w-full items-center justify-between gap-3 rounded-3xl border px-5 py-3 text-left transition-colors sm:w-auto ' +
-                      (isSelected
-                        ? 'border-brand-700 bg-brand-50'
-                        : 'border-slate-200 bg-white hover:border-slate-400') +
-                      (voided ? ' opacity-60' : '')
+                      'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 ' +
+                      (isSelected ? 'bg-brand-50 ' : '') +
+                      (voided ? 'opacity-60' : '')
                     }
                   >
-                    <span className="min-w-0">
-                      <span
-                        className={'font-display block text-xl font-semibold ' + (voided ? 'line-through' : '')}
-                      >
-                        {peso(x.amount)}
+                    {thumb ? (
+                      <img src={thumb} alt="Receipt thumbnail" className="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover" />
+                    ) : x.receipt_path ? (
+                      <span className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+                    ) : (
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-amber-500 bg-amber-50 text-center text-[10px] leading-tight font-semibold text-amber-800">
+                        No
+                        <br />
+                        receipt
                       </span>
-                      <span className="block text-sm break-words">{x.description}</span>
-                      <span className="block text-xs text-slate-500">
-                        {x.category}, {formatDate(x.spent_on)}
-                      </span>
-                      {voided && <span className="block text-xs font-medium text-red-700">Voided</span>}
-                      {!voided && !x.receipt_path && (
-                        <span className="mt-2 inline-block rounded border border-dashed border-amber-500 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-                          No receipt
-                        </span>
-                      )}
-                    </span>
-                    {thumb && (
-                      <img src={thumb} alt="Receipt thumbnail" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                     )}
+                    <span className="min-w-0 flex-1">
+                      <span className={'block text-sm font-medium break-words ' + (voided ? 'line-through' : '')}>{x.description}</span>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-700">{x.category}</span>
+                        <span>{formatDate(x.spent_on)}</span>
+                        {voided && <span className="font-medium text-red-700">Voided</span>}
+                      </span>
+                    </span>
+                    <span className={'font-display shrink-0 text-lg font-semibold tabular-nums ' + (voided ? 'line-through' : '')}>
+                      {peso(x.amount)}
+                    </span>
                   </button>
                 </li>
               )

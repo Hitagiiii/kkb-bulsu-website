@@ -46,8 +46,8 @@ export default function MonthCalendar({
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
         <h2 className="font-display text-xl font-semibold">
           {cursor.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}
         </h2>
@@ -72,7 +72,7 @@ export default function MonthCalendar({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-7 text-center text-xs font-medium text-slate-500">
+      <div className="grid grid-cols-7 bg-slate-50 text-center text-xs font-medium text-slate-500">
         {WEEKDAYS.map((d) => (
           <div key={d} className="py-2">
             <span className="sm:hidden">{d[0]}</span>
@@ -81,7 +81,7 @@ export default function MonthCalendar({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 border-r border-b border-slate-200 bg-white">
+      <div className="grid grid-cols-7">
         {cells.map((date) => {
           const key = dayKey(date)
           const inMonth = date.getMonth() === cursor.getMonth()
@@ -92,9 +92,9 @@ export default function MonthCalendar({
             <div
               key={key}
               className={
-                'min-h-14 border-t border-l border-slate-200 sm:min-h-24 ' +
-                (isSelected ? 'bg-brand-50 ' : '') +
-                (inMonth ? '' : 'bg-slate-50 text-slate-400')
+                'min-h-14 border-t border-r border-slate-100 sm:min-h-24 ' +
+                (isSelected ? 'bg-brand-50 ring-2 ring-brand-600/40 ring-inset ' : '') +
+                (inMonth ? '' : 'bg-slate-50/70 text-slate-400')
               }
             >
               <button
@@ -133,7 +133,7 @@ export default function MonthCalendar({
                     key={e.id}
                     type="button"
                     onClick={() => onOpenEvent(e.id)}
-                    className="block w-full truncate rounded bg-brand-100 px-1.5 py-0.5 text-left text-xs text-brand-900 hover:bg-brand-600 hover:text-white"
+                    className="block w-full truncate rounded-md bg-brand-100 px-1.5 py-0.5 text-left text-xs font-medium text-brand-900 transition-colors hover:bg-brand-700 hover:text-white"
                   >
                     {formatTime(e.starts_at)} {e.title}
                   </button>
