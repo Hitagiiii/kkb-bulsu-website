@@ -1,0 +1,271 @@
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { supabase } from '../lib/supabase'
+import { hasRole, ROLE_LABEL, type Role } from '../lib/types'
+import { errorMessage } from '../lib/finance'
+import { formatDateTime } from '../lib/announcements'
+import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import Chip from '../components/Chip'
+
+const BUCKET = 'documents'
+const MAX_BYTES = 10 * 1024 * 1024
+const CATEGORIES = ['Constitution', 'Minutes', 'Forms', 'Financial', 'Templates', 'Other']
+const ACCESS: { value: Role; label: string }[] = [
+  { value: 'member', label: 'All approved members' },
+  { value: 'officer', label: 'Officers and above' },
+  { value: 'treasurer', label: 'Treasurer and admin' },
+  { value: 'admin', label: 'Admin only' },
+]
+
+interface DocRow {
+  id: string
+  title: string
+  description: string | null
+  category: string
+  storage_path: string
+  file_name: string
+  file_size: number | null
+  min_role: Role
+  uploaded_name: string
+  created_at: string
+}
+
+function formatSize(bytes: number | null): string {
+  if (!bytes) return ''
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+export default function Documents() {
+  const { profile } = useAuth()
+  const canUpload = hasRole(profile?.role, 'officer')
+  const [docs, setDocs] = useState<DocRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [category, setCategory] = useState('all')
+  const [search, setSearch] = useState('')
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.from('documents').select('*').order('created_at', { ascending: false }).limit(500)
+    if (error) setError(error.message)
+    else {
+      setDocs((data ?? []) as DocRow[])
+      setError(null)
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  async function download(d: DocRow) {
+    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(d.storage_path, 120, { download: d.file_name })
+    if (error || !data) return setError(errorMessage(error, 'Could not open the file.'))
+    window.location.assign(data.signedUrl)
+  }
+
+  async function remove(d: DocRow) {
+    const { error } = await supabase.from('documents').delete().eq('id', d.id)
+    if (error) return setError(errorMessage(error, 'Could not delete the document.'))
+    await supabase.storage.from(BUCKET).remove([d.storage_path])
+    setDeleting(null)
+    await load()
+  }
+
+  const q = search.trim().toLowerCase()
+  const shown = docs.filter(
+    (d) =>
+      (category === 'all' || d.category === category) &&
+      (!q || d.title.toLowerCase().includes(q) || (d.description ?? '').toLowerCase().includes(q) || d.file_name.toLowerCase().includes(q)),
+  )
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Documents</h1>
+          <p className="mt-2 text-slate-600">Forms, templates and records that stay with the organization.</p>
+        </div>
+        {canUpload && !adding && (
+          <button onClick={() => setAdding(true)} className={subtleButtonClass}>
+            Upload a file
+          </button>
+        )}
+      </div>
+
+      {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+
+      {canUpload && adding && (
+        <UploadForm
+          onDone={async () => {
+            setAdding(false)
+            await load()
+          }}
+          onCancel={() => setAdding(false)}
+        />
+      )}
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        <input
+          aria-label="Search documents"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search"
+          className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+        />
+        <select
+          aria-label="Filter by category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="rounded-md border border-slate-300 bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+        >
+          <option value="all">All categories</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
+      {loading && <p className="mt-8 text-sm text-slate-500">Loading documents…</p>}
+      {!loading && shown.length === 0 && (
+        <p className="mt-6 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+          {docs.length === 0 ? (canUpload ? 'No files yet. Upload the first one above.' : 'No files yet.') : 'No files match.'}
+        </p>
+      )}
+
+      <ul className="mt-6 divide-y divide-slate-200 border-y border-slate-200">
+        {shown.map((d) => (
+          <li key={d.id} className="py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium break-words">{d.title}</p>
+                {d.description && <p className="mt-1 text-sm break-words text-slate-600">{d.description}</p>}
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <Chip>{d.category}</Chip>
+                  {d.min_role !== 'member' && <Chip tone="amber">{ROLE_LABEL[d.min_role]} and above</Chip>}
+                  <span className="break-all">{d.file_name}</span>
+                  {d.file_size ? <span>{formatSize(d.file_size)}</span> : null}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Added {formatDateTime(d.created_at)}
+                  {d.uploaded_name && ` by ${d.uploaded_name}`}
+                </p>
+              </div>
+              <button onClick={() => void download(d)} className={subtleButtonClass}>
+                Download
+              </button>
+            </div>
+            {canUpload && (
+              <div className="mt-2 text-sm">
+                {deleting === d.id ? (
+                  <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span className="text-slate-700">Delete this file for good?</span>
+                    <button onClick={() => void remove(d)} className="py-1 font-semibold text-red-700 hover:underline">Yes, delete</button>
+                    <button onClick={() => setDeleting(null)} className="py-1 text-slate-600 hover:underline">Cancel</button>
+                  </span>
+                ) : (
+                  <button onClick={() => setDeleting(d.id)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
+                    Delete
+                  </button>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCancel: () => void }) {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [category, setCategory] = useState('Forms')
+  const [access, setAccess] = useState<Role>('member')
+  const [file, setFile] = useState<File | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    if (!file) return setError('Choose a file first.')
+    if (file.size > MAX_BYTES) return setError('The file is larger than 10 MB.')
+    const t = title.trim() || file.name
+    setBusy(true)
+    setError(null)
+    const path = `${crypto.randomUUID()}/${file.name.replace(/[^\w.-]+/g, '_')}`
+    try {
+      const up = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type || 'application/octet-stream' })
+      if (up.error) throw up.error
+      const { error } = await supabase.from('documents').insert({
+        title: t,
+        description: description.trim() || null,
+        category,
+        storage_path: path,
+        file_name: file.name,
+        file_size: file.size,
+        min_role: access,
+      })
+      if (error) {
+        await supabase.storage.from(BUCKET).remove([path])
+        throw error
+      }
+      await onDone()
+    } catch (err) {
+      setError(errorMessage(err, 'Could not upload the file.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+      <h2 className="font-display text-xl font-semibold">Upload a file</h2>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label htmlFor="d-file" className="text-sm font-medium">File (up to 10 MB)</label>
+          <input
+            id="d-file"
+            type="file"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-200"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label htmlFor="d-title" className="text-sm font-medium">Title</label>
+          <input id="d-title" value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} placeholder="Defaults to the file name" className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="d-cat" className="text-sm font-medium">Category</label>
+          <select id="d-cat" value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="d-acc" className="text-sm font-medium">Who can open it</label>
+          <select id="d-acc" value={access} onChange={(e) => setAccess(e.target.value as Role)} className={inputClass}>
+            {ACCESS.map((a) => (
+              <option key={a.value} value={a.value}>{a.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="sm:col-span-2">
+          <label htmlFor="d-desc" className="text-sm font-medium">Description (optional)</label>
+          <textarea id="d-desc" rows={2} value={description} maxLength={500} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
+        </div>
+      </div>
+      {error && <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="w-full sm:w-auto sm:min-w-40">
+          <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Uploading…' : 'Upload'}</button>
+        </div>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+      </div>
+    </form>
+  )
+}

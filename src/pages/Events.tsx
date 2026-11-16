@@ -22,6 +22,7 @@ import MapView from '../components/MapView'
 import Modal from '../components/Modal'
 import MonthCalendar from '../components/MonthCalendar'
 import { buttonClass, subtleButtonClass } from '../components/ui'
+import EventExtras from '../components/EventExtras'
 
 type View = 'list' | 'calendar'
 
@@ -379,6 +380,8 @@ function EventDetail({
           <Linkify text={event.description} />
         </p>
       )}
+
+      <EventExtras event={event} canEdit={canEdit} over={over} />
 
       {canEdit && (
         <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-200 pt-4 text-sm">

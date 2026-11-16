@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../lib/supabase'
-import { hasRole, ROLE_LABEL } from '../lib/types'
+import { ROLE_LABEL } from '../lib/types'
 import { formatDateTime, formatEventTime, type Announcement } from '../lib/announcements'
 import type { EventRow } from '../lib/events'
-import { NAV_ITEMS } from '../nav'
+import { canSeeNav, NAV_ITEMS } from '../nav'
+import DashboardExtras from '../components/DashboardExtras'
 
 type Latest = Pick<Announcement, 'id' | 'title' | 'body' | 'pinned' | 'created_at' | 'event_at'>
 
@@ -44,7 +45,7 @@ export default function Dashboard() {
 
   const firstName = profile?.full_name.split(' ')[0] || 'there'
   const links = NAV_ITEMS.filter(
-    (i) => i.to !== '/' && (!i.minRole || hasRole(profile?.role, i.minRole)),
+    (i) => i.to !== '/' && canSeeNav(i, profile?.role),
   )
 
   return (
@@ -62,6 +63,8 @@ export default function Dashboard() {
           {pollsWaiting === 1 ? "1 poll is" : `${pollsWaiting} polls are`} waiting for your vote
         </Link>
       )}
+
+      <DashboardExtras />
 
       <section className="mt-10" aria-label="Latest announcements">
         <div className="flex items-baseline justify-between gap-4">

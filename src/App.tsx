@@ -3,16 +3,22 @@ import AuthProvider from './auth/AuthProvider'
 import RequireAuth from './auth/RequireAuth'
 import Layout from './components/Layout'
 import Announcements from './pages/Announcements'
+import Attendance from './pages/Attendance'
 import BudgetDetail from './pages/BudgetDetail'
+import CheckIn from './pages/CheckIn'
 import Dashboard from './pages/Dashboard'
+import Documents from './pages/Documents'
 import Events from './pages/Events'
 import Finance from './pages/Finance'
 import Login from './pages/Login'
 import Members from './pages/Members'
+import Merch from './pages/Merch'
+import MerchManage from './pages/MerchManage'
+import Minutes from './pages/Minutes'
 import Pending from './pages/Pending'
-import Placeholder from './pages/Placeholder'
 import Polls from './pages/Polls'
 import Register from './pages/Register'
+import Tasks from './pages/Tasks'
 
 export default function App() {
   return (
@@ -29,14 +35,21 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="announcements" element={<Announcements />} />
               <Route path="events" element={<Events />} />
+              <Route path="attend/:token" element={<CheckIn />} />
+              <Route path="attendance" element={<Attendance />} />
               <Route path="polls" element={<Polls />} />
-              <Route
-                path="chat"
-                element={<Placeholder title="Chat rooms" description="Talk with other members." />}
-              />
+              <Route path="merch" element={<Merch />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="minutes" element={<Minutes />} />
 
-              {/* Officers, treasurer and admin can view. Only treasurer and admin can edit (enforced by the database). */}
+              {/* Officers, treasurer and admin */}
               <Route element={<RequireAuth minRole="officer" />}>
+                <Route path="tasks" element={<Tasks />} />
+              </Route>
+
+              {/* Finance role (treasurer) only. Enforced by the database too. */}
+              <Route element={<RequireAuth onlyRole="treasurer" />}>
+                <Route path="merch/manage" element={<MerchManage />} />
                 <Route path="finance" element={<Finance />} />
                 <Route path="finance/:budgetId" element={<BudgetDetail />} />
               </Route>

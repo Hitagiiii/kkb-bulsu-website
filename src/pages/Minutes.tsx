@@ -1,0 +1,322 @@
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { supabase } from '../lib/supabase'
+import { hasRole } from '../lib/types'
+import { errorMessage, formatDate } from '../lib/finance'
+import { formatDateTime } from '../lib/announcements'
+import { STATUS_LABEL, type MinutesRow, type Officer, type Task } from '../lib/work'
+import Chip from '../components/Chip'
+import Linkify from '../components/Linkify'
+import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+
+export default function Minutes() {
+  const { profile } = useAuth()
+  const canWrite = hasRole(profile?.role, 'officer')
+  const [rows, setRows] = useState<MinutesRow[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [officers, setOfficers] = useState<Officer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    const m = await supabase.from('minutes').select('*').order('held_at', { ascending: false }).limit(100)
+    if (m.error) {
+      setError(m.error.message)
+      setLoading(false)
+      return
+    }
+    setRows((m.data ?? []) as MinutesRow[])
+    if (canWrite) {
+      const [t, o] = await Promise.all([
+        supabase.from('tasks').select('*').not('minutes_id', 'is', null),
+        supabase.from('profiles').select('id, full_name').eq('approved', true).in('role', ['officer', 'treasurer', 'admin']).order('full_name'),
+      ])
+      setTasks((t.data ?? []) as Task[])
+      setOfficers((o.data ?? []) as Officer[])
+    }
+    setError(null)
+    setLoading(false)
+  }, [canWrite])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  async function remove(r: MinutesRow) {
+    const { error } = await supabase.from('minutes').delete().eq('id', r.id)
+    setDeleting(null)
+    if (error) return setError(errorMessage(error, 'Could not delete the minutes.'))
+    setOpenId(null)
+    await load()
+  }
+
+  const names = Object.fromEntries(officers.map((o) => [o.id, o.full_name || 'Unnamed']))
+
+  return (
+    <div className="max-w-2xl">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Meeting minutes</h1>
+          <p className="mt-2 text-slate-600">
+            Decisions on record, with the action items that came out of them.
+          </p>
+        </div>
+        {canWrite && !creating && (
+          <button onClick={() => setCreating(true)} className={subtleButtonClass}>Write minutes</button>
+        )}
+      </div>
+
+      {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+
+      {canWrite && creating && (
+        <MinutesForm
+          officers={officers}
+          onDone={async () => {
+            setCreating(false)
+            await load()
+          }}
+          onCancel={() => setCreating(false)}
+        />
+      )}
+
+      {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+      {!loading && rows.length === 0 && (
+        <p className="mt-8 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+          {canWrite ? 'No minutes yet. Write the first one above.' : 'No minutes have been shared with members yet.'}
+        </p>
+      )}
+
+      <ul className="mt-8 divide-y divide-slate-200 border-y border-slate-200">
+        {rows.map((r) => {
+          const open = openId === r.id
+          const related = tasks.filter((t) => t.minutes_id === r.id)
+          return (
+            <li key={r.id} className="py-4">
+              <button
+                type="button"
+                onClick={() => setOpenId(open ? null : r.id)}
+                aria-expanded={open}
+                className="block w-full text-left"
+              >
+                <span className="font-display block text-lg font-semibold break-words">{r.title}</span>
+                <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                  {formatDateTime(r.held_at)}
+                  {canWrite && <Chip tone={r.visible_to_members ? 'green' : 'slate'}>{r.visible_to_members ? 'Shared with members' : 'Officers only'}</Chip>}
+                </span>
+              </button>
+
+              {open && (
+                <div className="mt-4">
+                  {r.attendees && (
+                    <p className="text-sm text-slate-600">
+                      <span className="font-medium">Present:</span> {r.attendees}
+                    </p>
+                  )}
+                  <p className="mt-3 break-words whitespace-pre-wrap">
+                    <Linkify text={r.body} />
+                  </p>
+                  <p className="mt-3 text-xs text-slate-500">Recorded by {r.author_name || 'an officer'}</p>
+
+                  {related.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-sm font-semibold">Action items</h3>
+                      <ul className="mt-1 divide-y divide-slate-200 border-y border-slate-200 text-sm">
+                        {related.map((t) => (
+                          <li key={t.id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 py-2">
+                            <span className="min-w-0 break-words">
+                              {t.title}
+                              <span className="text-slate-500">
+                                {' '}
+                                ({t.assigned_to ? names[t.assigned_to] ?? 'Unknown' : 'Unassigned'}
+                                {t.due_on && `, due ${formatDate(t.due_on)}`})
+                              </span>
+                            </span>
+                            <Chip tone={t.status === 'done' ? 'green' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {canWrite && (
+                    <div className="mt-4 text-sm">
+                      {deleting === r.id ? (
+                        <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <span className="text-slate-700">Delete these minutes for good?</span>
+                          <button onClick={() => void remove(r)} className="py-1 font-semibold text-red-700 hover:underline">Yes, delete</button>
+                          <button onClick={() => setDeleting(null)} className="py-1 text-slate-600 hover:underline">Cancel</button>
+                        </span>
+                      ) : (
+                        <button onClick={() => setDeleting(r.id)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+function MinutesForm({
+  officers,
+  onDone,
+  onCancel,
+}: {
+  officers: Officer[]
+  onDone: () => Promise<void>
+  onCancel: () => void
+}) {
+  const nextId = useRef(2)
+  const [title, setTitle] = useState('')
+  const [heldAt, setHeldAt] = useState(() => {
+    const d = new Date()
+    const p = (n: number) => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+  })
+  const [attendees, setAttendees] = useState('')
+  const [body, setBody] = useState('')
+  const [shared, setShared] = useState(false)
+  const [items, setItems] = useState([{ id: 1, title: '', who: '', due: '' }])
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    if (!title.trim()) return setError('Add a title, for example "General meeting, November".')
+    if (!body.trim()) return setError('Write what was discussed and decided.')
+    const held = new Date(heldAt)
+    if (Number.isNaN(held.getTime())) return setError('The meeting date is not valid.')
+
+    setBusy(true)
+    setError(null)
+    const { data, error } = await supabase
+      .from('minutes')
+      .insert({
+        title: title.trim(),
+        held_at: held.toISOString(),
+        attendees: attendees.trim(),
+        body: body.trim(),
+        visible_to_members: shared,
+      })
+      .select('id')
+      .single()
+    if (error) {
+      setBusy(false)
+      return setError(errorMessage(error, 'Could not save the minutes.'))
+    }
+
+    const actions = items.filter((i) => i.title.trim())
+    if (actions.length > 0) {
+      const { error: taskError } = await supabase.from('tasks').insert(
+        actions.map((i) => ({
+          title: i.title.trim(),
+          assigned_to: i.who || null,
+          due_on: i.due || null,
+          minutes_id: data.id,
+        })),
+      )
+      if (taskError) {
+        setBusy(false)
+        return setError('The minutes were saved, but the action items were not: ' + errorMessage(taskError, 'unknown error') + ' Add them from the Tasks page.')
+      }
+    }
+    setBusy(false)
+    await onDone()
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+      <h2 className="font-display text-xl font-semibold">New minutes</h2>
+      <div className="mt-4 space-y-4">
+        <div>
+          <label htmlFor="m-title" className="text-sm font-medium">Title</label>
+          <input id="m-title" value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="m-date" className="text-sm font-medium">When was the meeting</label>
+          <input id="m-date" type="datetime-local" value={heldAt} onChange={(e) => setHeldAt(e.target.value)} className={inputClass + ' sm:max-w-xs'} />
+        </div>
+        <div>
+          <label htmlFor="m-att" className="text-sm font-medium">Who was present (optional)</label>
+          <input id="m-att" value={attendees} onChange={(e) => setAttendees(e.target.value)} placeholder="Names, separated by commas" className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor="m-body" className="text-sm font-medium">Discussion and decisions</label>
+          <textarea id="m-body" rows={8} value={body} maxLength={20000} onChange={(e) => setBody(e.target.value)} className={inputClass + ' min-h-40'} />
+        </div>
+
+        <fieldset>
+          <legend className="text-sm font-medium">Action items (optional)</legend>
+          <ul className="mt-1 space-y-3">
+            {items.map((i, n) => (
+              <li key={i.id} className="grid gap-2 sm:grid-cols-[1fr_11rem_9rem_auto] sm:items-center">
+                <input
+                  aria-label={`Action item ${n + 1}`}
+                  value={i.title}
+                  onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, title: e.target.value } : x)))}
+                  placeholder="What needs to be done"
+                  className="min-w-0 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+                />
+                <select
+                  aria-label="Assigned to"
+                  value={i.who}
+                  onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, who: e.target.value } : x)))}
+                  className="rounded-md border border-slate-300 bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                >
+                  <option value="">Unassigned</option>
+                  {officers.map((o) => (
+                    <option key={o.id} value={o.id}>{o.full_name || 'Unnamed'}</option>
+                  ))}
+                </select>
+                <input
+                  aria-label="Due date"
+                  type="date"
+                  value={i.due}
+                  onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, due: e.target.value } : x)))}
+                  className="rounded-md border border-slate-300 px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                />
+                {items.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setItems((prev) => prev.filter((x) => x.id !== i.id))}
+                    aria-label={`Remove action item ${n + 1}`}
+                    className="rounded-md px-2 py-2 text-left text-sm text-slate-600 hover:bg-slate-100 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => setItems((prev) => [...prev, { id: nextId.current++, title: '', who: '', due: '' }])}
+            className="mt-2 py-1 text-sm font-medium text-brand-700 hover:underline"
+          >
+            Add another action item
+          </button>
+        </fieldset>
+
+        <label className="flex items-center gap-2 py-1 text-sm">
+          <input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} />
+          Share these minutes with all members (otherwise officers only)
+        </label>
+      </div>
+
+      {error && <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="w-full sm:w-auto sm:min-w-44">
+          <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save minutes'}</button>
+        </div>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+      </div>
+    </form>
+  )
+}

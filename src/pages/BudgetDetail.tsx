@@ -14,6 +14,8 @@ import {
   type Budget,
   type Expense,
 } from '../lib/finance'
+import BudgetEventLink from '../components/BudgetEventLink'
+import BudgetFolderPicker from '../components/BudgetFolderPicker'
 import Modal from '../components/Modal'
 import PrintBill from '../components/PrintBill'
 import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
@@ -188,6 +190,10 @@ export default function BudgetDetail() {
             />
           </div>
         </section>
+
+        <BudgetFolderPicker budgetId={budget.id} />
+
+        <BudgetEventLink budget={budget} spent={spent} canEdit={canEdit} onChanged={load} />
 
         {canEdit && <AddExpenseForm budgetId={budget.id} onAdded={load} />}
 

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { hasRole, ROLE_LABEL } from '../lib/types'
+import { ROLE_LABEL } from '../lib/types'
 import { formatEventTime, timeUntil } from '../lib/announcements'
 import { useUpcoming } from '../lib/useUpcoming'
-import { NAV_ITEMS } from '../nav'
+import { canSeeNav, NAV_ITEMS } from '../nav'
 
 const STORAGE_KEY = 'kkb.sidebar.collapsed'
 
@@ -50,7 +50,7 @@ export default function Layout() {
   const [drawerOpen, setDrawerOpen] = useState(false) // phone: sidebar slides over the page
   const { upcoming, dismiss, permission, enableAlerts } = useUpcoming()
 
-  const items = NAV_ITEMS.filter((i) => !i.minRole || hasRole(profile?.role, i.minRole))
+  const items = NAV_ITEMS.filter((i) => canSeeNav(i, profile?.role))
   const name = profile?.full_name || session?.user.email || 'Member'
   const badgeFor = (to: string) =>
     to === '/announcements'
