@@ -35,11 +35,16 @@ export default function BudgetDetail() {
   const [error, setError] = useState<string | null>(null)
   const [live, setLive] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [mobileDetailId, setMobileDetailId] = useState<string | null>(null)
+  const [isDesktop, setIsDesktop] = useState(false)
   const [showVoided, setShowVoided] = useState(false)
   const [onlyMissing, setOnlyMissing] = useState(false)
   const urlCache = useRef<Record<string, string>>({})
 
-  const closeDetail = useCallback(() => setSelectedId(null), [])
+  const closeDetail = useCallback(() => {
+    setSelectedId(null)
+    setMobileDetailId(null)
+  }, [])
 
   const load = useCallback(async () => {
     if (!budgetId) return
@@ -93,10 +98,17 @@ export default function BudgetDetail() {
     }
   }, [budgetId, load])
 
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 768px)')
+    const update = () => setIsDesktop(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
   const active = useMemo(() => expenses.filter((x) => !x.voided_at), [expenses])
   const missingCount = active.filter((x) => !x.receipt_path).length
   const filterMissing = onlyMissing && missingCount > 0
-
   const spentCents = active.reduce((sum, x) => sum + Math.round(x.amount * 100), 0)
   const totalCents = budget ? Math.round(budget.total_budget * 100) : 0
   const spent = spentCents / 100
@@ -107,6 +119,7 @@ export default function BudgetDetail() {
   let visible = showVoided ? expenses : active
   if (filterMissing) visible = visible.filter((x) => !x.receipt_path && !x.voided_at)
   const selected = expenses.find((x) => x.id === selectedId) ?? null
+  const mobileSelected = expenses.find((x) => x.id === mobileDetailId) ?? null
   const hasVoided = expenses.length !== active.length
 
   const catMap = new Map<string, number>()
@@ -115,6 +128,11 @@ export default function BudgetDetail() {
     catMap.set(key, (catMap.get(key) ?? 0) + Math.round(x.amount * 100))
   }
   const categories = [...catMap.entries()].sort((a, b) => b[1] - a[1])
+
+  function selectExpense(id: string) {
+    setSelectedId(id)
+    setMobileDetailId(id)
+  }
 
   async function printBill() {
     const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('#print-bill img'))
@@ -136,8 +154,8 @@ export default function BudgetDetail() {
     return (
       <div>
         <p className="text-slate-600">{error ?? 'This budget does not exist, or you do not have access to it.'}</p>
-        <Link to="/finance" className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline">
-          Back to all budgets
+        <Link to="/finance" className="mt-4 inline-block min-h-11 py-2 text-sm font-semibold text-brand-700 hover:underline">
+          Back to Finance
         </Link>
       </div>
     )
@@ -145,101 +163,97 @@ export default function BudgetDetail() {
 
   return (
     <>
-      <div className="max-w-4xl print:hidden">
-        <Link to="/finance" className="inline-block py-1 text-sm font-medium text-brand-700 hover:underline">
-          Back to all budgets
-        </Link>
+      <div className="w-full print:hidden">
+        <nav aria-label="Breadcrumb" className="text-sm">
+          <Link to="/finance" className="inline-flex min-h-11 items-center font-medium text-brand-700 hover:underline">
+            Finance
+          </Link>
+          <span className="px-2 text-slate-400" aria-hidden="true">/</span>
+          <span className="text-slate-600">Budget</span>
+        </nav>
 
-        <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+        <header className="mt-2 flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-4">
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-semibold break-words sm:text-3xl">{budget.name}</h1>
-            <p className="mt-2 inline-flex items-center gap-2 text-xs text-slate-500">
-              <span className={'h-2 w-2 rounded-full ' + (live ? 'bg-emerald-500' : 'bg-slate-300')} />
-              {live ? 'Updates live' : 'Reconnecting…'}
-            </p>
+            <p className="mt-1 text-xs text-slate-500">{live ? 'Updates live' : 'Reconnecting…'}</p>
           </div>
-          <button onClick={() => void printBill()} className={subtleButtonClass}>
+          <button type="button" onClick={() => void printBill()} className={subtleButtonClass + ' min-h-11'}>
             Print audit bill
           </button>
-        </div>
+        </header>
 
         {error && (
-          <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
           </p>
         )}
 
         <section aria-label="Budget summary" className="mt-5">
-          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-hairline bg-hairline sm:grid-cols-4">
-            <div className="bg-white p-3">
-              <dt className="text-xs text-slate-500">{over ? 'Over budget by' : 'Money left'}</dt>
-              <dd className={'font-display mt-0.5 text-2xl font-bold tabular-nums break-words ' + (over ? 'text-error' : 'text-ink')}>
-                {peso(Math.abs(left))}
-              </dd>
+          <div className="border-b border-hairline pb-4">
+            <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Money left</p>
+            <p className={'font-display mt-1 text-4xl font-bold tabular-nums sm:text-5xl ' + (over ? 'text-error' : 'text-ink')}>
+              {peso(Math.abs(left))}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">{over ? 'Over budget' : `${Math.round(pct)}% of the budget used`}</p>
+            <div className="mt-3 h-1 w-full bg-secondary" aria-hidden="true">
+              <div className={'h-full ' + (over ? 'bg-error' : 'bg-brand-700')} style={{ width: `${pct}%` }} />
             </div>
-            <div className="bg-white p-3">
-              <dt className="text-xs text-slate-500">Total budget</dt>
-              <dd className="font-display mt-0.5 text-2xl font-semibold tabular-nums break-words">{peso(budget.total_budget)}</dd>
+          </div>
+
+          <dl className="mt-4 grid grid-cols-3 divide-x divide-hairline border-y border-hairline">
+            <div className="px-3 py-3 first:pl-0">
+              <dt className="text-xs text-slate-500">Total</dt>
+              <dd className="font-display mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
             </div>
-            <div className="bg-white p-3">
+            <div className="px-3 py-3">
               <dt className="text-xs text-slate-500">Spent</dt>
-              <dd className="font-display mt-0.5 text-2xl font-semibold tabular-nums break-words">{peso(spent)}</dd>
+              <dd className="font-display mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(spent)}</dd>
             </div>
-            <div className="bg-white p-3">
+            <div className="px-3 py-3 last:pr-0">
               <dt className="text-xs text-slate-500">Receipts missing</dt>
-              <dd className={'font-display mt-0.5 text-2xl font-semibold ' + (missingCount > 0 ? 'text-brand-700' : 'text-ink')}>
+              <dd className={'font-display mt-1 text-lg font-semibold tabular-nums sm:text-xl ' + (missingCount > 0 ? 'text-brand-700' : 'text-ink')}>
                 {missingCount}
               </dd>
             </div>
           </dl>
 
-          <div className="mt-3 flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
-              <div className={'h-full rounded-full ' + (over ? 'bg-error' : 'bg-brand-700')} style={{ width: `${pct}%` }} />
-            </div>
-            <p className="shrink-0 text-xs text-slate-500 tabular-nums">{Math.round(pct)}% used</p>
-          </div>
-
           {categories.length > 0 && spentCents > 0 && (
-            <div className="mt-4 border-t border-hairline pt-3">
-              <h3 className="text-sm font-semibold">Where the money went</h3>
-              <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-secondary" role="img" aria-label="Spending by category">
-                {categories.map(([cat, cents], i) => (
-                  <span
-                    key={cat}
-                    className={CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]}
-                    style={{ width: `${(cents / spentCents) * 100}%` }}
-                    title={`${cat}: ${peso(cents / 100)}`}
-                  />
-                ))}
+            <div className="mt-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 className="text-sm font-semibold">Spending by category</h2>
+                <span className="text-xs text-slate-500">{categories.length} categories</span>
               </div>
-              <ul className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                {categories.map(([cat, cents], i) => (
-                  <li key={cat} className="flex items-center justify-between gap-3">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className={'h-2.5 w-2.5 shrink-0 rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} />
-                      <span className="truncate">{cat}</span>
-                    </span>
-                    <span className="tabular-nums text-slate-600">{peso(cents / 100)}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-3 space-y-2">
+                {categories.map(([cat, cents], i) => {
+                  const share = (cents / spentCents) * 100
+                  return (
+                    <div key={cat} className="grid grid-cols-[minmax(6rem,11rem)_1fr_auto] items-center gap-2 text-xs sm:grid-cols-[minmax(8rem,14rem)_1fr_auto]">
+                      <span className="min-w-0 truncate font-medium">{cat}</span>
+                      <div className="h-2 bg-secondary" aria-hidden="true">
+                        <div className={'h-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} style={{ width: `${share}%` }} />
+                      </div>
+                      <span className="tabular-nums text-slate-600">{peso(cents / 100)}</span>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           )}
         </section>
 
         <BudgetFolderPicker budgetId={budget.id} />
-
         <BudgetEventLink budget={budget} spent={spent} canEdit={canEdit} onChanged={load} />
-
         {canEdit && <AddExpenseForm budgetId={budget.id} onAdded={load} />}
 
         <section className="mt-10" aria-label="Expenses">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
-            <h2 className="font-display text-xl font-semibold">Expenses ({active.length})</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
+            <div>
+              <h2 className="font-display text-xl font-semibold">Expenses</h2>
+              <p className="mt-0.5 text-xs text-slate-500">{active.length} active {active.length === 1 ? 'entry' : 'entries'}</p>
+            </div>
             {hasVoided && (
-              <label className="flex items-center gap-2 py-1 text-sm text-slate-600">
+              <label className="flex min-h-11 items-center gap-2 py-2 text-sm text-slate-600">
                 <input type="checkbox" checked={showVoided} onChange={(e) => setShowVoided(e.target.checked)} />
                 Show voided
               </label>
@@ -248,10 +262,8 @@ export default function BudgetDetail() {
 
           {missingCount > 0 && (
             <div className={noticeClass + ' mt-4 flex flex-wrap items-center justify-between gap-2'}>
-              <span>
-                {missingCount} {missingCount === 1 ? 'expense has' : 'expenses have'} no receipt yet.
-              </span>
-              <label className="flex items-center gap-2 py-1">
+              <span>{missingCount} {missingCount === 1 ? 'expense has' : 'expenses have'} no receipt yet.</span>
+              <label className="flex min-h-11 items-center gap-2 py-2">
                 <input type="checkbox" checked={onlyMissing} onChange={(e) => setOnlyMissing(e.target.checked)} />
                 Show only these
               </label>
@@ -259,65 +271,97 @@ export default function BudgetDetail() {
           )}
 
           {visible.length === 0 && (
-            <p className="mt-4 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+            <p className="mt-4 border border-dashed border-ash bg-card px-4 py-6 text-sm text-slate-500">
               {canEdit ? 'No expenses yet. Add the first one above.' : 'No expenses recorded yet.'}
             </p>
           )}
 
-          <ul className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            {visible.map((x) => {
-              const isSelected = x.id === selectedId
-              const voided = !!x.voided_at
-              const thumb = x.receipt_path ? urls[x.receipt_path] : undefined
-              return (
-                <li key={x.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedId(isSelected ? null : x.id)}
-                    aria-pressed={isSelected}
-                    className={
-                      'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 ' +
-                      (isSelected ? 'bg-brand-50 ' : '') +
-                      (voided ? 'opacity-60' : '')
-                    }
-                  >
-                    {thumb ? (
-                      <img src={thumb} alt="Receipt thumbnail" className="h-12 w-12 shrink-0 rounded-lg border border-slate-200 object-cover" />
-                    ) : x.receipt_path ? (
-                      <span className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
-                    ) : (
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-ash bg-card text-center text-[10px] leading-tight font-semibold text-slate-600">
-                        No
-                        <br />
-                        receipt
-                      </span>
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className={'block text-sm font-medium break-words ' + (voided ? 'line-through' : '')}>{x.description}</span>
-                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-700">{x.category}</span>
-                        <span>{formatDate(x.spent_on)}</span>
-                        {voided && <span className="font-medium text-red-700">Voided</span>}
-                      </span>
-                    </span>
-                    <span className={'font-display shrink-0 text-lg font-semibold tabular-nums ' + (voided ? 'line-through' : '')}>
-                      {peso(x.amount)}
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+          {visible.length > 0 && (
+            <>
+              <div className="mt-4 md:hidden">
+                <ul className="divide-y divide-hairline border-y border-hairline">
+                  {visible.map((x) => <MobileExpenseRow key={x.id} expense={x} url={x.receipt_path ? urls[x.receipt_path] : undefined} onOpen={() => selectExpense(x.id)} />)}
+                </ul>
+              </div>
+
+              <div className="mt-4 hidden md:block">
+                <div className="overflow-x-auto border-y border-hairline">
+                  <table className="w-full min-w-[760px] border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b border-hairline bg-card text-left text-xs font-semibold text-slate-600">
+                        <th className="w-14 px-2 py-2">Receipt</th>
+                        <th className="px-3 py-2">Expense</th>
+                        <th className="w-32 px-3 py-2">Category</th>
+                        <th className="w-32 px-3 py-2">Date</th>
+                        <th className="w-36 px-3 py-2 text-right">Amount</th>
+                        <th className="w-28 px-3 py-2">Status</th>
+                        <th className="w-28 px-3 py-2 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visible.map((x) => {
+                        const voided = !!x.voided_at
+                        const thumb = x.receipt_path ? urls[x.receipt_path] : undefined
+                        return (
+                          <tr key={x.id} className={'border-b border-hairline last:border-b-0 ' + (voided ? 'opacity-60' : '')}>
+                            <td className="px-2 py-2 align-middle">
+                              <button type="button" onClick={() => selectExpense(x.id)} className="flex min-h-11 min-w-11 items-center justify-center" aria-label={`Open ${x.description}`}>
+                                {thumb ? (
+                                  <img src={thumb} alt="Receipt thumbnail" className="h-10 w-10 border border-hairline object-cover" />
+                                ) : x.receipt_path ? (
+                                  <span className="flex h-10 w-10 items-center justify-center border border-hairline bg-card text-[10px] text-slate-500">Loading</span>
+                                ) : (
+                                  <span className="flex h-10 w-10 items-center justify-center border border-dashed border-ash bg-card text-[10px] font-semibold text-slate-600">No receipt</span>
+                                )}
+                              </button>
+                            </td>
+                            <td className="px-3 py-2 align-middle">
+                              <button type="button" onClick={() => selectExpense(x.id)} className="min-h-11 w-full py-2 text-left hover:text-brand-700">
+                                <span className={'block font-medium break-words ' + (voided ? 'line-through' : '')}>{x.description}</span>
+                                <span className="mt-0.5 block text-xs text-slate-500">Added by {names[x.added_by] ?? 'Unknown'}</span>
+                              </button>
+                            </td>
+                            <td className="px-3 py-2 align-middle text-slate-600">{x.category}</td>
+                            <td className="px-3 py-2 align-middle whitespace-nowrap text-slate-600">{formatDate(x.spent_on)}</td>
+                            <td className={'px-3 py-2 text-right align-middle font-semibold tabular-nums ' + (voided ? 'line-through' : '')}>{peso(x.amount)}</td>
+                            <td className="px-3 py-2 align-middle">
+                              {voided ? <span className="text-xs font-semibold text-red-700">Voided</span> : x.receipt_path ? <span className="text-xs text-slate-600">Receipt attached</span> : <span className="text-xs font-semibold text-brand-700">No receipt</span>}
+                            </td>
+                            <td className="px-3 py-2 text-right align-middle">
+                              <button type="button" onClick={() => selectExpense(x.id)} className="min-h-11 px-2 text-xs font-semibold text-brand-700 hover:underline">Open</button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </section>
 
         {canEdit && <ActivityLog budgetId={budget.id} names={names} />}
       </div>
 
-      {selected && (
-        <Modal label="Expense details" onClose={closeDetail}>
+      {isDesktop && selected && (
+        <aside className="fixed inset-y-0 right-0 z-30 w-[min(28rem,40vw)] overflow-y-auto border-l border-hairline bg-white p-6 print:hidden" aria-label="Expense inspector">
           <ExpenseDetail
             expense={selected}
             url={selected.receipt_path ? urls[selected.receipt_path] : undefined}
+            names={names}
+            canEdit={canEdit}
+            onChanged={load}
+            onClose={closeDetail}
+          />
+        </aside>
+      )}
+
+      {!isDesktop && mobileSelected && (
+        <Modal label="Expense details" onClose={closeDetail}>
+          <ExpenseDetail
+            expense={mobileSelected}
+            url={mobileSelected.receipt_path ? urls[mobileSelected.receipt_path] : undefined}
             names={names}
             canEdit={canEdit}
             onChanged={load}
@@ -328,6 +372,28 @@ export default function BudgetDetail() {
 
       <PrintBill budget={budget} expenses={expenses} urls={urls} names={names} spent={spent} left={left} />
     </>
+  )
+}
+
+function MobileExpenseRow({ expense, url, onOpen }: { expense: Expense; url?: string; onOpen: () => void }) {
+  const voided = !!expense.voided_at
+  return (
+    <li>
+      <button type="button" onClick={onOpen} className={'flex min-h-16 w-full items-center gap-3 py-3 text-left ' + (voided ? 'opacity-60' : '')}>
+        {url ? (
+          <img src={url} alt="Receipt thumbnail" className="h-11 w-11 shrink-0 border border-hairline object-cover" />
+        ) : expense.receipt_path ? (
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-hairline bg-card text-[10px] text-slate-500">Loading</span>
+        ) : (
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-dashed border-ash bg-card text-center text-[9px] leading-tight font-semibold text-slate-600">No receipt</span>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className={'block break-words text-sm font-medium ' + (voided ? 'line-through' : '')}>{expense.description}</span>
+          <span className="mt-0.5 block text-xs text-slate-500">{expense.category} · {formatDate(expense.spent_on)}</span>
+        </span>
+        <span className={'shrink-0 text-sm font-semibold tabular-nums ' + (voided ? 'line-through' : '')}>{peso(expense.amount)}</span>
+      </button>
+    </li>
   )
 }
 
@@ -357,11 +423,12 @@ function ChangeTotal({ budget, onChanged }: { budget: Budget; onChanged: () => P
   if (!open) {
     return (
       <button
+        type="button"
         onClick={() => {
           setValue(String(budget.total_budget))
           setOpen(true)
         }}
-        className="mt-1 py-1 text-sm font-medium text-brand-700 hover:underline"
+        className="mt-1 min-h-11 py-2 text-sm font-medium text-brand-700 hover:underline"
       >
         Change total
       </button>
@@ -378,14 +445,10 @@ function ChangeTotal({ budget, onChanged }: { budget: Budget; onChanged: () => P
         step="0.01"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="w-32 rounded-md border border-slate-300 px-2 py-2 text-base sm:py-1 sm:text-sm"
+        className="w-32 min-h-11 border border-slate-300 px-2 py-2 text-base sm:text-sm"
       />
-      <button type="submit" disabled={busy} className={subtleButtonClass}>
-        Save
-      </button>
-      <button type="button" onClick={() => setOpen(false)} className="py-1 text-sm text-slate-500 hover:underline">
-        Cancel
-      </button>
+      <button type="submit" disabled={busy} className={subtleButtonClass + ' min-h-11'}>Save</button>
+      <button type="button" onClick={() => setOpen(false)} className="min-h-11 py-2 text-sm text-slate-500 hover:underline">Cancel</button>
       {error && <span role="alert" className="w-full text-xs text-red-700">{error}</span>}
     </form>
   )
@@ -442,79 +505,37 @@ function AddExpenseForm({ budgetId, onAdded }: { budgetId: string; onAdded: () =
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+    <form onSubmit={submit} className="mt-8 border-y border-hairline bg-card px-4 py-5 sm:px-5">
       <h2 className="font-display text-xl font-semibold">Add an expense</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="x-desc" className="text-sm font-medium">What was it for?</label>
-          <input
-            id="x-desc"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g. Lunch for 30 members"
-            className={inputClass}
-          />
+          <input id="x-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Lunch for 30 members" className={inputClass} />
         </div>
         <div>
           <label htmlFor="x-amount" className="text-sm font-medium">Amount (PHP)</label>
-          <input
-            id="x-amount"
-            type="number"
-            inputMode="decimal"
-            min="0.01"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className={inputClass}
-          />
+          <input id="x-amount" type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} />
         </div>
         <div>
           <label htmlFor="x-date" className="text-sm font-medium">Date spent</label>
-          <input
-            id="x-date"
-            type="date"
-            value={spentOn}
-            onChange={(e) => setSpentOn(e.target.value)}
-            className={inputClass}
-          />
+          <input id="x-date" type="date" value={spentOn} onChange={(e) => setSpentOn(e.target.value)} className={inputClass} />
         </div>
         <div>
           <label htmlFor="x-cat" className="text-sm font-medium">Category</label>
-          <input
-            id="x-cat"
-            list="x-cats"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className={inputClass}
-          />
+          <input id="x-cat" list="x-cats" value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} />
           <datalist id="x-cats">
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c} />
-            ))}
+            {CATEGORIES.map((c) => <option key={c} value={c} />)}
           </datalist>
         </div>
         <div>
           <label htmlFor="x-file" className="text-sm font-medium">Receipt photo (optional)</label>
-          <input
-            id="x-file"
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-200"
-          />
+          <input id="x-file" ref={fileRef} type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-1 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
           <p className="mt-1 text-xs text-slate-500">You can also add the receipt later from the saved expense.</p>
         </div>
       </div>
-      {error && (
-        <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
+      {error && <p role="alert" className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <div className="mt-5 sm:max-w-48">
-        <button type="submit" disabled={busy} className={buttonClass}>
-          {busy ? 'Saving…' : 'Add expense'}
-        </button>
+        <button type="submit" disabled={busy} className={buttonClass + ' min-h-11'}>{busy ? 'Saving…' : 'Add expense'}</button>
       </div>
     </form>
   )
@@ -536,17 +557,9 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
       const path = `${expense.budget_id}/${crypto.randomUUID()}.jpg`
       const up = await supabase.storage.from('receipts').upload(path, blob, { contentType: 'image/jpeg' })
       if (up.error) throw up.error
-
-      // Only fill in an empty receipt slot, never replace an existing receipt
-      const { data, error } = await supabase
-        .from('expenses')
-        .update({ receipt_path: path })
-        .eq('id', expense.id)
-        .is('receipt_path', null)
-        .select('id')
+      const { data, error } = await supabase.from('expenses').update({ receipt_path: path }).eq('id', expense.id).is('receipt_path', null).select('id')
       if (error) throw error
       if (!data || data.length === 0) throw new Error('A receipt was already attached to this expense.')
-
       setFile(null)
       await onChanged()
     } catch (err) {
@@ -557,50 +570,18 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-dashed border-ash bg-card p-4">
-      <label htmlFor="attach-file" className="text-sm font-medium text-slate-700">
-        This expense has no receipt yet
-      </label>
-      <input
-        id="attach-file"
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="mt-2 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100"
-      />
-      {error && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-      <div className="mt-3 sm:max-w-48">
-        <button type="submit" disabled={busy || !file} className={buttonClass}>
-          {busy ? 'Attaching…' : 'Attach receipt'}
-        </button>
-      </div>
-      <p className="mt-2 text-xs text-slate-700">
-        Once attached, a receipt can't be replaced. If it's the wrong photo, void the expense and add it again.
-      </p>
+    <form onSubmit={submit} className="border border-dashed border-ash bg-card p-4">
+      <label htmlFor="attach-file" className="text-sm font-medium text-slate-700">This expense has no receipt yet</label>
+      <input id="attach-file" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
+      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      <div className="mt-3 sm:max-w-48"><button type="submit" disabled={busy || !file} className={buttonClass + ' min-h-11'}>{busy ? 'Attaching…' : 'Attach receipt'}</button></div>
+      <p className="mt-2 text-xs text-slate-700">Once attached, a receipt can't be replaced. If it's the wrong photo, void the expense and add it again.</p>
     </form>
   )
 }
 
 /* ---------- one expense: receipt, details, void ---------- */
-function ExpenseDetail({
-  expense,
-  url,
-  names,
-  canEdit,
-  onChanged,
-  onClose,
-}: {
-  expense: Expense
-  url: string | undefined
-  names: Record<string, string>
-  canEdit: boolean
-  onChanged: () => Promise<void>
-  onClose: () => void
-}) {
+function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { expense: Expense; url: string | undefined; names: Record<string, string>; canEdit: boolean; onChanged: () => Promise<void>; onClose: () => void }) {
   const { profile } = useAuth()
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
@@ -611,10 +592,7 @@ function ExpenseDetail({
     e.preventDefault()
     if (!reason.trim()) return setError('Say why this expense is being voided.')
     setBusy(true)
-    const { error } = await supabase
-      .from('expenses')
-      .update({ voided_at: new Date().toISOString(), void_reason: reason.trim(), voided_by: profile?.id })
-      .eq('id', expense.id)
+    const { error } = await supabase.from('expenses').update({ voided_at: new Date().toISOString(), void_reason: reason.trim(), voided_by: profile?.id }).eq('id', expense.id)
     setBusy(false)
     if (error) return setError(errorMessage(error, 'Could not void the expense.'))
     setReason('')
@@ -624,83 +602,49 @@ function ExpenseDetail({
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 border-b border-hairline pb-4">
         <div className="min-w-0">
-          <p className="font-display text-2xl font-semibold">{peso(expense.amount)}</p>
+          <p className="font-display text-2xl font-semibold tabular-nums">{peso(expense.amount)}</p>
           <p className="mt-1 break-words">{expense.description}</p>
         </div>
-        <button onClick={onClose} className="shrink-0 rounded-md px-2 py-1 text-sm text-slate-600 hover:bg-slate-100">
-          Close
-        </button>
+        <button type="button" onClick={onClose} className="min-h-11 shrink-0 px-2 text-sm font-medium text-slate-600 hover:text-ink">Close</button>
       </div>
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-        <div>
-          <dt className="text-slate-500">Category</dt>
-          <dd>{expense.category}</dd>
-        </div>
-        <div>
-          <dt className="text-slate-500">Date spent</dt>
-          <dd>{formatDate(expense.spent_on)}</dd>
-        </div>
-        <div>
-          <dt className="text-slate-500">Added by</dt>
-          <dd>{names[expense.added_by] ?? 'Unknown'}</dd>
-        </div>
-        <div>
-          <dt className="text-slate-500">Recorded on</dt>
-          <dd>{formatDate(expense.created_at)}</dd>
-        </div>
+      <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+        <div><dt className="text-slate-500">Category</dt><dd>{expense.category}</dd></div>
+        <div><dt className="text-slate-500">Date spent</dt><dd>{formatDate(expense.spent_on)}</dd></div>
+        <div><dt className="text-slate-500">Added by</dt><dd>{names[expense.added_by] ?? 'Unknown'}</dd></div>
+        <div><dt className="text-slate-500">Recorded on</dt><dd>{formatDate(expense.created_at)}</dd></div>
       </dl>
 
       <div className="mt-5">
         {url ? (
           <a href={url} target="_blank" rel="noreferrer" title="Open full size">
-            <img src={url} alt="Receipt" className="max-h-96 w-full rounded-lg border border-slate-200 object-contain" />
+            <img src={url} alt="Receipt" className="max-h-[70vh] w-full border border-hairline object-contain" />
           </a>
         ) : expense.receipt_path ? (
           <p className="text-sm text-slate-500">Loading receipt…</p>
         ) : voided || !canEdit ? (
-          <p className="rounded-md border border-dashed border-ash bg-card px-3 py-2 text-sm text-slate-700">
-            No receipt attached.
-          </p>
+          <p className="border border-dashed border-ash bg-card px-3 py-2 text-sm text-slate-700">No receipt attached.</p>
         ) : (
           <AttachReceipt expense={expense} onChanged={onChanged} />
         )}
       </div>
 
       {voided ? (
-        <p className="mt-5 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-          Voided on {formatDate(expense.voided_at!)}
-          {expense.voided_by && names[expense.voided_by] ? ` by ${names[expense.voided_by]}` : ''}. Reason:{' '}
-          {expense.void_reason}
+        <p className="mt-5 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          Voided on {formatDate(expense.voided_at!)}{expense.voided_by && names[expense.voided_by] ? ` by ${names[expense.voided_by]}` : ''}. Reason: {expense.void_reason}
         </p>
-      ) : (
-        canEdit && (
-          <form onSubmit={voidExpense} className="mt-5 border-t border-slate-200 pt-4">
-            <label htmlFor="void-reason" className="text-sm font-medium">Void this expense</label>
-            <p className="text-xs text-slate-500">
-              It stays in the records, marked as voided, and no longer counts toward the total.
-            </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <input
-                id="void-reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Reason (required)"
-                className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-2 sm:text-sm"
-              />
-              <button type="submit" disabled={busy} className={subtleButtonClass}>
-                {busy ? 'Voiding…' : 'Void expense'}
-              </button>
-            </div>
-            {error && (
-              <p role="alert" className="mt-2 text-sm text-red-700">
-                {error}
-              </p>
-            )}
-          </form>
-        )
+      ) : canEdit && (
+        <form onSubmit={voidExpense} className="mt-5 border-t border-hairline pt-4">
+          <label htmlFor="void-reason" className="text-sm font-medium">Void this expense</label>
+          <p className="text-xs text-slate-500">It stays in the records, marked as voided, and no longer counts toward the total.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="min-h-11 min-w-0 flex-1 border border-slate-300 px-3 py-2.5 text-base sm:text-sm" />
+            <button type="submit" disabled={busy} className={subtleButtonClass + ' min-h-11'}>{busy ? 'Voiding…' : 'Void expense'}</button>
+          </div>
+          {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+        </form>
       )}
     </div>
   )
@@ -708,23 +652,14 @@ function ExpenseDetail({
 
 /* ---------- audit trail (treasurer and admin only) ---------- */
 type JsonRow = Record<string, string | number | null>
-interface AuditRow {
-  id: number
-  table_name: string
-  action: string
-  old_data: JsonRow | null
-  new_data: JsonRow | null
-  actor: string | null
-  at: string
-}
+interface AuditRow { id: number; table_name: string; action: string; old_data: JsonRow | null; new_data: JsonRow | null; actor: string | null; at: string }
 
 function describe(row: AuditRow): string {
   const n = row.new_data ?? {}
   const o = row.old_data ?? {}
   if (row.table_name === 'budgets') {
     if (row.action === 'INSERT') return `Created the budget with ${peso(Number(n.total_budget))}`
-    if (n.total_budget !== o.total_budget)
-      return `Changed the total budget from ${peso(Number(o.total_budget))} to ${peso(Number(n.total_budget))}`
+    if (n.total_budget !== o.total_budget) return `Changed the total budget from ${peso(Number(o.total_budget))} to ${peso(Number(n.total_budget))}`
     return 'Edited the budget'
   }
   if (row.action === 'INSERT') return `Added “${n.description}” for ${peso(Number(n.amount))}`
@@ -742,37 +677,25 @@ function ActivityLog({ budgetId, names }: { budgetId: string; names: Record<stri
     const next = !open
     setOpen(next)
     if (!next) return
-    const { data, error } = await supabase
-      .from('audit_log')
-      .select('*')
-      .or(`new_data->>budget_id.eq.${budgetId},record_id.eq.${budgetId}`)
-      .order('at', { ascending: false })
-      .limit(100)
+    const { data, error } = await supabase.from('audit_log').select('*').or(`new_data->>budget_id.eq.${budgetId},record_id.eq.${budgetId}`).order('at', { ascending: false }).limit(100)
     if (error) setError(error.message)
-    else {
-      setRows((data ?? []) as AuditRow[])
-      setError(null)
-    }
+    else { setRows((data ?? []) as AuditRow[]); setError(null) }
   }
 
   return (
     <section className="mt-10 mb-10" aria-label="Activity log">
-      <button onClick={() => void toggle()} aria-expanded={open} className="font-display py-1 text-xl font-semibold">
-        Activity log {open ? '(hide)' : '(show)'}
-      </button>
+      <button type="button" onClick={() => void toggle()} aria-expanded={open} className="min-h-11 py-2 font-display text-xl font-semibold">Activity log {open ? '(hide)' : '(show)'}</button>
       {open && (
         <div className="mt-3">
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
           {!rows && !error && <p className="text-sm text-slate-500">Loading…</p>}
           {rows && rows.length === 0 && <p className="text-sm text-slate-500">Nothing recorded yet.</p>}
           {rows && rows.length > 0 && (
-            <ul className="divide-y divide-slate-200 border-y border-slate-200">
+            <ul className="divide-y divide-hairline border-y border-hairline">
               {rows.map((r) => (
                 <li key={r.id} className="py-3 text-sm">
                   <p className="break-words">{describe(r)}</p>
-                  <p className="text-xs text-slate-500">
-                    {r.actor ? names[r.actor] ?? 'Unknown' : 'System'}, {new Date(r.at).toLocaleString('en-PH')}
-                  </p>
+                  <p className="text-xs text-slate-500">{r.actor ? names[r.actor] ?? 'Unknown' : 'System'}, {new Date(r.at).toLocaleString('en-PH')}</p>
                 </li>
               ))}
             </ul>

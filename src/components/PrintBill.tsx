@@ -12,7 +12,7 @@ interface Props {
 const th = 'border border-black px-2 py-1 text-left font-semibold'
 const td = 'border border-black px-2 py-1 align-top'
 
-/** Only visible when printing. Rendered on the page, hidden on screen. */
+/** Only visible when printing. Content and wording are kept unchanged; print styling is black on white. */
 export default function PrintBill({ budget, expenses, urls, names, spent, left }: Props) {
   const active = expenses
     .filter((e) => !e.voided_at)
@@ -21,36 +21,25 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
   const withReceipts = active.map((e, i) => ({ e, n: i + 1 })).filter(({ e }) => e.receipt_path && urls[e.receipt_path])
 
   return (
-    <div id="print-bill" className="hidden text-black print:block">
-      <header className="border-b-2 border-black pb-3">
+    <div id="print-bill" className="hidden bg-white text-black print:block print:bg-white print:text-black">
+      <header className="border-b-2 border-black bg-white pb-3 text-black">
         <p className="text-sm">KKB BULSU</p>
         <h1 className="text-2xl font-bold">Statement of Expenses</h1>
         <p className="text-lg">{budget.name}</p>
-        <p className="mt-1 text-sm">
-          Printed on {new Date().toLocaleDateString('en-PH', { dateStyle: 'long' })}
-        </p>
+        <p className="mt-1 text-sm">Printed on {new Date().toLocaleDateString('en-PH', { dateStyle: 'long' })}</p>
       </header>
 
-      <table className="mt-5 w-full border-collapse text-sm">
+      <table className="mt-5 w-full border-collapse bg-white text-sm text-black">
         <tbody>
-          <tr>
-            <th className={th}>Total budget</th>
-            <td className={td + ' text-right'}>{peso(budget.total_budget)}</td>
-          </tr>
-          <tr>
-            <th className={th}>Total expenses</th>
-            <td className={td + ' text-right'}>{peso(spent)}</td>
-          </tr>
-          <tr>
-            <th className={th}>{left < 0 ? 'Over budget by' : 'Remaining balance'}</th>
-            <td className={td + ' text-right font-bold'}>{peso(Math.abs(left))}</td>
-          </tr>
+          <tr><th className={th}>Total budget</th><td className={td + ' text-right'}>{peso(budget.total_budget)}</td></tr>
+          <tr><th className={th}>Total expenses</th><td className={td + ' text-right'}>{peso(spent)}</td></tr>
+          <tr><th className={th}>{left < 0 ? 'Over budget by' : 'Remaining balance'}</th><td className={td + ' text-right font-bold'}>{peso(Math.abs(left))}</td></tr>
         </tbody>
       </table>
 
       <h2 className="mt-6 mb-2 text-base font-bold">Itemized expenses</h2>
-      <table className="w-full border-collapse text-sm">
-        <thead>
+      <table className="w-full border-collapse bg-white text-sm text-black">
+        <thead className="table-header-group">
           <tr>
             <th className={th}>No.</th>
             <th className={th}>Date</th>
@@ -61,11 +50,7 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
           </tr>
         </thead>
         <tbody>
-          {active.length === 0 && (
-            <tr>
-              <td className={td} colSpan={6}>No expenses recorded.</td>
-            </tr>
-          )}
+          {active.length === 0 && <tr><td className={td} colSpan={6}>No expenses recorded.</td></tr>}
           {active.map((e, i) => (
             <tr key={e.id} className="break-inside-avoid">
               <td className={td}>{i + 1}</td>
@@ -76,24 +61,16 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
               <td className={td + ' text-right'}>{peso(e.amount)}</td>
             </tr>
           ))}
-          <tr>
-            <td className={td + ' text-right font-bold'} colSpan={5}>Total</td>
-            <td className={td + ' text-right font-bold'}>{peso(spent)}</td>
-          </tr>
+          <tr><td className={td + ' text-right font-bold'} colSpan={5}>Total</td><td className={td + ' text-right font-bold'}>{peso(spent)}</td></tr>
         </tbody>
       </table>
 
       {voided.length > 0 && (
         <>
           <h2 className="mt-6 mb-2 text-base font-bold">Voided entries (not counted in the total)</h2>
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr>
-                <th className={th}>Description</th>
-                <th className={th}>Amount</th>
-                <th className={th}>Reason</th>
-                <th className={th}>Voided by</th>
-              </tr>
+          <table className="w-full border-collapse bg-white text-sm text-black">
+            <thead className="table-header-group">
+              <tr><th className={th}>Description</th><th className={th}>Amount</th><th className={th}>Reason</th><th className={th}>Voided by</th></tr>
             </thead>
             <tbody>
               {voided.map((e) => (
@@ -111,11 +88,7 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
 
       <div className="mt-12 grid grid-cols-3 gap-8 break-inside-avoid text-sm">
         {['Prepared by (Finance)', 'Noted by (President)', 'Approved by (SCOM Head)'].map((label) => (
-          <div key={label}>
-            <div className="h-10 border-b border-black" />
-            <p className="mt-1">{label}</p>
-            <p className="text-xs">Date: ______________</p>
-          </div>
+          <div key={label}><div className="h-10 border-b border-black" /><p className="mt-1">{label}</p><p className="text-xs">Date: ______________</p></div>
         ))}
       </div>
 
@@ -124,11 +97,9 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
           <h2 className="mb-3 text-base font-bold">Receipts</h2>
           <div className="grid grid-cols-2 gap-4">
             {withReceipts.map(({ e, n }) => (
-              <figure key={e.id} className="break-inside-avoid border border-black p-2">
+              <figure key={e.id} className="break-inside-avoid border border-black bg-white p-2">
                 <img src={urls[e.receipt_path!]} alt={`Receipt for item ${n}`} className="max-h-96 w-full object-contain" />
-                <figcaption className="mt-1 text-xs">
-                  Item {n}: {e.description} ({peso(e.amount)})
-                </figcaption>
+                <figcaption className="mt-1 text-xs">Item {n}: {e.description} ({peso(e.amount)})</figcaption>
               </figure>
             ))}
           </div>
