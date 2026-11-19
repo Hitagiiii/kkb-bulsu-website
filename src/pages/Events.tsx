@@ -16,7 +16,6 @@ import {
   wazeDirections,
   type EventRow,
 } from '../lib/events'
-import Chip from '../components/Chip'
 import EventExtras from '../components/EventExtras'
 import EventForm, { type EventValues } from '../components/EventForm'
 import { CalendarIcon, ClockIcon, MapPinIcon, VideoIcon } from '../components/Icons'
@@ -46,10 +45,12 @@ export default function Events() {
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<View>('list')
   const [now, setNow] = useState(() => Date.now())
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [mobileDetailId, setMobileDetailId] = useState<string | null>(null)
   const [formFor, setFormFor] = useState<'new' | string | null>(null)
   const [selectedDay, setSelectedDay] = useState(() => dayKey(new Date()))
   const [showPast, setShowPast] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('events').select('*').order('starts_at').limit(500)
@@ -93,15 +94,23 @@ export default function Events() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 768px)')
+    const onChange = () => setIsDesktop(media.matches)
+    onChange()
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+
   const upcoming = events.filter((e) => !isOver(e, now))
   const past = events.filter((e) => isOver(e, now)).sort((a, b) => b.starts_at.localeCompare(a.starts_at))
   const next = upcoming[0] ?? null
   const rest = upcoming.slice(1)
   const dayEvents = events.filter((e) => dayKey(e.starts_at) === selectedDay)
-  const opened = events.find((e) => e.id === openId) ?? null
+  const selected = events.find((e) => e.id === selectedId) ?? null
+  const mobileOpened = events.find((e) => e.id === mobileDetailId) ?? null
   const editing = formFor && formFor !== 'new' ? (events.find((e) => e.id === formFor) ?? null) : null
 
-  // group the rest of the upcoming events by day, in order
   const groups: { key: string; items: EventRow[] }[] = []
   for (const e of rest) {
     const key = dayKey(e.starts_at)
@@ -110,8 +119,13 @@ export default function Events() {
     else groups.push({ key, items: [e] })
   }
 
-  const closeDetail = () => {
-    setOpenId(null)
+  function selectEvent(id: string) {
+    setSelectedId(id)
+    setMobileDetailId(id)
+  }
+
+  function closeMobileDetail() {
+    setMobileDetailId(null)
     void loadMine()
   }
 
@@ -138,121 +152,177 @@ export default function Events() {
   async function deleteEvent(id: string) {
     const { error } = await supabase.from('events').delete().eq('id', id)
     if (error) return setError(errorMessage(error, 'Could not delete the event.'))
-    setOpenId(null)
+    setSelectedId(null)
+    setMobileDetailId(null)
     await load()
   }
 
   const card = (e: EventRow) => (
     <li key={e.id}>
-      <EventCard event={e} now={now} rsvp={rsvps[e.id]} attended={attended.has(e.id)} onOpen={() => setOpenId(e.id)} />
+      <EventCard
+        event={e}
+        now={now}
+        rsvp={rsvps[e.id]}
+        attended={attended.has(e.id)}
+        selected={selectedId === e.id}
+        onOpen={() => selectEvent(e.id)}
+      />
     </li>
   )
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-6xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold sm:text-3xl">Events</h1>
           <p className="mt-2 text-slate-600">What is happening, where, and who is going.</p>
         </div>
         {canEdit && (
-          <button onClick={() => setFormFor('new')} className={buttonClass + ' sm:w-auto'}>
+          <button type="button" onClick={() => setFormFor('new')} className={buttonClass + ' min-h-11 sm:w-auto'}>
             Add an event
           </button>
         )}
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mt-6 border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
           {error}
         </p>
       )}
 
-      <div role="group" aria-label="View" className="mt-8 inline-flex rounded-full bg-card p-1">
-        {(['list', 'calendar'] as const).map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => setView(v)}
-            aria-pressed={view === v}
-            className={
-              'rounded-full px-5 py-2 text-sm font-medium transition-colors sm:py-1.5 ' +
-              (view === v ? 'bg-ink text-white' : 'text-ink hover:bg-secondary')
-            }
-          >
-            {v === 'list' ? 'List' : 'Calendar'}
-          </button>
-        ))}
+      <div className="mt-6 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_380px]">
+        <main className="min-w-0">
+          <div role="group" aria-label="View" className="inline-flex rounded-md border border-hairline bg-card p-1">
+            {(['list', 'calendar'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                aria-pressed={view === v}
+                className={
+                  'min-h-11 rounded-md px-4 text-sm font-bold transition-colors ' +
+                  (view === v ? 'bg-ink text-white' : 'text-ink hover:bg-secondary')
+                }
+              >
+                {v === 'list' ? 'List' : 'Month'}
+              </button>
+            ))}
+          </div>
+
+          {loading && (
+            <div className="mt-6 space-y-3" aria-label="Loading events">
+              {[0, 1, 2].map((n) => (
+                <div key={n} className="h-20 border border-hairline bg-card" />
+              ))}
+            </div>
+          )}
+
+          {!loading && view === 'list' && (
+            <>
+              {next ? (
+                <NextUp
+                  event={next}
+                  now={now}
+                  rsvp={rsvps[next.id]}
+                  selected={selectedId === next.id}
+                  onOpen={() => selectEvent(next.id)}
+                />
+              ) : (
+                <div className="mt-6 border border-dashed border-hairline bg-card px-6 py-10 text-center">
+                  <CalendarIcon size={36} className="mx-auto text-brand-700" />
+                  <p className="font-display mt-3 text-xl font-semibold">Nothing coming up</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {canEdit ? 'Add the first event and members will see it here.' : 'New events will show up here.'}
+                  </p>
+                </div>
+              )}
+
+              {groups.map((g) => (
+                <section key={g.key} className="mt-8" aria-label={dayLabel(g.key, now)}>
+                  <h2 className="text-sm font-bold tracking-wide text-slate-500 uppercase">{dayLabel(g.key, now)}</h2>
+                  <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+                    {g.items.map((e) => card(e))}
+                  </ul>
+                </section>
+              ))}
+
+              {past.length > 0 && (
+                <section className="mt-8 border-t border-hairline pt-5">
+                  <button
+                    type="button"
+                    onClick={() => setShowPast((s) => !s)}
+                    aria-expanded={showPast}
+                    className="flex min-h-11 w-full items-center justify-between gap-4 text-left"
+                  >
+                    <span className="font-display text-lg font-semibold">Past events ({past.length})</span>
+                    <span className="text-sm font-medium text-slate-500">{showPast ? 'Hide' : 'Show'}</span>
+                  </button>
+                  {showPast && (
+                    <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+                      {past.slice(0, 30).map((e) => card(e))}
+                    </ul>
+                  )}
+                </section>
+              )}
+            </>
+          )}
+
+          {!loading && view === 'calendar' && (
+            <div className="mt-6">
+              <MonthCalendar
+                events={events}
+                selectedDay={selectedDay}
+                onSelectDay={setSelectedDay}
+                onOpenEvent={selectEvent}
+              />
+              <section className="mt-6" aria-label="Events on the selected day">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h2 className="font-display text-lg font-semibold">{formatDay(selectedDay + 'T00:00:00')}</h2>
+                  <span className="text-sm text-slate-500">{dayEvents.length} event{dayEvents.length === 1 ? '' : 's'}</span>
+                </div>
+                {dayEvents.length === 0 ? (
+                  <p className="mt-2 border border-dashed border-hairline bg-card px-4 py-5 text-sm text-slate-500">
+                    No events on this day.
+                  </p>
+                ) : (
+                  <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+                    {dayEvents.map((e) => card(e))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          )}
+        </main>
+
+        {isDesktop && (
+          <aside className="md:sticky md:top-6" aria-label="Event details">
+            {selected ? (
+              <EventDetail
+                event={selected}
+                now={now}
+                canEdit={canEdit}
+                onEdit={() => setFormFor(selected.id)}
+                onDelete={() => void deleteEvent(selected.id)}
+              />
+            ) : (
+              <div className="border border-hairline bg-card p-5">
+                <p className="font-display text-lg font-semibold">Event details</p>
+                <p className="mt-2 text-sm text-slate-500">Select an event to see its time, place, links, RSVP and attendance information.</p>
+              </div>
+            )}
+          </aside>
+        )}
       </div>
 
-      {loading && (
-        <div className="mt-8 space-y-3" aria-label="Loading events">
-          {[0, 1, 2].map((n) => (
-            <div key={n} className="h-24 animate-pulse rounded-2xl bg-slate-200/70" />
-          ))}
-        </div>
-      )}
-
-      {!loading && view === 'list' && (
-        <>
-          {next ? (
-            <NextUp event={next} now={now} rsvp={rsvps[next.id]} onOpen={() => setOpenId(next.id)} />
-          ) : (
-            <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-              <CalendarIcon size={36} className="mx-auto text-brand-700" />
-              <p className="font-display mt-3 text-xl font-semibold">Nothing coming up</p>
-              <p className="mt-1 text-sm text-slate-500">
-                {canEdit ? 'Add the first event and members will see it here.' : 'New events will show up here.'}
-              </p>
-            </div>
-          )}
-
-          {groups.map((g) => (
-            <section key={g.key} className="mt-8" aria-label={dayLabel(g.key, now)}>
-              <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">{dayLabel(g.key, now)}</h2>
-              <ul className="mt-3 grid gap-4 sm:grid-cols-2">{g.items.map((e) => card(e))}</ul>
-            </section>
-          ))}
-
-          {past.length > 0 && (
-            <div className="mt-10">
-              <button
-                type="button"
-                onClick={() => setShowPast((s) => !s)}
-                aria-expanded={showPast}
-                className="font-display py-1 text-lg font-semibold"
-              >
-                Past events ({past.length}) {showPast ? '(hide)' : '(show)'}
-              </button>
-              {showPast && <ul className="mt-3 grid gap-4 sm:grid-cols-2">{past.slice(0, 30).map((e) => card(e))}</ul>}
-            </div>
-          )}
-        </>
-      )}
-
-      {!loading && view === 'calendar' && (
-        <div className="mt-6">
-          <MonthCalendar events={events} selectedDay={selectedDay} onSelectDay={setSelectedDay} onOpenEvent={(id) => setOpenId(id)} />
-          <section className="mt-6" aria-label="Events on the selected day">
-            <h2 className="font-display text-lg font-semibold">{formatDay(selectedDay + 'T00:00:00')}</h2>
-            {dayEvents.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">No events on this day.</p>
-            ) : (
-              <ul className="mt-3 grid gap-4 sm:grid-cols-2">{dayEvents.map((e) => card(e))}</ul>
-            )}
-          </section>
-        </div>
-      )}
-
-      {opened && !formFor && (
-        <Modal label="Event details" onClose={closeDetail}>
+      {!isDesktop && mobileOpened && !formFor && (
+        <Modal label="Event details" onClose={closeMobileDetail}>
           <EventDetail
-            event={opened}
+            event={mobileOpened}
             now={now}
             canEdit={canEdit}
-            onEdit={() => setFormFor(opened.id)}
-            onDelete={() => void deleteEvent(opened.id)}
-            onClose={closeDetail}
+            onEdit={() => setFormFor(mobileOpened.id)}
+            onDelete={() => void deleteEvent(mobileOpened.id)}
+            onClose={closeMobileDetail}
           />
         </Modal>
       )}
@@ -271,20 +341,16 @@ export default function Events() {
   )
 }
 
-/* ---------- cover tile: the "image" of an event card ---------- */
-function EventCover({ iso, label, large = false }: { iso: string; label?: string; large?: boolean }) {
+/* ---------- flat event placeholder ---------- */
+function EventCover({ iso, label }: { iso: string; label?: string }) {
   const d = new Date(iso)
   return (
-    <div className={'relative flex items-end bg-secondary p-4 ' + (large ? 'min-h-48 sm:min-h-full' : 'h-32')}>
-      {label && (
-        <span className="absolute top-3 left-3 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-ink">{label}</span>
-      )}
-      <div>
-        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">
-          {d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short' })}
-        </p>
-        <p className={'font-display leading-none font-bold text-ink ' + (large ? 'text-7xl' : 'text-5xl')}>{d.getDate()}</p>
-      </div>
+    <div className="flex min-w-20 flex-col justify-center bg-secondary px-3 py-3 sm:min-w-24 sm:px-4">
+      {label && <p className="text-xs font-bold text-slate-600">{label}</p>}
+      <p className="mt-1 text-xs font-bold tracking-wide text-brand-700 uppercase">
+        {d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short' })}
+      </p>
+      <p className="font-display text-3xl leading-none font-bold text-ink">{d.getDate()}</p>
     </div>
   )
 }
@@ -298,32 +364,41 @@ function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   )
 }
 
-/* ---------- the next event, shown big ---------- */
-function NextUp({ event, now, rsvp, onOpen }: { event: EventRow; now: number; rsvp?: Rsvp; onOpen: () => void }) {
+/* ---------- compact next-up row ---------- */
+function NextUp({
+  event,
+  now,
+  rsvp,
+  selected,
+  onOpen,
+}: {
+  event: EventRow
+  now: number
+  rsvp?: Rsvp
+  selected: boolean
+  onOpen: () => void
+}) {
   const live = new Date(event.starts_at).getTime() <= now
   return (
-    <section aria-label="Next event" className="mt-8 overflow-hidden rounded-3xl bg-card sm:grid sm:grid-cols-[2fr_3fr]">
-      <EventCover iso={event.starts_at} label={live ? 'Happening now' : `Starts ${timeUntil(event.starts_at, now)}`} large />
-      <div className="p-5 sm:p-7">
-        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">Next up</p>
-        <h2 className="font-display mt-1 text-2xl leading-tight font-bold break-words sm:text-3xl">{event.title}</h2>
-        <div className="mt-4 space-y-1.5 text-slate-700">
-          <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
-          {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
-          {event.meeting_link && <Meta icon={<VideoIcon size={16} />}>Online link available</Meta>}
-        </div>
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button type="button" onClick={onOpen} className={buttonClass + ' sm:w-auto'}>
-            View details
-          </button>
-          {event.meeting_link && (
-            <a href={event.meeting_link} target="_blank" rel="noopener noreferrer" className={subtleButtonClass}>
-              Join online
-            </a>
-          )}
-          {rsvp === 'going' && <Chip tone="green">You are going</Chip>}
-        </div>
-      </div>
+    <section aria-label="Next event" className="mt-6 border border-hairline bg-white">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-pressed={selected}
+        className="flex min-h-20 w-full items-stretch text-left hover:bg-card"
+      >
+        <EventCover iso={event.starts_at} label={live ? 'Now' : `Next · ${timeUntil(event.starts_at, now)}`} />
+        <span className="min-w-0 flex-1 p-3 sm:p-4">
+          <span className="block text-xs font-bold tracking-wide text-brand-700 uppercase">Next up</span>
+          <span className="mt-0.5 block break-words font-display text-base font-bold sm:text-lg">{event.title}</span>
+          <span className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 sm:text-sm">
+            <span>{formatRange(event.starts_at, event.ends_at)}</span>
+            {event.location_name && <span>{event.location_name}</span>}
+            {event.meeting_link && <span>Online</span>}
+          </span>
+        </span>
+      </button>
+      {rsvp === 'going' && <p className="border-t border-hairline px-3 py-2 text-xs font-semibold text-brand-700 sm:px-4">You are going</p>}
     </section>
   )
 }
@@ -334,12 +409,14 @@ function EventCard({
   now,
   rsvp,
   attended,
+  selected,
   onOpen,
 }: {
   event: EventRow
   now: number
   rsvp?: Rsvp
   attended: boolean
+  selected: boolean
   onOpen: () => void
 }) {
   const over = isOver(event, now)
@@ -351,27 +428,29 @@ function EventCard({
     <button
       type="button"
       onClick={onOpen}
+      aria-pressed={selected}
       className={
-        'block w-full overflow-hidden rounded-md border border-hairline bg-white text-left transition-colors hover:border-ash ' +
-        (over ? 'opacity-75' : '')
+        'flex min-h-20 w-full items-stretch text-left hover:bg-card ' +
+        (over ? 'opacity-70 ' : '') +
+        (selected ? 'bg-card' : 'bg-white')
       }
     >
       <EventCover iso={event.starts_at} label={timeLabel} />
-      <span className="block p-4">
-        <span className="font-display block text-lg font-bold break-words">{event.title}</span>
+      <span className="min-w-0 flex-1 p-3 sm:p-4">
+        <span className="block break-words font-display text-base font-bold">{event.title}</span>
         {event.location_name && (
-          <span className="mt-1 flex text-slate-600">
+          <span className="mt-1 block text-sm text-slate-600">
             <Meta icon={<MapPinIcon size={15} />}>{event.location_name}</Meta>
           </span>
         )}
         {(soon || attended || rsvp || event.meeting_link || hasPin) && (
-          <span className="mt-3 flex flex-wrap gap-1.5">
-            {soon && <Chip tone="amber">Starts {timeUntil(event.starts_at, now)}</Chip>}
-            {attended && <Chip tone="green">Checked in</Chip>}
-            {!attended && rsvp === 'going' && <Chip tone="green">You are going</Chip>}
-            {!attended && rsvp === 'not_going' && <Chip>Not going</Chip>}
-            {event.meeting_link && <Chip tone="brand">Online</Chip>}
-            {hasPin && <Chip>On the map</Chip>}
+          <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-slate-600">
+            {soon && <span className="text-brand-700">Starts {timeUntil(event.starts_at, now)}</span>}
+            {attended && <span>Checked in</span>}
+            {!attended && rsvp === 'going' && <span className="text-brand-700">You are going</span>}
+            {!attended && rsvp === 'not_going' && <span>Not going</span>}
+            {event.meeting_link && <span>Online</span>}
+            {hasPin && <span>On the map</span>}
           </span>
         )}
       </span>
@@ -379,7 +458,7 @@ function EventCard({
   )
 }
 
-/* ---------- full details in a dialog ---------- */
+/* ---------- event details: persistent pane on desktop, sheet/modal on mobile ---------- */
 function EventDetail({
   event,
   now,
@@ -393,7 +472,7 @@ function EventDetail({
   canEdit: boolean
   onEdit: () => void
   onDelete: () => void
-  onClose: () => void
+  onClose?: () => void
 }) {
   const [confirming, setConfirming] = useState(false)
   const hasPin = event.latitude != null && event.longitude != null
@@ -401,49 +480,51 @@ function EventDetail({
   const soon = !over && eventState(event.starts_at, now) === 'soon'
 
   return (
-    <div>
-      <div className="relative -mx-5 -mt-5 mb-5">
-        <EventCover
-          iso={event.starts_at}
-          label={soon ? `Starts ${timeUntil(event.starts_at, now)}` : over ? 'Already happened' : undefined}
-          large
-        />
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 rounded-full bg-white px-4 py-2 text-sm font-bold text-ink hover:bg-card"
-        >
-          Close
-        </button>
-      </div>
-      <h2 className="font-display text-2xl leading-tight font-bold break-words">{event.title}</h2>
-      <div className="mt-3 mb-5 space-y-1.5 text-slate-700">
-        <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
-        {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
+    <div className="border border-hairline bg-white p-4 sm:p-5">
+      {onClose && (
+        <div className="mb-4 flex justify-end md:hidden">
+          <button type="button" onClick={onClose} className="min-h-11 rounded-md bg-secondary px-4 text-sm font-bold text-ink">
+            Close
+          </button>
+        </div>
+      )}
+
+      <div className="border-b border-hairline pb-4">
+        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">
+          {soon ? `Starts ${timeUntil(event.starts_at, now)}` : over ? 'Already happened' : 'Event details'}
+        </p>
+        <h2 className="font-display mt-1 text-2xl leading-tight font-bold break-words">{event.title}</h2>
+        <div className="mt-3 space-y-2 text-slate-700">
+          <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
+          {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
+        </div>
       </div>
 
       {event.meeting_link && (
-        <a href={event.meeting_link} target="_blank" rel="noopener noreferrer" className={buttonClass + ' sm:w-auto'}>
-          Join online meeting ({linkHost(event.meeting_link)})
-        </a>
+        <div className="mt-4">
+          <a href={event.meeting_link} target="_blank" rel="noopener noreferrer" className={buttonClass + ' min-h-11 sm:w-auto'}>
+            Join online meeting ({linkHost(event.meeting_link)})
+          </a>
+        </div>
       )}
 
       {(event.location_name || hasPin) && (
         <div className="mt-5">
           {hasPin && (
             <>
-              <MapView lat={event.latitude} lng={event.longitude} className="h-56 w-full rounded-2xl border border-slate-200" />
+              <MapView lat={event.latitude} lng={event.longitude} className="h-52 w-full border border-hairline" />
               <div className="mt-3 flex flex-wrap gap-2">
-                <a href={googleDirections(event.latitude!, event.longitude!)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass}>
+                <a href={googleDirections(event.latitude!, event.longitude!)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass + ' min-h-11'}>
                   Directions in Google Maps
                 </a>
-                <a href={wazeDirections(event.latitude!, event.longitude!)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass}>
+                <a href={wazeDirections(event.latitude!, event.longitude!)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass + ' min-h-11'}>
                   Directions in Waze
                 </a>
               </div>
             </>
           )}
           {!hasPin && event.location_name && (
-            <a href={googleDirectionsByName(event.location_name)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass}>
+            <a href={googleDirectionsByName(event.location_name)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass + ' min-h-11'}>
               Find it in Google Maps
             </a>
           )}
@@ -451,7 +532,7 @@ function EventDetail({
       )}
 
       {event.description && (
-        <p className="mt-5 break-words whitespace-pre-wrap">
+        <p className="mt-5 break-words whitespace-pre-wrap text-sm leading-6">
           <Linkify text={event.description} />
         </p>
       )}
@@ -459,23 +540,23 @@ function EventDetail({
       <EventExtras event={event} canEdit={canEdit} over={over} />
 
       {canEdit && (
-        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-slate-200 pt-4 text-sm">
+        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-hairline pt-4 text-sm">
           {confirming ? (
             <>
               <span className="text-slate-700">Delete this event for good?</span>
-              <button onClick={onDelete} className="py-1 font-semibold text-red-700 hover:underline">
+              <button type="button" onClick={onDelete} className="min-h-11 px-2 font-semibold text-red-700 hover:underline">
                 Yes, delete
               </button>
-              <button onClick={() => setConfirming(false)} className="py-1 text-slate-600 hover:underline">
+              <button type="button" onClick={() => setConfirming(false)} className="min-h-11 px-2 text-slate-600 hover:underline">
                 Cancel
               </button>
             </>
           ) : (
             <>
-              <button onClick={onEdit} className="py-1 font-medium text-brand-700 hover:underline">
+              <button type="button" onClick={onEdit} className="min-h-11 px-2 font-medium text-brand-700 hover:underline">
                 Edit
               </button>
-              <button onClick={() => setConfirming(true)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
+              <button type="button" onClick={() => setConfirming(true)} className="min-h-11 px-2 text-slate-600 hover:text-red-700 hover:underline">
                 Delete
               </button>
             </>

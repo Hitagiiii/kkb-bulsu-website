@@ -56,7 +56,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
   return (
     <div className="mt-6 border-t border-slate-200 pt-5">
       {attended && (
-        <p className="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900">
+        <p className="mb-4 border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-medium text-emerald-900">
           You are checked in for this event.
         </p>
       )}
@@ -73,8 +73,8 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
             aria-pressed={mine === 'going'}
             onClick={() => void answer('going')}
             className={
-              'rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 sm:py-2 ' +
-              (mine === 'going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50')
+              'min-h-11 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ' +
+              (mine === 'going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-hairline bg-white text-ink hover:bg-card')
             }
           >
             {full ? 'Event is full' : "I'm going"}
@@ -85,8 +85,8 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
             aria-pressed={mine === 'not_going'}
             onClick={() => void answer('not_going')}
             className={
-              'rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 sm:py-2 ' +
-              (mine === 'not_going' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50')
+              'min-h-11 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ' +
+              (mine === 'not_going' ? 'border-ink bg-ink text-white' : 'border-hairline bg-white text-ink hover:bg-card')
             }
           >
             Can't make it
@@ -237,12 +237,12 @@ function OfficerPanel({
   }
 
   return (
-    <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="mt-6 border border-hairline bg-card p-4">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="font-display py-1 text-lg font-semibold"
+        className="font-display min-h-11 py-2 text-lg font-semibold"
       >
         Attendance and headcount {open ? '(hide)' : '(show)'}
       </button>
@@ -258,18 +258,18 @@ function OfficerPanel({
               hours before the event until 2 hours after it ends.
             </p>
             {qr ? (
-              <img src={qr} alt="QR code for event check-in" className="mt-3 h-56 w-56 rounded-lg border border-slate-200 bg-white" />
+              <img src={qr} alt="QR code for event check-in" className="mt-3 h-56 w-56 border border-hairline bg-white" />
             ) : (
               <p className="mt-3 text-sm text-slate-500">Making the QR code…</p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => void downloadQr()} disabled={!link} className={subtleButtonClass}>
+              <button type="button" onClick={() => void downloadQr()} disabled={!link} className={subtleButtonClass + ' min-h-11'}>
                 Download QR (PNG)
               </button>
-              <button type="button" onClick={() => void copy()} className={subtleButtonClass}>
+              <button type="button" onClick={() => void copy()} className={subtleButtonClass + ' min-h-11'}>
                 {copied ? 'Copied' : 'Copy check-in link'}
               </button>
-              <button type="button" onClick={() => void resetCode()} className={subtleButtonClass}>
+              <button type="button" onClick={() => void resetCode()} className={subtleButtonClass + ' min-h-11'}>
                 Make a new code
               </button>
             </div>
@@ -282,9 +282,9 @@ function OfficerPanel({
             {attendance.length === 0 ? (
               <p className="mt-2 text-sm text-slate-500">No one has checked in yet.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200 bg-white text-sm">
+              <ul className="mt-2 divide-y divide-hairline border-y border-hairline bg-white text-sm">
                 {attendance.map((a) => (
-                  <li key={a.id} className="flex items-center justify-between gap-3 px-3 py-2">
+                  <li key={a.id} className="flex min-h-11 items-center justify-between gap-3 px-3 py-2">
                     <span className="min-w-0 break-words">
                       {names[a.user_id] ?? 'Unknown'}
                       <span className="ml-2 text-xs text-slate-500">
@@ -292,7 +292,7 @@ function OfficerPanel({
                         {a.method === 'manual' && ' (added by an officer)'}
                       </span>
                     </span>
-                    <button type="button" onClick={() => void removeRow(a.id)} className="shrink-0 py-1 text-xs text-slate-600 hover:text-red-700 hover:underline">
+                    <button type="button" onClick={() => void removeRow(a.id)} className="min-h-11 shrink-0 px-2 text-xs text-slate-600 hover:text-red-700 hover:underline">
                       Remove
                     </button>
                   </li>
@@ -304,7 +304,7 @@ function OfficerPanel({
                 aria-label="Add a member who could not scan"
                 value={pick}
                 onChange={(e) => setPick(e.target.value)}
-                className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                className="min-h-11 min-w-0 flex-1 rounded-md border border-hairline bg-white px-2 py-2.5 text-base sm:text-sm"
               >
                 <option value="">Add someone who could not scan…</option>
                 {people
@@ -315,7 +315,7 @@ function OfficerPanel({
                     </option>
                   ))}
               </select>
-              <button type="button" disabled={!pick} onClick={() => void addManual()} className={subtleButtonClass}>
+              <button type="button" disabled={!pick} onClick={() => void addManual()} className={subtleButtonClass + ' min-h-11'}>
                 Add
               </button>
             </div>
@@ -330,9 +330,9 @@ function OfficerPanel({
             )}
             <div className="mt-3 flex flex-wrap items-end gap-2">
               <div>
-                <label htmlFor="cap" className="text-xs text-slate-500">Limit (leave empty for no limit)</label>
+                <label htmlFor={`cap-${event.id}`} className="text-xs text-slate-500">Limit (leave empty for no limit)</label>
                 <input
-                  id="cap"
+                  id={`cap-${event.id}`}
                   type="number"
                   min="1"
                   inputMode="numeric"
@@ -341,7 +341,7 @@ function OfficerPanel({
                   className={inputClass + ' w-32'}
                 />
               </div>
-              <button type="button" onClick={() => void saveCapacity()} className={subtleButtonClass}>
+              <button type="button" onClick={() => void saveCapacity()} className={subtleButtonClass + ' min-h-11'}>
                 Save limit
               </button>
             </div>
@@ -357,7 +357,7 @@ function OfficerPanel({
             ) : (
               <ul className="mt-2 space-y-2 text-sm">
                 {budgets.map((b) => (
-                  <li key={b.budget_id} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                  <li key={b.budget_id} className="border border-hairline bg-white px-3 py-3">
                     <Link to={`/finance/${b.budget_id}`} className="font-medium text-brand-700 hover:underline">
                       {b.name}
                     </Link>
@@ -376,3 +376,4 @@ function OfficerPanel({
     </div>
   )
 }
+
