@@ -118,26 +118,28 @@ export default function OrderRow({
   }
 
   return (
-    <li className={'py-4 ' + (cancelled ? 'opacity-70' : '')}>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="font-medium break-words">
-          {buyer}
-          {!order.user_id && <span className="ml-2 text-xs font-normal text-slate-500">(not a member)</span>}
+    <li className={'py-3 ' + (cancelled ? 'opacity-70' : '')}>
+      <div className="grid gap-2 md:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)_auto_auto] md:items-center md:gap-4">
+        <div className="min-w-0">
+          <p className="font-semibold break-words">
+            {buyer}
+            {!order.user_id && <span className="ml-2 text-xs font-normal text-slate-500">(not a member)</span>}
+          </p>
+          <p className="mt-0.5 text-sm text-slate-600">
+            {order.variant ? `${order.variant} · ` : ''}Qty {order.quantity}
+          </p>
+        </div>
+        <p className="text-sm tabular-nums text-slate-600 md:text-right">
+          <span className="font-semibold text-ink">{peso(order.amount_paid)}</span> / {peso(orderTotal(order))}
         </p>
-        <p className="text-sm tabular-nums text-slate-600">
-          {peso(order.amount_paid)} / {peso(orderTotal(order))}
-        </p>
-      </div>
-      <p className="text-sm text-slate-600">
-        {order.variant ? `${order.variant}, ` : ''}quantity {order.quantity}
-      </p>
-      <p className="mt-2 flex flex-wrap items-center gap-2">
+        <p className="flex flex-wrap items-center gap-1.5">
         {!cancelled && <Chip tone={PAY_TONE[p]}>{PAY_LABEL[p]}</Chip>}
         <Chip tone={st.tone}>{st.label}</Chip>
-        {claimed && <span className="text-xs text-slate-500">{formatDateTime(order.claimed_at!)}</span>}
         {refundDue && <Chip tone="amber">Refund {peso(order.amount_paid)} due</Chip>}
         {pendingProofs.length > 0 && <Chip tone="amber">Proof to verify</Chip>}
       </p>
+      <div className="hidden text-xs text-slate-500 md:block md:text-right">{claimed ? `Claimed ${formatDateTime(order.claimed_at!)}` : st.label}</div>
+      </div>
       {cancelled && order.cancel_reason && <p className="mt-1 text-xs text-slate-500">Reason: {order.cancel_reason}</p>}
 
       {proofs.length > 0 && (
@@ -149,14 +151,14 @@ export default function OrderRow({
       )}
 
       {canEdit && mode === null && voidId === null && (
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-hairline pt-2 text-sm">
           {!cancelled && !claimed && balance > 0 && (
             <button
               onClick={() => {
                 setAmount(String(balance))
                 setMode('pay')
               }}
-              className="py-1 font-semibold text-brand-700 hover:underline"
+              className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-brand-50"
             >
               Record payment
             </button>
@@ -165,7 +167,7 @@ export default function OrderRow({
             <button
               disabled={busy}
               onClick={() => void run(() => supabase.from('merch_orders').update({ claimed_at: new Date().toISOString() }).eq('id', order.id), 'Could not mark as claimed.')}
-              className="py-1 font-semibold text-brand-700 hover:underline"
+              className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-brand-50"
             >
               Mark as claimed
             </button>
@@ -174,18 +176,18 @@ export default function OrderRow({
             <button
               disabled={busy}
               onClick={() => void run(() => supabase.from('merch_orders').update({ claimed_at: null }).eq('id', order.id), 'Could not undo the claim.')}
-              className="py-1 text-slate-600 hover:underline"
+              className="min-h-11 rounded-md border border-hairline bg-white px-3 py-2 text-slate-700 hover:bg-card"
             >
               Undo claim
             </button>
           )}
           {!cancelled && !claimed && (
-            <button onClick={() => setMode('cancel')} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
+            <button onClick={() => setMode('cancel')} className="min-h-11 rounded-md border border-hairline bg-white px-3 py-2 text-slate-700 hover:border-error hover:text-error">
               Cancel order
             </button>
           )}
           {payments.length > 0 && (
-            <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="py-1 text-slate-600 hover:underline">
+            <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="min-h-11 rounded-md border border-hairline bg-white px-3 py-2 text-slate-700 hover:bg-card">
               Payments ({payments.length}) {history ? '(hide)' : '(show)'}
             </button>
           )}
@@ -193,13 +195,13 @@ export default function OrderRow({
       )}
 
       {!canEdit && payments.length > 0 && (
-        <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="mt-2 py-1 text-sm text-slate-600 hover:underline">
+        <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="mt-2 min-h-11 rounded-md border border-hairline bg-white px-3 py-2 text-sm text-slate-700 hover:bg-card">
           Payments ({payments.length}) {history ? '(hide)' : '(show)'}
         </button>
       )}
 
       {mode === 'pay' && (
-        <form onSubmit={pay} className="mt-3 grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-3">
+        <form onSubmit={pay} className="mt-3 grid gap-3 border border-hairline bg-card p-3 sm:grid-cols-3">
           <div>
             <label htmlFor={`amt-${order.id}`} className="text-sm font-medium">Amount received</label>
             <input
@@ -229,13 +231,13 @@ export default function OrderRow({
             <div className="w-40">
               <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save payment'}</button>
             </div>
-            <button type="button" onClick={() => setMode(null)} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+            <button type="button" onClick={() => setMode(null)} className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:underline">Cancel</button>
           </div>
         </form>
       )}
 
       {mode === 'cancel' && (
-        <form onSubmit={cancel} className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <form onSubmit={cancel} className="mt-3 flex flex-wrap items-center gap-2 border border-hairline bg-card p-3">
           <input
             aria-label="Reason for cancelling"
             value={reason}
@@ -244,7 +246,7 @@ export default function OrderRow({
             className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-2 sm:text-sm"
           />
           <button type="submit" disabled={busy} className={subtleButtonClass}>Cancel the order</button>
-          <button type="button" onClick={() => setMode(null)} className="py-2 text-sm text-slate-600 hover:underline">Keep it</button>
+          <button type="button" onClick={() => setMode(null)} className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:underline">Keep it</button>
           {order.amount_paid > 0 && (
             <p className="w-full text-xs text-amber-900">
               {peso(order.amount_paid)} was already paid. After cancelling, return the money and void the payment so the books match.
@@ -254,7 +256,7 @@ export default function OrderRow({
       )}
 
       {history && (
-        <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200 text-sm">
+        <ul className="mt-3 divide-y divide-hairline border-y border-hairline text-sm">
           {payments.map((pay) => (
             <li key={pay.id} className="py-2">
               <p className={pay.voided_at ? 'text-slate-500 line-through' : ''}>
@@ -266,7 +268,7 @@ export default function OrderRow({
               </p>
               {pay.voided_at && <p className="text-xs text-red-700">Voided: {pay.void_reason}</p>}
               {canEdit && !pay.voided_at && !claimed && voidId !== pay.id && (
-                <button onClick={() => setVoidId(pay.id)} className="py-1 text-xs text-slate-600 hover:text-red-700 hover:underline">
+                <button onClick={() => setVoidId(pay.id)} className="min-h-11 px-2 py-2 text-xs text-slate-600 hover:text-red-700 hover:underline">
                   Void payment
                 </button>
               )}
@@ -280,7 +282,7 @@ export default function OrderRow({
                     className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-1.5 sm:text-sm"
                   />
                   <button type="submit" disabled={busy} className={subtleButtonClass}>Void</button>
-                  <button type="button" onClick={() => setVoidId(null)} className="py-1 text-xs text-slate-600 hover:underline">Cancel</button>
+                  <button type="button" onClick={() => setVoidId(null)} className="min-h-11 px-2 py-2 text-xs text-slate-600 hover:underline">Cancel</button>
                 </form>
               )}
             </li>
@@ -345,16 +347,16 @@ function ProofReview({
   }
 
   return (
-    <ul className="mt-3 space-y-3 text-sm">
+    <ul className="mt-3 space-y-2 text-sm">
       {proofs.map((p) => (
-        <li key={p.id} className={'rounded-lg border p-3 ' + (p.status === 'pending' ? 'border-ink bg-white' : 'border-hairline bg-card')}>
+        <li key={p.id} className={'border p-3 ' + (p.status === 'pending' ? 'border-ink bg-white' : 'border-hairline bg-card')}>
           <div className="flex gap-3">
             {urls[p.image_path] ? (
               <a href={urls[p.image_path]} target="_blank" rel="noreferrer" title="Open full size" className="shrink-0">
-                <img src={urls[p.image_path]} alt="Payment screenshot" className="h-20 w-20 rounded border border-slate-200 bg-white object-cover" />
+                <img src={urls[p.image_path]} alt="Payment screenshot" className="h-16 w-16 rounded-md border border-hairline bg-white object-cover" />
               </a>
             ) : (
-              <div className="h-20 w-20 shrink-0 animate-pulse rounded bg-slate-200" />
+              <div className="h-16 w-16 shrink-0 rounded-md border border-hairline bg-card" aria-hidden="true" />
             )}
             <div className="min-w-0">
               <p className="font-medium">
@@ -370,14 +372,14 @@ function ProofReview({
           </div>
 
           {canEdit && p.status === 'pending' && active?.id !== p.id && (
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-hairline pt-2">
               <button
                 onClick={() => {
                   setAmount(String(Math.min(p.amount, balance)))
                   setActive({ id: p.id, mode: 'verify' })
                   setError(null)
                 }}
-                className="py-1 font-semibold text-brand-700 hover:underline"
+                className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-brand-50"
               >
                 Verify and record payment
               </button>
@@ -386,7 +388,7 @@ function ProofReview({
                   setActive({ id: p.id, mode: 'reject' })
                   setError(null)
                 }}
-                className="py-1 text-slate-600 hover:text-red-700 hover:underline"
+                className="min-h-11 rounded-md border border-hairline bg-white px-3 py-2 text-slate-700 hover:border-error hover:text-error"
               >
                 Reject
               </button>
@@ -411,7 +413,7 @@ function ProofReview({
                 <div className="w-44">
                   <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Confirm payment'}</button>
                 </div>
-                <button type="button" onClick={() => setActive(null)} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+                <button type="button" onClick={() => setActive(null)} className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:underline">Cancel</button>
               </div>
             </form>
           )}
@@ -426,7 +428,7 @@ function ProofReview({
                 className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-2 sm:text-sm"
               />
               <button type="submit" disabled={busy} className={subtleButtonClass}>Reject</button>
-              <button type="button" onClick={() => setActive(null)} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+              <button type="button" onClick={() => setActive(null)} className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:underline">Cancel</button>
             </form>
           )}
           {error && active?.id === p.id && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
@@ -435,3 +437,4 @@ function ProofReview({
     </ul>
   )
 }
+

@@ -23,7 +23,6 @@ import {
 import Chip from '../components/Chip'
 import OrderRow from '../components/OrderRow'
 import PaymentInfoCard from '../components/PaymentInfoCard'
-import StatCard from '../components/StatCard'
 import { CheckIcon } from '../components/Icons'
 import { buttonClass, inputClass, noticeClass, subtleButtonClass } from '../components/ui'
 
@@ -96,7 +95,7 @@ export default function MerchManage() {
   const pendingProofs = proofs.filter((x) => x.status === 'pending').length
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <Link to="/merch" className="inline-block py-1 text-sm font-medium text-brand-700 hover:underline">
         Back to merch
       </Link>
@@ -114,18 +113,27 @@ export default function MerchManage() {
 
       {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-      <div className="mt-8">
+      {!loading && (
+        <section aria-label="Totals" className="mt-6 flex overflow-x-auto border-y border-hairline bg-white">
+          <Metric label="Expected" value={peso(expected)} />
+          <Metric label="Collected" value={peso(collected)} tone="good" />
+          <Metric label="Still to collect" value={peso(expected - collected)} tone={expected - collected > 0 ? 'warn' : 'default'} />
+          <Metric label="Refunds due" value={peso(refunds)} tone={refunds > 0 ? 'bad' : 'default'} />
+        </section>
+      )}
+
+      <FolderBar folders={folders} value={folderFilter} onChange={setFolderFilter} canEdit={canEdit} onChanged={load} setError={setError} />
+
+      <div className="mt-5">
         <PaymentInfoCard editable={canEdit} />
       </div>
 
       {pendingProofs > 0 && (
-        <p role="status" className={noticeClass + ' mt-6'}>
+        <p role="status" className={noticeClass + ' mt-4'}>
           {pendingProofs} payment {pendingProofs === 1 ? 'proof is' : 'proofs are'} waiting for you to verify. Look for
           "Proof to verify" on the orders below, or choose "Needs verification" in an item's filter.
         </p>
       )}
-
-      <FolderBar folders={folders} value={folderFilter} onChange={setFolderFilter} canEdit={canEdit} onChanged={load} setError={setError} />
 
       {canEdit && creating && (
         <NewItemForm
@@ -140,15 +148,6 @@ export default function MerchManage() {
       )}
 
       {loading && <p className="mt-10 text-sm text-slate-500">Loading…</p>}
-
-      {!loading && (
-        <section aria-label="Totals" className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Expected" value={peso(expected)} />
-          <StatCard label="Collected" value={peso(collected)} tone="good" />
-          <StatCard label="Still to collect" value={peso(expected - collected)} tone={expected - collected > 0 ? 'warn' : 'default'} />
-          <StatCard label="Refunds due" value={peso(refunds)} tone={refunds > 0 ? 'bad' : 'default'} />
-        </section>
-      )}
 
       {!loading && visibleItems.length === 0 && (
         <p className="mt-8 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
@@ -174,6 +173,16 @@ export default function MerchManage() {
           />
         ))}
       </div>
+    </div>
+  )
+}
+
+function Metric({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'good' | 'warn' | 'bad' }) {
+  const valueClass = tone === 'good' ? 'text-success-deep' : tone === 'warn' ? 'text-brand-700' : tone === 'bad' ? 'text-error' : 'text-ink'
+  return (
+    <div className="min-w-[150px] flex-1 border-r border-hairline px-3 py-3 last:border-r-0 sm:px-4">
+      <dt className="text-xs font-medium text-slate-500">{label}</dt>
+      <dd className={'mt-0.5 font-display text-lg font-semibold tabular-nums ' + valueClass}>{value}</dd>
     </div>
   )
 }
@@ -227,14 +236,14 @@ function FolderBar({
   }
 
   return (
-    <div className="mt-8 flex flex-wrap items-end gap-x-4 gap-y-3">
+    <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-3">
       <div>
         <label htmlFor="mf" className="text-sm font-medium">Folder (sale period)</label>
         <select
           id="mf"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+          className="mt-1 block min-h-11 rounded-md border border-hairline bg-white px-3 py-2.5 text-base sm:py-2 sm:text-sm"
         >
           <option value="all">All items</option>
           {folders.map((f) => (
@@ -304,19 +313,20 @@ function FolderBar({
 function StageSteps({ stage }: { stage: Stage }) {
   const idx = STAGES.indexOf(stage)
   return (
-    <ol className="mt-5 flex items-start" aria-label="Sale stage">
+    <ol className="mt-4 grid grid-cols-4 border-y border-hairline py-2" aria-label="Sale stage">
       {STAGES.map((s, i) => (
-        <li key={s} className="relative flex flex-1 flex-col items-center text-center" aria-current={i === idx ? 'step' : undefined}>
-          {i > 0 && <span aria-hidden="true" className={'absolute top-3 -left-1/2 h-0.5 w-full ' + (i <= idx ? 'bg-brand-700' : 'bg-slate-200')} />}
+        <li key={s} className="relative min-w-0 px-1 text-center" aria-current={i === idx ? 'step' : undefined}>
+          {i > 0 && <span aria-hidden="true" className={'absolute left-0 top-3 h-px w-1/2 ' + (i <= idx ? 'bg-brand-700' : 'bg-hairline')} />}
+          {i < STAGES.length - 1 && <span aria-hidden="true" className={'absolute right-0 top-3 h-px w-1/2 ' + (i < idx ? 'bg-brand-700' : 'bg-hairline')} />}
           <span
             className={
-              'relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-white ' +
-              (i < idx ? 'bg-brand-700' : i === idx ? 'border-2 border-gold-400 bg-white' : 'bg-slate-200')
+              'relative z-10 mx-auto flex h-6 w-6 items-center justify-center rounded-md border text-[11px] font-bold ' +
+              (i < idx ? 'border-brand-700 bg-brand-700 text-white' : i === idx ? 'border-brand-700 bg-white text-brand-700' : 'border-hairline bg-card text-slate-500')
             }
           >
-            {i < idx && <CheckIcon size={14} />}
+            {i + 1}
           </span>
-          <span className={'mt-1.5 text-xs ' + (i <= idx ? 'font-medium text-ink' : 'text-slate-500')}>{STAGE_LABEL[s]}</span>
+          <span className={'mt-1 block truncate text-[11px] ' + (i <= idx ? 'font-semibold text-ink' : 'text-slate-500')}>{STAGE_LABEL[s]}</span>
         </li>
       ))}
     </ol>
@@ -520,7 +530,7 @@ function ItemSection({
   }
 
   return (
-    <section aria-label={item.name} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section aria-label={item.name} className="border border-hairline bg-white p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="font-display text-xl font-semibold break-words">{item.name}</h2>
         <span className="font-display text-lg font-semibold">{peso(item.price)}</span>
@@ -533,7 +543,7 @@ function ItemSection({
 
       <StageSteps stage={item.stage} />
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-hairline py-3 text-sm sm:grid-cols-4">
         <div>
           <dt className="text-slate-500">Pieces ordered</dt>
           <dd className="font-display text-lg font-semibold">{qty}</dd>
@@ -555,12 +565,12 @@ function ItemSection({
       {canEdit && (
         <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
           {next && (
-            <button disabled={busy} onClick={() => void update({ stage: next }, 'Could not change the stage.')} className={subtleButtonClass}>
+            <button disabled={busy} onClick={() => void update({ stage: next }, 'Could not change the stage.')} className={subtleButtonClass + ' min-h-11'}>
               {NEXT_LABEL[next]}
             </button>
           )}
           {idx > 0 && (
-            <button disabled={busy} onClick={() => void update({ stage: STAGES[idx - 1] }, 'Could not change the stage.')} className="py-1 text-sm text-slate-600 hover:underline">
+            <button disabled={busy} onClick={() => void update({ stage: STAGES[idx - 1] }, 'Could not change the stage.')} className="min-h-11 px-2 py-1 text-sm text-slate-600 hover:underline">
               Go back to "{STAGE_LABEL[STAGES[idx - 1]]}"
             </button>
           )}
@@ -571,7 +581,7 @@ function ItemSection({
               value={item.folder_id ?? ''}
               disabled={busy}
               onChange={(e) => void update({ folder_id: e.target.value || null }, 'Could not move the item.')}
-              className="rounded-md border border-slate-300 bg-white px-2 py-2 text-base sm:py-1 sm:text-sm"
+              className="min-h-11 rounded-md border border-hairline bg-white px-3 py-2 text-base sm:py-1 sm:text-sm"
             >
               <option value="">No folder</option>
               {folders.map((f) => (
@@ -634,7 +644,7 @@ function ItemSection({
         )}
       </details>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <h3 className="font-display text-lg font-semibold">Orders ({orders.length})</h3>
         <select
           aria-label="Filter orders"
@@ -654,7 +664,7 @@ function ItemSection({
       {shown.length === 0 ? (
         <p className="mt-3 text-sm text-slate-500">No orders match.</p>
       ) : (
-        <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200">
+        <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
           {shown.map((o) => (
             <OrderRow
               key={o.id}
@@ -750,3 +760,4 @@ function AddOrder({ item, people, onAdded }: { item: MerchItem; people: Person[]
     </details>
   )
 }
+

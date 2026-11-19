@@ -50,18 +50,18 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
   }
 
   const dark = !(editing && editable)
-  const lightBtn = 'rounded-md bg-secondary px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-secondary-pressed'
+  const lightBtn = 'min-h-11 rounded-md bg-secondary px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-secondary-pressed'
 
   return (
     <section
       aria-label="How to pay"
       className={
-        'rounded-md p-5 sm:p-6 ' +
-        (dark ? 'bg-card text-ink' : 'border border-hairline bg-white')
+        'border border-hairline p-4 sm:p-5 ' +
+        (dark ? 'bg-card text-ink' : 'bg-white')
       }
     >
       
-      <div className="relative flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold tracking-wide text-brand-700 uppercase">Pay with GCash</p>
           <h2 className="font-display text-xl font-semibold">How to pay</h2>
@@ -84,9 +84,9 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
           onCancel={() => setEditing(false)}
         />
       ) : hasInfo ? (
-        <div className="relative mt-4 grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
+        <div className="mt-4 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
           {qrUrl && (
-            <a href={qrUrl} target="_blank" rel="noreferrer" title="Open full size to save it" className="justify-self-start rounded-md border border-hairline bg-white p-2">
+            <a href={qrUrl} target="_blank" rel="noreferrer" title="Open full size to save it" className="justify-self-start border border-hairline bg-white p-2">
               <img src={qrUrl} alt="GCash QR code" className="h-40 w-40 object-contain" />
             </a>
           )}
@@ -106,7 +106,7 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
           </div>
         </div>
       ) : (
-        <p className="relative mt-3 text-sm text-slate-600">
+        <p className="mt-3 text-sm text-slate-600">
           Members will see these details when they order. Add your GCash number, a QR image, or both.
         </p>
       )}
@@ -172,8 +172,8 @@ function PaymentForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={submit} className="mt-3 space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label htmlFor="pi-num" className="text-sm font-medium">GCash number</label>
           <input id="pi-num" inputMode="tel" value={number} maxLength={30} onChange={(e) => setNumber(e.target.value)} placeholder="09XX XXX XXXX" className={inputClass} />
@@ -202,10 +202,10 @@ function PaymentForm({
           type="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-200"
+          className="mt-1 block w-full min-h-11 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-secondary-pressed"
         />
         {settings?.qr_path && !file && (
-          <label className="mt-2 flex items-center gap-2 py-1 text-sm">
+          <label className="mt-2 flex min-h-11 items-center gap-2 py-1 text-sm">
             <input type="checkbox" checked={removeQr} onChange={(e) => setRemoveQr(e.target.checked)} />
             Remove the current QR image
           </label>
@@ -216,8 +216,9 @@ function PaymentForm({
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save details'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:underline">Cancel</button>
       </div>
     </form>
   )
 }
+
