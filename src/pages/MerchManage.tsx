@@ -25,7 +25,7 @@ import OrderRow from '../components/OrderRow'
 import PaymentInfoCard from '../components/PaymentInfoCard'
 import StatCard from '../components/StatCard'
 import { CheckIcon } from '../components/Icons'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, inputClass, noticeClass, subtleButtonClass } from '../components/ui'
 
 interface Person {
   id: string
@@ -119,7 +119,7 @@ export default function MerchManage() {
       </div>
 
       {pendingProofs > 0 && (
-        <p role="status" className="mt-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-950">
+        <p role="status" className={noticeClass + ' mt-6'}>
           {pendingProofs} payment {pendingProofs === 1 ? 'proof is' : 'proofs are'} waiting for you to verify. Look for
           "Proof to verify" on the orders below, or choose "Needs verification" in an item's filter.
         </p>
