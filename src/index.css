@@ -55,9 +55,8 @@
   --radius-2xl: 16px;
   --radius-3xl: 32px;
 
-  /* No elevation except the modal */
+  /* Flat surfaces throughout the app */
   --shadow-*: initial;
-  --shadow-xl: 0 16px 32px rgb(0 0 0 / 0.16);
 }
 
 @layer base {
@@ -91,3 +90,4 @@
     outline-offset: 2px;
   }
 }
+

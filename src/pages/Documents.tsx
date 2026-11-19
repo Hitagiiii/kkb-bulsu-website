@@ -83,20 +83,20 @@ export default function Documents() {
   )
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="max-w-4xl">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Documents</h1>
-          <p className="mt-2 text-slate-600">Forms, templates and records that stay with the organization.</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Documents</h1>
+          <p className="mt-1 text-sm text-slate-600">Forms, templates and records that stay with the organization.</p>
         </div>
         {canUpload && !adding && (
-          <button onClick={() => setAdding(true)} className={subtleButtonClass}>
+          <button onClick={() => setAdding(true)} className={subtleButtonClass + ' min-h-11'}>
             Upload a file
           </button>
         )}
       </div>
 
-      {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       {canUpload && adding && (
         <UploadForm
@@ -108,19 +108,19 @@ export default function Documents() {
         />
       )}
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
         <input
           aria-label="Search documents"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search"
-          className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+          className="min-h-11 min-w-0 flex-1 rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:text-sm"
         />
         <select
           aria-label="Filter by category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="rounded-md border border-slate-300 bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+          className="min-h-11 rounded-none border border-slate-300 bg-white px-2 py-2 text-base sm:text-sm"
         >
           <option value="all">All categories</option>
           {CATEGORIES.map((c) => (
@@ -129,16 +129,16 @@ export default function Documents() {
         </select>
       </div>
 
-      {loading && <p className="mt-8 text-sm text-slate-500">Loading documents…</p>}
+      {loading && <p className="mt-6 text-sm text-slate-500">Loading documents…</p>}
       {!loading && shown.length === 0 && (
-        <p className="mt-6 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+        <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">
           {docs.length === 0 ? (canUpload ? 'No files yet. Upload the first one above.' : 'No files yet.') : 'No files match.'}
         </p>
       )}
 
-      <ul className="mt-6 divide-y divide-slate-200 border-y border-slate-200">
+      <ul className="mt-4 divide-y divide-slate-200 border-y border-slate-200">
         {shown.map((d) => (
-          <li key={d.id} className="py-4">
+          <li key={d.id} className="py-3">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-medium break-words">{d.title}</p>
@@ -154,7 +154,7 @@ export default function Documents() {
                   {d.uploaded_name && ` by ${d.uploaded_name}`}
                 </p>
               </div>
-              <button onClick={() => void download(d)} className={subtleButtonClass}>
+              <button onClick={() => void download(d)} className={subtleButtonClass + ' min-h-11'}>
                 Download
               </button>
             </div>
@@ -163,11 +163,11 @@ export default function Documents() {
                 {deleting === d.id ? (
                   <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     <span className="text-slate-700">Delete this file for good?</span>
-                    <button onClick={() => void remove(d)} className="py-1 font-semibold text-red-700 hover:underline">Yes, delete</button>
-                    <button onClick={() => setDeleting(null)} className="py-1 text-slate-600 hover:underline">Cancel</button>
+                    <button onClick={() => void remove(d)} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">Yes, delete</button>
+                    <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-slate-600 hover:underline">Cancel</button>
                   </span>
                 ) : (
-                  <button onClick={() => setDeleting(d.id)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
+                  <button onClick={() => setDeleting(d.id)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">
                     Delete
                   </button>
                 )}
@@ -222,7 +222,7 @@ function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCance
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+    <form onSubmit={submit} className="mt-5 border-y border-slate-200 bg-transparent py-4">
       <h2 className="font-display text-xl font-semibold">Upload a file</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -259,7 +259,7 @@ function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCance
           <textarea id="d-desc" rows={2} value={description} maxLength={500} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
         </div>
       </div>
-      {error && <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Uploading…' : 'Upload'}</button>
@@ -269,3 +269,4 @@ function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCance
     </form>
   )
 }
+

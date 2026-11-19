@@ -101,7 +101,7 @@ export default function MerchManage() {
       </Link>
       <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Manage merch sales</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Manage merch sales</h1>
           <p className="mt-2 text-slate-600">Orders, payments, proofs, supplier order sheet and claiming, in one place.</p>
         </div>
         {canEdit && !creating && (

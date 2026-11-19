@@ -34,6 +34,7 @@ export default function Attendance() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [report, setReport] = useState<Report | null>(null)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     if (!profile) return
@@ -87,23 +88,24 @@ export default function Attendance() {
   }, [report])
 
   const attendedPast = mine.filter((m) => m.events && new Date(m.events.starts_at).getTime() < Date.now()).length
+  const shownMine = mine.filter((m) => (m.events?.title ?? 'Event removed').toLowerCase().includes(search.trim().toLowerCase()))
 
   return (
-    <div className="max-w-3xl">
-      <div className="flex flex-wrap items-start justify-between gap-4 print:hidden">
+    <div className="max-w-4xl print:max-w-3xl">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4 print:hidden">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Attendance</h1>
-          <p className="mt-2 text-slate-600">Scan the QR code at an event to check in.</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Attendance</h1>
+          <p className="mt-1 text-sm text-slate-600">Scan the QR code at an event to check in.</p>
         </div>
         {isOfficer && report && (
-          <button onClick={() => window.print()} className={subtleButtonClass}>
+          <button onClick={() => window.print()} className={subtleButtonClass + ' min-h-11'}>
             Print report
           </button>
         )}
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -115,13 +117,18 @@ export default function Attendance() {
           <p className="mt-1 text-sm text-slate-600">
             {attendedPast} of {pastCount} past events attended.
           </p>
+          {mine.length > 0 && (
+            <div className="mt-3">
+              <input aria-label="Search my attendance" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by event" className="min-h-11 w-full rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+            </div>
+          )}
           {mine.length === 0 ? (
-            <p className="mt-3 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+            <p className="mt-3 border-y border-slate-200 py-4 text-sm text-slate-500">
               No check-ins yet.
             </p>
           ) : (
             <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
-              {mine.map((m, i) => (
+              {shownMine.map((m, i) => (
                 <li key={i} className="py-3">
                   <p className="font-medium break-words">{m.events?.title ?? 'Event removed'}</p>
                   <p className="text-sm text-slate-500">
@@ -131,6 +138,7 @@ export default function Attendance() {
               ))}
             </ul>
           )}
+          {mine.length > 0 && shownMine.length === 0 && <p className="py-3 text-sm text-slate-500">No matching events.</p>}
         </section>
       )}
 
@@ -197,3 +205,4 @@ export default function Attendance() {
     </div>
   )
 }
+

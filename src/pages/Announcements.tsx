@@ -159,28 +159,28 @@ export default function Announcements() {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Announcements</h1>
-          <p className="mt-2 text-slate-600">News and notices from the officers.</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Announcements</h1>
+          <p className="mt-1 text-sm text-slate-600">News and notices from the officers.</p>
         </div>
         {canPost && !composing && (
-          <button onClick={() => setComposing(true)} className={subtleButtonClass}>
-            Write an announcement
+          <button onClick={() => setComposing(true)} className={subtleButtonClass + ' min-h-11'}>
+            Write announcement
           </button>
         )}
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mt-4 border-l-2 border-error bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       )}
 
       {canPost && composing && (
-        <div className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-          <h2 className="font-display text-xl font-semibold">New announcement</h2>
+        <div className="mt-5 border-y border-hairline bg-white py-4 sm:py-5">
+          <h2 className="font-display text-lg font-bold">New announcement</h2>
           <AnnouncementForm
             initial={{ title: '', body: '', pinned: false, eventAt: null, imagePaths: [] }}
             urls={urls}
@@ -191,17 +191,17 @@ export default function Announcements() {
         </div>
       )}
 
-      {loading && <p className="mt-10 text-sm text-slate-500">Loading announcements…</p>}
+      {loading && <p className="mt-6 text-sm text-slate-500">Loading announcements…</p>}
 
       {!loading && items.length === 0 && (
-        <p className="mt-10 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+        <p className="mt-6 border-y border-hairline px-1 py-6 text-sm text-slate-500">
           {canPost ? 'Nothing posted yet. Write the first announcement above.' : 'Nothing has been posted yet.'}
         </p>
       )}
 
-      <ul className="mt-8 space-y-6">
+      <ul className="mt-5 divide-y divide-hairline border-y border-hairline">
         {items.map((a) => (
-          <li key={a.id} className={'overflow-hidden rounded-md border border-hairline bg-white ' + (editingId === a.id ? 'p-4 sm:p-5' : '')}>
+          <li key={a.id} className={editingId === a.id ? 'bg-white px-3 py-4 sm:px-5' : 'bg-white'}>
             {editingId === a.id ? (
               <AnnouncementForm
                 initial={{
@@ -217,60 +217,53 @@ export default function Announcements() {
                 onCancel={() => setEditingId(null)}
               />
             ) : (
-              <article>
-                <Photos paths={a.image_paths ?? []} urls={urls} />
-                <div className="p-4 sm:p-5">
-                  {a.pinned && (
-                    <span className="mb-2 inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-900">
-                      Pinned
-                    </span>
-                  )}
-                  <h2 className="font-display text-xl font-bold break-words">{a.title}</h2>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Posted {formatDateTime(a.created_at)} by {a.author_name || 'an officer'}
-                    {a.updated_at && ' (edited)'}
-                  </p>
+              <article className="py-4 sm:py-5">
+                <div className="px-3 sm:px-5">
+                  <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex flex-wrap items-center gap-2">
+                        {a.pinned && (
+                          <span className="inline-flex items-center border border-brand-200 bg-brand-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-brand-800">Pinned</span>
+                        )}
+                      </div>
+                      <h2 className="font-display break-words text-lg font-bold sm:text-xl">{a.title}</h2>
+                      <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                        {formatDateTime(a.created_at)} <span aria-hidden="true">·</span> {a.author_name || 'an officer'}
+                        {a.updated_at && ' · Edited'}
+                      </p>
+                    </div>
+                    {canPost && (
+                      <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-x-3 text-xs sm:text-sm">
+                        {deletingId === a.id ? (
+                          <>
+                            <span className="text-slate-700">Delete permanently?</span>
+                            <button onClick={() => void remove(a)} className="min-h-11 font-semibold text-error underline underline-offset-2">Yes, delete</button>
+                            <button onClick={() => setDeletingId(null)} className="min-h-11 text-slate-600 underline underline-offset-2">Cancel</button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => void togglePin(a)} className="min-h-11 text-brand-800 underline underline-offset-2">{a.pinned ? 'Unpin' : 'Pin'}</button>
+                            <button
+                              onClick={() => {
+                                setEditingId(a.id)
+                                setDeletingId(null)
+                              }}
+                              className="min-h-11 text-brand-800 underline underline-offset-2"
+                            >Edit</button>
+                            <button onClick={() => setDeletingId(a.id)} className="min-h-11 text-slate-600 underline underline-offset-2 hover:text-error">Delete</button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   {a.event_at && <EventLine iso={a.event_at} now={now} />}
 
-                  <p className="mt-4 whitespace-pre-wrap break-words">
+                  <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-ink sm:text-base">
                     <Linkify text={a.body} />
                   </p>
-
-                  {canPost && (
-                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                      {deletingId === a.id ? (
-                        <>
-                          <span className="text-slate-700">Delete this announcement for good?</span>
-                          <button onClick={() => void remove(a)} className="py-1 font-semibold text-error hover:underline">
-                            Yes, delete
-                          </button>
-                          <button onClick={() => setDeletingId(null)} className="py-1 text-slate-600 hover:underline">
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => void togglePin(a)} className="py-1 font-medium text-brand-700 hover:underline">
-                            {a.pinned ? 'Unpin' : 'Pin to top'}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEditingId(a.id)
-                              setDeletingId(null)
-                            }}
-                            className="py-1 font-medium text-brand-700 hover:underline"
-                          >
-                            Edit
-                          </button>
-                          <button onClick={() => setDeletingId(a.id)} className="py-1 text-slate-600 hover:text-error hover:underline">
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
                 </div>
+                <Photos paths={a.image_paths ?? []} urls={urls} />
               </article>
             )}
           </li>
@@ -284,11 +277,11 @@ export default function Announcements() {
 function EventLine({ iso, now }: { iso: string; now: number }) {
   const state = eventState(iso, now)
   return (
-    <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md bg-brand-50 px-3 py-2 text-sm">
-      <span className="font-semibold text-brand-800">Event</span>
-      <span>{formatEventTime(iso)}</span>
+    <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm">
+      <span className="border border-brand-200 bg-brand-50 px-2 py-1 font-semibold text-brand-800">Event</span>
+      <span className="text-slate-600">{formatEventTime(iso)}</span>
       {state === 'soon' && (
-        <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-ink">
+        <span className="border border-gold-200 bg-gold-50 px-2 py-1 text-xs font-semibold text-ink">
           Starts {timeUntil(iso, now)}
         </span>
       )}
@@ -298,12 +291,12 @@ function EventLine({ iso, now }: { iso: string; now: number }) {
   )
 }
 
-/* ---------- photos on a posted announcement (full-bleed, first in the card) ---------- */
+/* ---------- photos on a posted announcement ---------- */
 function Photos({ paths, urls }: { paths: string[]; urls: Record<string, string> }) {
   if (paths.length === 0) return null
   const single = paths.length === 1
   return (
-    <div className={'grid gap-0.5 bg-card ' + (single ? '' : paths.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
+    <div className={'mt-4 grid gap-1 ' + (single ? 'grid-cols-1' : paths.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
       {paths.map((p) =>
         urls[p] ? (
           <a key={p} href={urls[p]} target="_blank" rel="noreferrer" title="Open full size">
@@ -311,11 +304,11 @@ function Photos({ paths, urls }: { paths: string[]; urls: Record<string, string>
               src={urls[p]}
               alt="Photo attached to the announcement"
               loading="lazy"
-              className={'w-full bg-secondary object-cover ' + (single ? 'max-h-[28rem]' : 'aspect-square')}
+              className={'w-full bg-secondary object-cover ' + (single ? 'max-h-[34rem] aspect-[16/9]' : 'aspect-square')}
             />
           </a>
         ) : (
-          <div key={p} className="aspect-square animate-pulse bg-secondary" />
+          <div key={p} className={'bg-secondary ' + (single ? 'aspect-[16/9]' : 'aspect-square')} />
         ),
       )}
     </div>
@@ -341,11 +334,11 @@ function NewPreview({ file, onRemove }: { file: File; onRemove: () => void }) {
   return (
     <li className="w-24">
       {src ? (
-        <img src={src} alt="New photo preview" className="h-24 w-24 rounded-lg border border-slate-200 object-cover" />
+        <img src={src} alt="New photo preview" className="h-24 w-24 border border-hairline object-cover" />
       ) : (
-        <div className="h-24 w-24 animate-pulse rounded-lg bg-slate-100" />
+        <div className="h-24 w-24 bg-secondary" />
       )}
-      <button type="button" onClick={onRemove} className="mt-1 py-1 text-xs text-slate-600 hover:text-red-700 hover:underline">
+      <button type="button" onClick={onRemove} className="mt-1 min-h-11 py-2 text-xs text-slate-600 underline underline-offset-2 hover:text-error">
         Remove
       </button>
     </li>
@@ -449,7 +442,7 @@ function AnnouncementForm({
             className={inputClass + ' sm:max-w-xs'}
           />
           {eventLocal && (
-            <button type="button" onClick={() => setEventLocal('')} className="mt-1 py-2 text-sm text-slate-600 hover:underline">
+            <button type="button" onClick={() => setEventLocal('')} className="mt-1 min-h-11 py-2 text-sm text-slate-600 underline underline-offset-2">
               Clear
             </button>
           )}
@@ -473,7 +466,7 @@ function AnnouncementForm({
             pickFiles(e.target.files)
             e.target.value = ''
           }}
-          className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-200 disabled:opacity-60"
+          className="mt-1 block min-h-11 w-full text-sm file:mr-3 file:min-h-11 file:border-0 file:bg-secondary file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-200 disabled:opacity-60"
         />
         {note && <p className="mt-1 text-xs text-amber-800">{note}</p>}
 
@@ -482,14 +475,14 @@ function AnnouncementForm({
             {keepPaths.map((p) => (
               <li key={p} className="w-24">
                 {urls[p] ? (
-                  <img src={urls[p]} alt="Saved photo" className="h-24 w-24 rounded-lg border border-slate-200 object-cover" />
+                  <img src={urls[p]} alt="Saved photo" className="h-24 w-24 border border-hairline object-cover" />
                 ) : (
-                  <div className="h-24 w-24 animate-pulse rounded-lg bg-slate-100" />
+                  <div className="h-24 w-24 bg-secondary" />
                 )}
                 <button
                   type="button"
                   onClick={() => setKeepPaths((prev) => prev.filter((x) => x !== p))}
-                  className="mt-1 py-1 text-xs text-slate-600 hover:text-red-700 hover:underline"
+                  className="mt-1 min-h-11 py-2 text-xs text-slate-600 underline underline-offset-2 hover:text-error"
                 >
                   Remove
                 </button>
@@ -506,13 +499,13 @@ function AnnouncementForm({
         )}
       </div>
 
-      <label className="flex items-center gap-2 py-1 text-sm">
+      <label className="flex min-h-11 items-center gap-2 py-1 text-sm">
         <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
         Pin to the top
       </label>
 
       {error && (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="border-l-2 border-error bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -523,10 +516,11 @@ function AnnouncementForm({
             {busy ? (newFiles.length ? 'Uploading photos…' : 'Saving…') : submitLabel}
           </button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-slate-600 hover:underline">
+        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-slate-600 underline underline-offset-2">
           Cancel
         </button>
       </div>
     </form>
   )
 }
+

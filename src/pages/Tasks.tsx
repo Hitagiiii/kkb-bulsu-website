@@ -63,7 +63,7 @@ export default function Tasks() {
   function renderTask(t: Task) {
     const overdue = t.status !== 'done' && !!t.due_on && t.due_on < today
     return (
-      <li key={t.id} className="py-3">
+      <li key={t.id} className="py-2.5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <p className={'font-medium break-words ' + (t.status === 'done' ? 'text-slate-500 line-through' : '')}>{t.title}</p>
           <Chip tone={t.status === 'done' ? 'green' : t.status === 'doing' ? 'brand' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>
@@ -79,27 +79,27 @@ export default function Tasks() {
           )}
           {t.minutes_id && minutesById[t.minutes_id] && <span>From: {minutesById[t.minutes_id]}</span>}
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           {t.status === 'todo' && (
-            <button onClick={() => void setStatus(t, 'doing')} className="py-1 font-medium text-brand-700 hover:underline">Start</button>
+            <button onClick={() => void setStatus(t, 'doing')} className="min-h-11 py-2 font-medium text-brand-700 hover:underline">Start</button>
           )}
           {t.status !== 'done' && (
-            <button onClick={() => void setStatus(t, 'done')} className="py-1 font-semibold text-brand-700 hover:underline">Mark done</button>
+            <button onClick={() => void setStatus(t, 'done')} className="min-h-11 py-2 font-semibold text-brand-700 hover:underline">Mark done</button>
           )}
           {t.status === 'doing' && (
-            <button onClick={() => void setStatus(t, 'todo')} className="py-1 text-slate-600 hover:underline">Back to to-do</button>
+            <button onClick={() => void setStatus(t, 'todo')} className="min-h-11 py-2 text-slate-600 hover:underline">Back to to-do</button>
           )}
           {t.status === 'done' && (
-            <button onClick={() => void setStatus(t, 'todo')} className="py-1 text-slate-600 hover:underline">Reopen</button>
+            <button onClick={() => void setStatus(t, 'todo')} className="min-h-11 py-2 text-slate-600 hover:underline">Reopen</button>
           )}
           {deleting === t.id ? (
             <>
               <span className="text-slate-700">Delete this task?</span>
-              <button onClick={() => void remove(t)} className="py-1 font-semibold text-red-700 hover:underline">Yes, delete</button>
-              <button onClick={() => setDeleting(null)} className="py-1 text-slate-600 hover:underline">Cancel</button>
+              <button onClick={() => void remove(t)} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">Yes, delete</button>
+              <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-slate-600 hover:underline">Cancel</button>
             </>
           ) : (
-            <button onClick={() => setDeleting(t.id)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
+            <button onClick={() => setDeleting(t.id)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
           )}
         </div>
       </li>
@@ -107,18 +107,18 @@ export default function Tasks() {
   }
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="max-w-4xl">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Tasks</h1>
-          <p className="mt-2 text-slate-600">Who is doing what, and by when.</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Tasks</h1>
+          <p className="mt-1 text-sm text-slate-600">Who is doing what, and by when.</p>
         </div>
         {!creating && (
-          <button onClick={() => setCreating(true)} className={subtleButtonClass}>Add a task</button>
+          <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>Add a task</button>
         )}
       </div>
 
-      {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       {creating && (
         <TaskForm
@@ -133,19 +133,22 @@ export default function Tasks() {
         />
       )}
 
-      <label className="mt-8 flex items-center gap-2 py-1 text-sm text-slate-700">
+      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <label className="flex items-center gap-2 py-1 text-sm text-slate-700">
         <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
         Show only my tasks
       </label>
+      <span className="text-xs text-slate-500">{open.length} open · {done.length} done</span>
+      </div>
 
       {loading && <p className="mt-6 text-sm text-slate-500">Loading tasks…</p>}
 
       {!loading && (
         <>
           <section className="mt-6" aria-label="Open tasks">
-            <h2 className="font-display text-xl font-semibold">Open ({open.length})</h2>
+            <h2 className="font-display text-base font-semibold">Open <span className="font-normal text-slate-500">({open.length})</span></h2>
             {open.length === 0 ? (
-              <p className="mt-3 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Nothing open. Nice.</p>
+              <p className="mt-2 border-y border-slate-200 py-4 text-sm text-slate-500">Nothing open. Nice.</p>
             ) : (
               <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200">{open.map(renderTask)}</ul>
             )}
@@ -153,7 +156,7 @@ export default function Tasks() {
 
           {done.length > 0 && (
             <section className="mt-8" aria-label="Finished tasks">
-              <button onClick={() => setShowDone((s) => !s)} aria-expanded={showDone} className="font-display py-1 text-lg font-semibold">
+              <button onClick={() => setShowDone((s) => !s)} aria-expanded={showDone} className="min-h-11 font-display py-1 text-base font-semibold">
                 Done ({done.length}) {showDone ? '(hide)' : '(show)'}
               </button>
               {showDone && <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200">{done.map(renderTask)}</ul>}
@@ -204,7 +207,7 @@ function TaskForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+    <form onSubmit={submit} className="mt-5 border-y border-slate-200 bg-transparent py-4">
       <h2 className="font-display text-xl font-semibold">New task</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -240,7 +243,7 @@ function TaskForm({
           <textarea id="t-desc" rows={3} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
         </div>
       </div>
-      {error && <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Add task'}</button>
@@ -250,3 +253,4 @@ function TaskForm({
     </form>
   )
 }
+

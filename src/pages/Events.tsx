@@ -174,7 +174,7 @@ export default function Events() {
     <div className="max-w-6xl">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Events</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Events</h1>
           <p className="mt-2 text-slate-600">What is happening, where, and who is going.</p>
         </div>
         {canEdit && (

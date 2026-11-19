@@ -174,7 +174,7 @@ export default function BudgetDetail() {
 
         <header className="mt-2 flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-4">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold break-words sm:text-3xl">{budget.name}</h1>
+            <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{budget.name}</h1>
             <p className="mt-1 text-xs text-slate-500">{live ? 'Updates live' : 'Reconnecting…'}</p>
           </div>
           <button type="button" onClick={() => void printBill()} className={subtleButtonClass + ' min-h-11'}>

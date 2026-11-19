@@ -20,6 +20,7 @@ export default function Minutes() {
   const [creating, setCreating] = useState(false)
   const [openId, setOpenId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
 
   const load = useCallback(async () => {
     const m = await supabase.from('minutes').select('*').order('held_at', { ascending: false }).limit(100)
@@ -54,22 +55,24 @@ export default function Minutes() {
   }
 
   const names = Object.fromEntries(officers.map((o) => [o.id, o.full_name || 'Unnamed']))
+  const q = search.trim().toLowerCase()
+  const shown = rows.filter((r) => !q || r.title.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="max-w-4xl">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Meeting minutes</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Meeting minutes</h1>
+          <p className="mt-1 text-sm text-slate-600">
             Decisions on record, with the action items that came out of them.
           </p>
         </div>
         {canWrite && !creating && (
-          <button onClick={() => setCreating(true)} className={subtleButtonClass}>Write minutes</button>
+          <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>Write minutes</button>
         )}
       </div>
 
-      {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
       {canWrite && creating && (
         <MinutesForm
@@ -82,26 +85,30 @@ export default function Minutes() {
         />
       )}
 
-      {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+      <div className="mt-4">
+        <input aria-label="Search meeting minutes" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search minutes" className="min-h-11 w-full rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+      </div>
+      {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
       {!loading && rows.length === 0 && (
         <p className="mt-8 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
           {canWrite ? 'No minutes yet. Write the first one above.' : 'No minutes have been shared with members yet.'}
         </p>
       )}
 
-      <ul className="mt-8 divide-y divide-slate-200 border-y border-slate-200">
-        {rows.map((r) => {
+      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">No minutes match.</p>}
+      <ul className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+        {shown.map((r) => {
           const open = openId === r.id
           const related = tasks.filter((t) => t.minutes_id === r.id)
           return (
-            <li key={r.id} className="py-4">
+            <li key={r.id} className="py-3">
               <button
                 type="button"
                 onClick={() => setOpenId(open ? null : r.id)}
                 aria-expanded={open}
                 className="block w-full text-left"
               >
-                <span className="font-display block text-lg font-semibold break-words">{r.title}</span>
+                <span className="font-display block text-base font-semibold break-words">{r.title}</span>
                 <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
                   {formatDateTime(r.held_at)}
                   {canWrite && <Chip tone={r.visible_to_members ? 'green' : 'slate'}>{r.visible_to_members ? 'Shared with members' : 'Officers only'}</Chip>}
@@ -146,11 +153,11 @@ export default function Minutes() {
                       {deleting === r.id ? (
                         <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                           <span className="text-slate-700">Delete these minutes for good?</span>
-                          <button onClick={() => void remove(r)} className="py-1 font-semibold text-red-700 hover:underline">Yes, delete</button>
-                          <button onClick={() => setDeleting(null)} className="py-1 text-slate-600 hover:underline">Cancel</button>
+                          <button onClick={() => void remove(r)} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">Yes, delete</button>
+                          <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-slate-600 hover:underline">Cancel</button>
                         </span>
                       ) : (
-                        <button onClick={() => setDeleting(r.id)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
+                        <button onClick={() => setDeleting(r.id)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
                       )}
                     </div>
                   )}
@@ -232,7 +239,7 @@ function MinutesForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+    <form onSubmit={submit} className="mt-5 border-y border-slate-200 bg-transparent py-4">
       <h2 className="font-display text-xl font-semibold">New minutes</h2>
       <div className="mt-4 space-y-4">
         <div>
@@ -298,7 +305,7 @@ function MinutesForm({
           <button
             type="button"
             onClick={() => setItems((prev) => [...prev, { id: nextId.current++, title: '', who: '', due: '' }])}
-            className="mt-2 py-1 text-sm font-medium text-brand-700 hover:underline"
+            className="min-h-11 mt-2 py-2 text-sm font-medium text-brand-700 hover:underline"
           >
             Add another action item
           </button>
@@ -310,7 +317,7 @@ function MinutesForm({
         </label>
       </div>
 
-      {error && <p role="alert" className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-44">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save minutes'}</button>
@@ -320,3 +327,4 @@ function MinutesForm({
     </form>
   )
 }
+

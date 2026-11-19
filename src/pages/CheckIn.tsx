@@ -27,7 +27,7 @@ export default function CheckIn() {
 
   return (
     <div className="max-w-md">
-      <h1 className="font-display text-2xl font-semibold sm:text-3xl">Event check-in</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Event check-in</h1>
 
       {state.status === 'working' && <p className="mt-6 text-sm text-slate-500">Checking you in…</p>}
 
@@ -53,3 +53,4 @@ export default function CheckIn() {
     </div>
   )
 }
+

@@ -24,17 +24,18 @@ export default function Pending() {
       title="Waiting for approval"
       subtitle={`You're signed in as ${session.user.email}. An officer needs to approve your account.`}
     >
-      <p className="text-sm text-slate-600">
+      <p className="text-sm leading-relaxed text-slate-600">
         Once you're approved, refresh this page or press the button below.
       </p>
-      <div className="mt-6 flex gap-3">
-        <button onClick={() => void check()} disabled={checking} className={subtleButtonClass}>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <button onClick={() => void check()} disabled={checking} className={subtleButtonClass + ' min-h-11 flex-1'}>
           {checking ? 'Checking…' : 'Check again'}
         </button>
-        <button onClick={() => void signOut()} className={subtleButtonClass}>
+        <button onClick={() => void signOut()} className={subtleButtonClass + ' min-h-11 flex-1'}>
           Sign out
         </button>
       </div>
     </AuthShell>
   )
 }
+

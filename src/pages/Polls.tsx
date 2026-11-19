@@ -26,6 +26,7 @@ export default function Polls() {
   const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [now, setNow] = useState(() => Date.now())
+  const [search, setSearch] = useState('')
 
   const load = useCallback(async () => {
     const { data: pollRows, error: pollError } = await supabase
@@ -135,14 +136,16 @@ export default function Polls() {
     else await load()
   }
 
-  const open = polls.filter((p) => !isClosed(p, now))
-  const closed = polls.filter((p) => isClosed(p, now))
+  const q = search.trim().toLowerCase()
+  const matching = polls.filter((p) => !q || p.question.toLowerCase().includes(q))
+  const open = matching.filter((p) => !isClosed(p, now))
+  const closed = matching.filter((p) => isClosed(p, now))
 
   function renderList(list: Poll[]) {
     return (
       <ul className="mt-4 divide-y divide-slate-200 border-y border-slate-200">
         {list.map((p) => (
-          <li key={p.id} className="py-6">
+          <li key={p.id} className="py-4">
             <PollCard
               poll={p}
               options={options[p.id] ?? []}
@@ -161,50 +164,55 @@ export default function Polls() {
   }
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="max-w-4xl">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold sm:text-3xl">Polls</h1>
-          <p className="mt-2 text-slate-600">Vote on organization decisions. Votes are anonymous.</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Polls</h1>
+          <p className="mt-1 text-sm text-slate-600">Vote on organization decisions. Votes are anonymous.</p>
         </div>
         {canManage && !creating && (
-          <button onClick={() => setCreating(true)} className={subtleButtonClass}>
+          <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>
             Create a poll
           </button>
         )}
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       )}
 
       {canManage && creating && (
-        <div className="mt-8 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+        <div className="mt-5 border-y border-slate-200 bg-transparent py-4">
           <h2 className="font-display text-xl font-semibold">New poll</h2>
           <PollForm onSubmit={createPoll} onCancel={() => setCreating(false)} />
         </div>
       )}
 
-      {loading && <p className="mt-10 text-sm text-slate-500">Loading polls…</p>}
+      <div className="mt-4">
+        <input aria-label="Search polls" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search polls" className="min-h-11 w-full rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+      </div>
+      {loading && <p className="mt-6 text-sm text-slate-500">Loading polls…</p>}
 
       {!loading && polls.length === 0 && (
-        <p className="mt-10 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+        <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">
           {canManage ? 'No polls yet. Create the first one above.' : 'No polls yet.'}
         </p>
       )}
 
+      {!loading && matching.length === 0 && polls.length > 0 && <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">No polls match.</p>}
+
       {open.length > 0 && (
-        <section className="mt-10" aria-label="Open polls">
-          <h2 className="font-display text-xl font-semibold">Open polls ({open.length})</h2>
+        <section className="mt-6" aria-label="Open polls">
+          <h2 className="font-display text-base font-semibold">Open polls <span className="font-normal text-slate-500">({open.length})</span></h2>
           {renderList(open)}
         </section>
       )}
 
       {closed.length > 0 && (
-        <section className="mt-10" aria-label="Closed polls">
-          <h2 className="font-display text-xl font-semibold">Closed polls ({closed.length})</h2>
+        <section className="mt-7" aria-label="Closed polls">
+          <h2 className="font-display text-base font-semibold">Closed polls <span className="font-normal text-slate-500">({closed.length})</span></h2>
           {renderList(closed)}
         </section>
       )}
@@ -259,7 +267,7 @@ function PollCard({
 
   return (
     <article>
-      <h3 className="font-display text-xl font-semibold break-words">{poll.question}</h3>
+      <h3 className="font-display text-base font-semibold break-words">{poll.question}</h3>
       <p className="mt-1 text-sm text-slate-500">
         Posted {formatDateTime(poll.created_at)}.{' '}
         {closed
@@ -287,9 +295,9 @@ function PollCard({
                       {n} ({pct}%)
                     </span>
                   </div>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
+                  <div className="mt-1 h-2 overflow-hidden bg-slate-200" aria-hidden="true">
                     <div
-                      className={'h-full rounded-full ' + (winner || !closed ? 'bg-brand-700' : 'bg-slate-400')}
+                      className={'h-full ' + (winner || !closed ? 'bg-brand-700' : 'bg-slate-400')}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -307,7 +315,7 @@ function PollCard({
                 setChoice(myVote)
                 setChanging(true)
               }}
-              className="mt-2 py-1 text-sm font-medium text-brand-700 hover:underline"
+              className="min-h-11 mt-2 py-2 text-sm font-medium text-brand-700 hover:underline"
             >
               Change my vote
             </button>
@@ -322,8 +330,8 @@ function PollCard({
                 <label
                   key={o.id}
                   className={
-                    'flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-sm transition-colors ' +
-                    (choice === o.id ? 'border-brand-700 bg-brand-50' : 'border-slate-300 bg-white hover:border-slate-400')
+                    'flex min-h-11 cursor-pointer items-center gap-3 border-b border-slate-200 py-2 text-sm ' +
+                    (choice === o.id ? 'font-medium text-brand-800' : 'text-slate-700')
                   }
                 >
                   <input
@@ -339,7 +347,7 @@ function PollCard({
             </div>
           </fieldset>
           {error && (
-            <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p role="alert" className="mt-3 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
             </p>
           )}
@@ -364,10 +372,10 @@ function PollCard({
           {confirmingDelete ? (
             <>
               <span className="text-slate-700">Delete this poll and all its votes?</span>
-              <button onClick={onDelete} className="py-1 font-semibold text-red-700 hover:underline">
+              <button onClick={onDelete} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">
                 Yes, delete
               </button>
-              <button onClick={() => setConfirmingDelete(false)} className="py-1 text-slate-600 hover:underline">
+              <button onClick={() => setConfirmingDelete(false)} className="min-h-11 py-2 text-slate-600 hover:underline">
                 Cancel
               </button>
             </>
@@ -379,22 +387,22 @@ function PollCard({
                   setConfirmingClose(false)
                   onClose()
                 }}
-                className="py-1 font-semibold text-brand-700 hover:underline"
+                className="min-h-11 py-2 font-semibold text-brand-700 hover:underline"
               >
                 Yes, close it
               </button>
-              <button onClick={() => setConfirmingClose(false)} className="py-1 text-slate-600 hover:underline">
+              <button onClick={() => setConfirmingClose(false)} className="min-h-11 py-2 text-slate-600 hover:underline">
                 Cancel
               </button>
             </>
           ) : (
             <>
               {!closed && (
-                <button onClick={() => setConfirmingClose(true)} className="py-1 font-medium text-brand-700 hover:underline">
+                <button onClick={() => setConfirmingClose(true)} className="min-h-11 py-2 font-medium text-brand-700 hover:underline">
                   Close poll now
                 </button>
               )}
-              <button onClick={() => setConfirmingDelete(true)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
+              <button onClick={() => setConfirmingDelete(true)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">
                 Delete
               </button>
             </>
@@ -451,7 +459,7 @@ function PollForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 space-y-4">
+    <form onSubmit={submit} className="mt-4 space-y-3">
       <div>
         <label htmlFor={`${uid}-q`} className="text-sm font-medium">Question</label>
         <input
@@ -477,14 +485,14 @@ function PollForm({
                   setChoices((prev) => prev.map((x) => (x.id === c.id ? { ...x, text: e.target.value } : x)))
                 }
                 placeholder={`Option ${i + 1}`}
-                className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+                className="min-h-11 min-w-0 flex-1 rounded-none border border-slate-300 px-3 py-2 text-base sm:text-sm"
               />
               {choices.length > MIN_OPTIONS && (
                 <button
                   type="button"
                   onClick={() => setChoices((prev) => prev.filter((x) => x.id !== c.id))}
                   aria-label={`Remove option ${i + 1}`}
-                  className="rounded-md px-2 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-red-700"
+                  className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:text-red-700"
                 >
                   Remove
                 </button>
@@ -496,7 +504,7 @@ function PollForm({
           <button
             type="button"
             onClick={() => setChoices((prev) => [...prev, { id: nextId.current++, text: '' }])}
-            className="mt-2 py-1 text-sm font-medium text-brand-700 hover:underline"
+            className="min-h-11 mt-2 py-2 text-sm font-medium text-brand-700 hover:underline"
           >
             Add another option
           </button>
@@ -523,7 +531,7 @@ function PollForm({
       </div>
 
       {error && (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -541,3 +549,4 @@ function PollForm({
     </form>
   )
 }
+

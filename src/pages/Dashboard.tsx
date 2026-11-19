@@ -58,7 +58,7 @@ export default function Dashboard() {
     <div className="max-w-5xl">
       <div className="md:grid md:grid-cols-[minmax(0,1fr)_20rem] md:items-start md:gap-x-10">
         <header className="md:col-span-2">
-          <h1 className="font-display text-2xl font-bold">Hello, {firstName}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Hello, {firstName}</h1>
           <p className="mt-0.5 text-sm text-slate-600">
             Signed in as {profile ? ROLE_LABEL[profile.role].toLowerCase() : 'a member'}.
           </p>

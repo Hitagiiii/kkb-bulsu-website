@@ -36,9 +36,9 @@ export default function Login() {
 
   return (
     <AuthShell title="Sign in" subtitle="Use the email and password you registered with.">
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-5">
         <div>
-          <label htmlFor="email" className="text-sm font-medium">Email</label>
+          <label htmlFor="email" className="block text-sm font-semibold text-ink">Email</label>
           <input
             id="email"
             type="email"
@@ -50,7 +50,7 @@ export default function Login() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="text-sm font-medium">Password</label>
+          <label htmlFor="password" className="block text-sm font-semibold text-ink">Password</label>
           <input
             id="password"
             type="password"
@@ -62,7 +62,7 @@ export default function Login() {
           />
         </div>
         {error && (
-          <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="border-l-4 border-red-600 bg-red-50 px-3 py-2.5 text-sm text-red-700">
             {error}
           </p>
         )}
@@ -70,7 +70,7 @@ export default function Login() {
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p className="mt-6 text-sm text-slate-600">
+      <p className="mt-6 text-sm leading-relaxed text-slate-600">
         New to the organization?{' '}
         <Link to="/register" className="font-semibold text-brand-700 hover:underline">
           Create an account
@@ -79,3 +79,4 @@ export default function Login() {
     </AuthShell>
   )
 }
+
