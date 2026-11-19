@@ -86,7 +86,7 @@ export default function Layout() {
     <div className="min-h-screen md:flex">
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 md:hidden print:hidden"
+          className="fixed inset-0 z-30 bg-black/50 md:hidden print:hidden"
           onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
@@ -95,7 +95,7 @@ export default function Layout() {
       <aside
         id="sidebar"
         className={
-          'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] flex-col overflow-y-auto bg-brand-900 text-white ' +
+          'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] flex-col overflow-y-auto border-r border-hairline bg-white text-ink ' +
           'transition-[transform,visibility] duration-200 motion-reduce:transition-none ' +
           (drawerOpen ? 'translate-x-0 ' : '-translate-x-full max-md:invisible ') +
           'md:sticky md:top-0 md:bottom-auto md:h-screen md:w-64 md:max-w-none md:shrink-0 md:translate-x-0 ' +
@@ -104,12 +104,12 @@ export default function Layout() {
         }
       >
         <div className="flex items-center justify-between px-5 py-5">
-          <span className="font-display text-xl font-bold tracking-tight">KKB BULSU</span>
+          <span className="font-display text-xl font-bold tracking-tight text-brand-700">KKB BULSU</span>
           <button
             type="button"
             onClick={() => setDrawerOpen(false)}
             aria-label="Close menu"
-            className="rounded-md p-2 text-white/70 hover:bg-white/10 hover:text-white md:hidden"
+            className="rounded-md p-2 text-slate-600 hover:bg-card hover:text-ink md:hidden"
           >
             <CloseIcon />
           </button>
@@ -117,7 +117,7 @@ export default function Layout() {
             type="button"
             onClick={() => setCollapsedAndRemember(true)}
             aria-label="Hide menu"
-            className="hidden rounded-md p-2 text-white/70 hover:bg-white/10 hover:text-white md:block"
+            className="hidden rounded-md p-2 text-slate-600 hover:bg-card hover:text-ink md:block"
           >
             <ChevronLeftIcon />
           </button>
@@ -131,15 +131,13 @@ export default function Layout() {
               end={item.end}
               onClick={() => setDrawerOpen(false)}
               className={({ isActive }) =>
-                'flex items-center justify-between rounded-md px-3 py-3 text-base font-medium transition-colors md:py-2 md:text-sm ' +
-                (isActive
-                  ? 'bg-white/15 text-white'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white')
+                'flex items-center justify-between rounded-md px-3 py-3 text-base font-semibold transition-colors md:py-2 md:text-sm ' +
+                (isActive ? 'bg-ink text-white' : 'text-ink hover:bg-card')
               }
             >
               {item.label}
               {badgeFor(item.to) > 0 && (
-                <span className="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-semibold text-brand-900">
+                <span className="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-bold text-ink">
                   {badgeFor(item.to)}
                   <span className="sr-only"> starting within 24 hours</span>
                 </span>
@@ -148,13 +146,13 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="mt-6 border-t border-white/10 p-4">
-          <p className="truncate text-sm font-medium">{name}</p>
-          <p className="text-xs text-white/60">{profile ? ROLE_LABEL[profile.role] : ''}</p>
+        <div className="mt-6 border-t border-hairline p-4">
+          <p className="truncate text-sm font-semibold text-ink">{name}</p>
+          <p className="text-xs text-slate-500">{profile ? ROLE_LABEL[profile.role] : ''}</p>
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-3 py-1 text-sm text-white/70 underline-offset-2 hover:text-white hover:underline"
+            className="mt-3 py-1 text-sm text-slate-600 underline-offset-2 hover:text-ink hover:underline"
           >
             Sign out
           </button>
@@ -164,7 +162,7 @@ export default function Layout() {
       <div className="min-w-0 flex-1">
         <header
           className={
-            'sticky top-0 z-20 flex items-center gap-2 border-b border-slate-200 bg-white/90 px-3 py-2 backdrop-blur print:hidden ' +
+            'sticky top-0 z-20 flex items-center gap-2 border-b border-hairline bg-white/90 px-3 py-2 backdrop-blur print:hidden ' +
             (collapsed ? '' : 'md:hidden')
           }
         >
@@ -173,17 +171,17 @@ export default function Layout() {
             onClick={openMenu}
             aria-label="Open menu"
             aria-controls="sidebar"
-            className="rounded-md p-2 text-brand-800 hover:bg-slate-100"
+            className="rounded-md p-2 text-ink hover:bg-card"
           >
             <MenuIcon />
           </button>
-          <span className="font-display text-lg font-bold text-brand-800">KKB BULSU</span>
+          <span className="font-display text-lg font-bold text-brand-700">KKB BULSU</span>
         </header>
 
         {upcoming.length > 0 && (
           <div
             role="status"
-            className="border-b border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 sm:px-6 md:px-10 print:hidden"
+            className="border-b border-hairline bg-card px-4 py-3 text-sm text-ink sm:px-6 md:px-10 print:hidden"
           >
             <ul className="space-y-2">
               {upcoming.map((u) => (
@@ -193,9 +191,9 @@ export default function Layout() {
                     <Link to={u.to} className="underline underline-offset-2">
                       {u.title}
                     </Link>
-                    <span className="text-amber-900/80"> ({formatEventTime(u.at)})</span>
+                    <span className="text-slate-500"> ({formatEventTime(u.at)})</span>
                   </span>
-                  <button type="button" onClick={() => dismiss(u)} className="py-1 underline underline-offset-2">
+                  <button type="button" onClick={() => dismiss(u)} className="py-1 text-slate-600 underline underline-offset-2 hover:text-ink">
                     Dismiss
                   </button>
                 </li>

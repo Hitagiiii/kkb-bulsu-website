@@ -36,7 +36,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-6"
       onMouseDown={(e) => {
         if (dismissOnBackdrop && e.target === e.currentTarget) onClose()
       }}
@@ -47,7 +47,7 @@ export default function Modal({
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="max-h-[90dvh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 pb-8 shadow-xl outline-none sm:max-w-xl sm:rounded-2xl sm:pb-5"
+        className="max-h-[90dvh] w-full overflow-y-auto rounded-t-3xl bg-white p-5 pb-8 shadow-xl outline-none sm:max-w-xl sm:rounded-3xl sm:pb-5"
       >
         {children}
       </div>

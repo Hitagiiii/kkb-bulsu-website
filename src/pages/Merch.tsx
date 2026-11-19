@@ -153,8 +153,8 @@ export default function Merch() {
               </p>
             ) : (
               <ul className="mt-4 grid gap-5 sm:grid-cols-2">
-                {available.map((item, i) => (
-                  <li key={item.id} className="animate-fade-up motion-reduce:animate-none" style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}>
+                {available.map((item) => (
+                  <li key={item.id}>
                     <ProductCard item={item} folder={item.folder_id ? folderName[item.folder_id] : undefined} onOrdered={load} />
                   </li>
                 ))}
@@ -181,7 +181,7 @@ export default function Merch() {
                       className={
                         'shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors sm:py-1.5 ' +
                         (tab === t.id
-                          ? 'border-brand-700 bg-brand-700 text-white'
+                          ? 'border-ink bg-ink text-white'
                           : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50')
                       }
                     >
@@ -249,14 +249,14 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
   }
 
   return (
-    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md motion-reduce:transition-none">
+    <form onSubmit={submit} className="overflow-hidden rounded-md border border-hairline bg-white">
       <div className="relative">
-        <ProductArt category={item.category} />
-        <span className="font-display absolute top-3 right-3 rounded-full bg-white px-3 py-1 text-lg font-semibold text-brand-900 shadow">
+        <ProductArt category={item.category} className="aspect-[4/3] w-full" />
+        <span className="absolute bottom-3 left-3 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-ink">
           {peso(item.price)}
         </span>
         {item.order_deadline && (
-          <span className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+          <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-ink">
             <ClockIcon size={13} />
             Closes {timeUntil(item.order_deadline)}
           </span>
@@ -284,7 +284,7 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
                     onChange={() => setVariant(v)}
                     className="peer sr-only"
                   />
-                  <span className="inline-flex min-w-11 items-center justify-center rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors peer-checked:border-brand-700 peer-checked:bg-brand-700 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-600 hover:bg-slate-50 peer-checked:hover:bg-brand-700">
+                  <span className="inline-flex min-w-11 items-center justify-center rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-600 hover:bg-slate-50 peer-checked:hover:bg-ink">
                     {v}
                   </span>
                 </label>
@@ -446,7 +446,7 @@ function OrderCard({
             <div className="h-full rounded-full bg-brand-700 transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${pct}%` }} />
           </div>
           {!cancelled && balance > 0 && (
-            <p className="mt-1.5 text-sm font-medium text-amber-800">Balance {peso(balance)}</p>
+            <p className="mt-1.5 text-sm font-medium text-brand-700">Balance {peso(balance)}</p>
           )}
           {o.claimed_at && <p className="mt-1.5 text-xs text-slate-500">Claimed {formatDateTime(o.claimed_at)}</p>}
         </div>

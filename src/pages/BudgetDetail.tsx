@@ -18,9 +18,9 @@ import BudgetEventLink from '../components/BudgetEventLink'
 import BudgetFolderPicker from '../components/BudgetFolderPicker'
 import Modal from '../components/Modal'
 import PrintBill from '../components/PrintBill'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, inputClass, noticeClass, subtleButtonClass } from '../components/ui'
 
-const CAT_COLORS = ['bg-brand-800', 'bg-gold-400', 'bg-brand-600', 'bg-slate-500', 'bg-amber-600', 'bg-rose-400', 'bg-slate-300']
+const CAT_COLORS = ['bg-brand-800', 'bg-ink', 'bg-brand-600', 'bg-slate-500', 'bg-brand-100', 'bg-slate-400', 'bg-slate-300']
 
 export default function BudgetDetail() {
   const { budgetId } = useParams<{ budgetId: string }>()
@@ -169,44 +169,42 @@ export default function BudgetDetail() {
           </p>
         )}
 
-        <section aria-label="Budget summary" className="mt-6">
-          <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-brand-900 via-brand-800 to-brand-700 p-5 text-white shadow-sm sm:p-7">
-            <span aria-hidden="true" className="absolute -top-16 -right-10 h-52 w-52 rounded-full bg-white/10" />
-            <p className="relative text-sm text-white/70">{over ? 'Over budget by' : 'Money left'}</p>
-            <p className={'font-display relative text-5xl font-bold tracking-tight tabular-nums break-words sm:text-6xl ' + (over ? 'text-red-200' : '')}>
-              {peso(Math.abs(left))}
-            </p>
-            <div className="relative mt-5 h-2.5 overflow-hidden rounded-full bg-white/20" aria-hidden="true">
-              <div
-                className={'h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none ' + (over ? 'bg-red-300' : 'bg-gold-400')}
-                style={{ width: `${pct}%` }}
-              />
+        <section aria-label="Budget summary" className="mt-5">
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-hairline bg-hairline sm:grid-cols-4">
+            <div className="bg-white p-3">
+              <dt className="text-xs text-slate-500">{over ? 'Over budget by' : 'Money left'}</dt>
+              <dd className={'font-display mt-0.5 text-2xl font-bold tabular-nums break-words ' + (over ? 'text-error' : 'text-ink')}>
+                {peso(Math.abs(left))}
+              </dd>
             </div>
-            <p className="relative mt-2 text-sm text-white/70">{Math.round(pct)}% of the budget used</p>
-          </div>
-
-          <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <dt className="text-sm text-slate-500">Total budget</dt>
-              <dd className="font-display mt-1 text-2xl font-semibold tabular-nums break-words">{peso(budget.total_budget)}</dd>
+            <div className="bg-white p-3">
+              <dt className="text-xs text-slate-500">Total budget</dt>
+              <dd className="font-display mt-0.5 text-2xl font-semibold tabular-nums break-words">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <dt className="text-sm text-slate-500">Spent</dt>
-              <dd className="font-display mt-1 text-2xl font-semibold tabular-nums break-words">{peso(spent)}</dd>
+            <div className="bg-white p-3">
+              <dt className="text-xs text-slate-500">Spent</dt>
+              <dd className="font-display mt-0.5 text-2xl font-semibold tabular-nums break-words">{peso(spent)}</dd>
             </div>
-            <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-1">
-              <dt className="text-sm text-slate-500">Receipts missing</dt>
-              <dd className={'font-display mt-1 text-2xl font-semibold ' + (missingCount > 0 ? 'text-amber-800' : 'text-brand-800')}>
+            <div className="bg-white p-3">
+              <dt className="text-xs text-slate-500">Receipts missing</dt>
+              <dd className={'font-display mt-0.5 text-2xl font-semibold ' + (missingCount > 0 ? 'text-brand-700' : 'text-ink')}>
                 {missingCount}
               </dd>
             </div>
           </dl>
 
+          <div className="mt-3 flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
+              <div className={'h-full rounded-full ' + (over ? 'bg-error' : 'bg-brand-700')} style={{ width: `${pct}%` }} />
+            </div>
+            <p className="shrink-0 text-xs text-slate-500 tabular-nums">{Math.round(pct)}% used</p>
+          </div>
+
           {categories.length > 0 && spentCents > 0 && (
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-              <h3 className="font-display text-lg font-semibold">Where the money went</h3>
-              <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-slate-100" role="img" aria-label="Spending by category">
+            <div className="mt-4 border-t border-hairline pt-3">
+              <h3 className="text-sm font-semibold">Where the money went</h3>
+              <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-secondary" role="img" aria-label="Spending by category">
                 {categories.map(([cat, cents], i) => (
                   <span
                     key={cat}
@@ -216,7 +214,7 @@ export default function BudgetDetail() {
                   />
                 ))}
               </div>
-              <ul className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
+              <ul className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                 {categories.map(([cat, cents], i) => (
                   <li key={cat} className="flex items-center justify-between gap-3">
                     <span className="flex min-w-0 items-center gap-2">
@@ -249,7 +247,7 @@ export default function BudgetDetail() {
           </div>
 
           {missingCount > 0 && (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            <div className={noticeClass + ' mt-4 flex flex-wrap items-center justify-between gap-2'}>
               <span>
                 {missingCount} {missingCount === 1 ? 'expense has' : 'expenses have'} no receipt yet.
               </span>
@@ -288,7 +286,7 @@ export default function BudgetDetail() {
                     ) : x.receipt_path ? (
                       <span className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-slate-100" />
                     ) : (
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-amber-500 bg-amber-50 text-center text-[10px] leading-tight font-semibold text-amber-800">
+                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-dashed border-ash bg-card text-center text-[10px] leading-tight font-semibold text-slate-600">
                         No
                         <br />
                         receipt
@@ -559,8 +557,8 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-dashed border-amber-500 bg-amber-50 p-4">
-      <label htmlFor="attach-file" className="text-sm font-medium text-amber-900">
+    <form onSubmit={submit} className="rounded-lg border border-dashed border-ash bg-card p-4">
+      <label htmlFor="attach-file" className="text-sm font-medium text-slate-700">
         This expense has no receipt yet
       </label>
       <input
@@ -580,7 +578,7 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
           {busy ? 'Attaching…' : 'Attach receipt'}
         </button>
       </div>
-      <p className="mt-2 text-xs text-amber-900">
+      <p className="mt-2 text-xs text-slate-700">
         Once attached, a receipt can't be replaced. If it's the wrong photo, void the expense and add it again.
       </p>
     </form>
@@ -663,7 +661,7 @@ function ExpenseDetail({
         ) : expense.receipt_path ? (
           <p className="text-sm text-slate-500">Loading receipt…</p>
         ) : voided || !canEdit ? (
-          <p className="rounded-md border border-dashed border-amber-500 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <p className="rounded-md border border-dashed border-ash bg-card px-3 py-2 text-sm text-slate-700">
             No receipt attached.
           </p>
         ) : (

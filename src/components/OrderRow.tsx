@@ -347,7 +347,7 @@ function ProofReview({
   return (
     <ul className="mt-3 space-y-3 text-sm">
       {proofs.map((p) => (
-        <li key={p.id} className={'rounded-lg border p-3 ' + (p.status === 'pending' ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50')}>
+        <li key={p.id} className={'rounded-lg border p-3 ' + (p.status === 'pending' ? 'border-ink bg-white' : 'border-hairline bg-card')}>
           <div className="flex gap-3">
             {urls[p.image_path] ? (
               <a href={urls[p.image_path]} target="_blank" rel="noreferrer" title="Open full size" className="shrink-0">

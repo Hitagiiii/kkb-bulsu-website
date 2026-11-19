@@ -63,7 +63,7 @@ export default function Tasks() {
   function renderTask(t: Task) {
     const overdue = t.status !== 'done' && !!t.due_on && t.due_on < today
     return (
-      <li key={t.id} className="py-4">
+      <li key={t.id} className="py-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <p className={'font-medium break-words ' + (t.status === 'done' ? 'text-slate-500 line-through' : '')}>{t.title}</p>
           <Chip tone={t.status === 'done' ? 'green' : t.status === 'doing' ? 'brand' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>

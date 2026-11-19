@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../lib/supabase'
 import { hasRole } from '../lib/types'
 import { formatDate, peso, todayISO } from '../lib/finance'
+import { noticeClass } from './ui'
 
 interface OrderBit {
   quantity: number
@@ -67,7 +68,7 @@ export default function DashboardExtras() {
       {isFinance && proofsWaiting > 0 && (
         <Link
           to="/merch/manage"
-          className="mt-4 block rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-950 hover:bg-amber-100"
+          className={noticeClass + ' mt-4 block hover:bg-secondary'}
         >
           {proofsWaiting} payment {proofsWaiting === 1 ? 'proof is' : 'proofs are'} waiting for you to verify.
         </Link>
@@ -76,7 +77,7 @@ export default function DashboardExtras() {
       {(ready > 0 || owing > 0) && (
         <Link
           to="/merch"
-          className="mt-4 block rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-950 hover:bg-amber-100"
+          className={noticeClass + ' mt-4 block hover:bg-secondary'}
         >
           {ready > 0 && `${ready} merch ${ready === 1 ? 'order is' : 'orders are'} ready to claim. `}
           {owing > 0 && `You still owe ${peso(owing)} for merch.`}

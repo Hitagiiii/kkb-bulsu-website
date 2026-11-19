@@ -55,7 +55,7 @@ export default function Members() {
             ) : (
               <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
                 {pending.map((p) => (
-                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2">
                     <span className="font-medium">{p.full_name || '(no name)'}</span>
                     <button onClick={() => void update(p.id, { approved: true })} className={subtleButtonClass}>
                       Approve
@@ -70,7 +70,7 @@ export default function Members() {
             <h2 className="font-display text-xl font-semibold">Approved members ({approved.length})</h2>
             <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
               {approved.map((p) => (
-                <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
+                <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2">
                   <span className="font-medium">
                     {p.full_name || '(no name)'}
                     {p.id === me?.id && <span className="ml-2 text-sm font-normal text-slate-500">(you)</span>}

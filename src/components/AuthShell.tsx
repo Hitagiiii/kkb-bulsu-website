@@ -11,15 +11,15 @@ export default function AuthShell({
 }) {
   return (
     <div className="min-h-screen md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <div className="hidden bg-brand-900 p-12 text-white md:flex md:flex-col md:justify-between">
-        <div className="font-display text-2xl font-bold tracking-tight">KKB BULSU</div>
+      <div className="hidden bg-card p-12 text-ink md:flex md:flex-col md:justify-between">
+        <div className="font-display text-2xl font-bold tracking-tight text-brand-700">KKB BULSU</div>
         <div>
           <p className="font-display max-w-sm text-4xl leading-tight font-semibold">
             One place for announcements, events and the organization's funds.
           </p>
           <div className="mt-6 h-1 w-16 bg-gold-400" />
         </div>
-        <p className="text-sm text-white/60">Members only. New accounts are approved by an officer.</p>
+        <p className="text-sm text-mute">Members only. New accounts are approved by an officer.</p>
       </div>
 
       <div className="flex items-center justify-center px-6 py-12">

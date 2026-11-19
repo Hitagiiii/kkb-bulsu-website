@@ -19,7 +19,7 @@ import {
 import Chip from '../components/Chip'
 import EventExtras from '../components/EventExtras'
 import EventForm, { type EventValues } from '../components/EventForm'
-import { CalendarIcon, ChevronRightIcon, ClockIcon, MapPinIcon, VideoIcon } from '../components/Icons'
+import { CalendarIcon, ClockIcon, MapPinIcon, VideoIcon } from '../components/Icons'
 import Linkify from '../components/Linkify'
 import MapView from '../components/MapView'
 import Modal from '../components/Modal'
@@ -142,8 +142,8 @@ export default function Events() {
     await load()
   }
 
-  const card = (e: EventRow, i = 0) => (
-    <li key={e.id} className="animate-fade-up motion-reduce:animate-none" style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}>
+  const card = (e: EventRow) => (
+    <li key={e.id}>
       <EventCard event={e} now={now} rsvp={rsvps[e.id]} attended={attended.has(e.id)} onOpen={() => setOpenId(e.id)} />
     </li>
   )
@@ -168,7 +168,7 @@ export default function Events() {
         </p>
       )}
 
-      <div role="group" aria-label="View" className="mt-8 inline-flex rounded-full border border-slate-300 bg-white p-1 shadow-sm">
+      <div role="group" aria-label="View" className="mt-8 inline-flex rounded-full bg-card p-1">
         {(['list', 'calendar'] as const).map((v) => (
           <button
             key={v}
@@ -177,7 +177,7 @@ export default function Events() {
             aria-pressed={view === v}
             className={
               'rounded-full px-5 py-2 text-sm font-medium transition-colors sm:py-1.5 ' +
-              (view === v ? 'bg-brand-700 text-white shadow' : 'text-slate-700 hover:bg-slate-100')
+              (view === v ? 'bg-ink text-white' : 'text-ink hover:bg-secondary')
             }
           >
             {v === 'list' ? 'List' : 'Calendar'}
@@ -210,7 +210,7 @@ export default function Events() {
           {groups.map((g) => (
             <section key={g.key} className="mt-8" aria-label={dayLabel(g.key, now)}>
               <h2 className="text-sm font-semibold tracking-wide text-slate-500 uppercase">{dayLabel(g.key, now)}</h2>
-              <ul className="mt-3 space-y-3">{g.items.map((e, i) => card(e, i))}</ul>
+              <ul className="mt-3 grid gap-4 sm:grid-cols-2">{g.items.map((e) => card(e))}</ul>
             </section>
           ))}
 
@@ -224,7 +224,7 @@ export default function Events() {
               >
                 Past events ({past.length}) {showPast ? '(hide)' : '(show)'}
               </button>
-              {showPast && <ul className="mt-3 space-y-3">{past.slice(0, 30).map((e, i) => card(e, i))}</ul>}
+              {showPast && <ul className="mt-3 grid gap-4 sm:grid-cols-2">{past.slice(0, 30).map((e) => card(e))}</ul>}
             </div>
           )}
         </>
@@ -238,7 +238,7 @@ export default function Events() {
             {dayEvents.length === 0 ? (
               <p className="mt-2 text-sm text-slate-500">No events on this day.</p>
             ) : (
-              <ul className="mt-3 space-y-3">{dayEvents.map((e, i) => card(e, i))}</ul>
+              <ul className="mt-3 grid gap-4 sm:grid-cols-2">{dayEvents.map((e) => card(e))}</ul>
             )}
           </section>
         </div>
@@ -271,21 +271,21 @@ export default function Events() {
   )
 }
 
-/* ---------- date block ---------- */
-function DateTile({ iso, dark = false }: { iso: string; dark?: boolean }) {
+/* ---------- cover tile: the "image" of an event card ---------- */
+function EventCover({ iso, label, large = false }: { iso: string; label?: string; large?: boolean }) {
   const d = new Date(iso)
   return (
-    <span
-      className={
-        'flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-xl text-center ' +
-        (dark ? 'bg-white/15 text-white' : 'bg-brand-50 text-brand-900')
-      }
-    >
-      <span className={'text-xs font-semibold tracking-wide uppercase ' + (dark ? 'text-gold-400' : 'text-brand-700')}>
-        {d.toLocaleDateString('en-PH', { month: 'short' })}
-      </span>
-      <span className="font-display text-2xl leading-none font-semibold">{d.getDate()}</span>
-    </span>
+    <div className={'relative flex items-end bg-secondary p-4 ' + (large ? 'min-h-48 sm:min-h-full' : 'h-32')}>
+      {label && (
+        <span className="absolute top-3 left-3 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-ink">{label}</span>
+      )}
+      <div>
+        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">
+          {d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short' })}
+        </p>
+        <p className={'font-display leading-none font-bold text-ink ' + (large ? 'text-7xl' : 'text-5xl')}>{d.getDate()}</p>
+      </div>
+    </div>
   )
 }
 
@@ -302,50 +302,27 @@ function Meta({ icon, children }: { icon: ReactNode; children: ReactNode }) {
 function NextUp({ event, now, rsvp, onOpen }: { event: EventRow; now: number; rsvp?: Rsvp; onOpen: () => void }) {
   const live = new Date(event.starts_at).getTime() <= now
   return (
-    <section
-      aria-label="Next event"
-      className="relative mt-8 overflow-hidden rounded-3xl bg-linear-to-br from-brand-900 via-brand-800 to-brand-700 p-5 text-white shadow-md sm:p-7"
-    >
-      <span aria-hidden="true" className="absolute -top-16 -right-10 h-52 w-52 rounded-full bg-white/10" />
-      <span aria-hidden="true" className="absolute -bottom-20 right-24 h-40 w-40 rounded-full bg-gold-400/20" />
-
-      <div className="relative flex items-start gap-4">
-        <DateTile iso={event.starts_at} dark />
-        <div className="min-w-0">
-          <p className="text-xs font-semibold tracking-wide text-gold-400 uppercase">
-            {live ? 'Happening now' : `Next up · starts ${timeUntil(event.starts_at, now)}`}
-          </p>
-          <h2 className="font-display mt-1 text-2xl leading-tight font-semibold break-words sm:text-3xl">{event.title}</h2>
+    <section aria-label="Next event" className="mt-8 overflow-hidden rounded-3xl bg-card sm:grid sm:grid-cols-[2fr_3fr]">
+      <EventCover iso={event.starts_at} label={live ? 'Happening now' : `Starts ${timeUntil(event.starts_at, now)}`} large />
+      <div className="p-5 sm:p-7">
+        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">Next up</p>
+        <h2 className="font-display mt-1 text-2xl leading-tight font-bold break-words sm:text-3xl">{event.title}</h2>
+        <div className="mt-4 space-y-1.5 text-slate-700">
+          <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
+          {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
+          {event.meeting_link && <Meta icon={<VideoIcon size={16} />}>Online link available</Meta>}
         </div>
-      </div>
-
-      <div className="relative mt-5 space-y-1.5 text-white/85">
-        <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
-        {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
-        {event.meeting_link && <Meta icon={<VideoIcon size={16} />}>Online link available</Meta>}
-      </div>
-
-      <div className="relative mt-6 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={onOpen}
-          className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-900 transition-colors hover:bg-gold-100"
-        >
-          View details
-        </button>
-        {event.meeting_link && (
-          <a
-            href={event.meeting_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full bg-gold-400 px-5 py-2.5 text-sm font-semibold text-brand-900 transition-colors hover:bg-gold-100"
-          >
-            Join online
-          </a>
-        )}
-        {rsvp === 'going' && (
-          <span className="rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium">You are going</span>
-        )}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={onOpen} className={buttonClass + ' sm:w-auto'}>
+            View details
+          </button>
+          {event.meeting_link && (
+            <a href={event.meeting_link} target="_blank" rel="noopener noreferrer" className={subtleButtonClass}>
+              Join online
+            </a>
+          )}
+          {rsvp === 'going' && <Chip tone="green">You are going</Chip>}
+        </div>
       </div>
     </section>
   )
@@ -368,29 +345,27 @@ function EventCard({
   const over = isOver(event, now)
   const soon = !over && eventState(event.starts_at, now) === 'soon'
   const hasPin = event.latitude != null && event.longitude != null
+  const timeLabel = formatTime(event.starts_at) + (event.ends_at ? ` to ${formatTime(event.ends_at)}` : '')
 
   return (
     <button
       type="button"
       onClick={onOpen}
       className={
-        'group flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition ' +
-        'hover:-translate-y-0.5 hover:border-brand-600/40 hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none ' +
+        'block w-full overflow-hidden rounded-md border border-hairline bg-white text-left transition-colors hover:border-ash ' +
         (over ? 'opacity-75' : '')
       }
     >
-      <DateTile iso={event.starts_at} />
-      <span className="min-w-0 flex-1">
-        <span className="font-display block text-lg font-semibold break-words">{event.title}</span>
-        <span className="mt-1 flex flex-col gap-0.5 text-slate-600">
-          <Meta icon={<ClockIcon size={15} />}>
-            {formatTime(event.starts_at)}
-            {event.ends_at && ` to ${formatTime(event.ends_at)}`}
-          </Meta>
-          {event.location_name && <Meta icon={<MapPinIcon size={15} />}>{event.location_name}</Meta>}
-        </span>
+      <EventCover iso={event.starts_at} label={timeLabel} />
+      <span className="block p-4">
+        <span className="font-display block text-lg font-bold break-words">{event.title}</span>
+        {event.location_name && (
+          <span className="mt-1 flex text-slate-600">
+            <Meta icon={<MapPinIcon size={15} />}>{event.location_name}</Meta>
+          </span>
+        )}
         {(soon || attended || rsvp || event.meeting_link || hasPin) && (
-          <span className="mt-2 flex flex-wrap gap-1.5">
+          <span className="mt-3 flex flex-wrap gap-1.5">
             {soon && <Chip tone="amber">Starts {timeUntil(event.starts_at, now)}</Chip>}
             {attended && <Chip tone="green">Checked in</Chip>}
             {!attended && rsvp === 'going' && <Chip tone="green">You are going</Chip>}
@@ -400,7 +375,6 @@ function EventCard({
           </span>
         )}
       </span>
-      <ChevronRightIcon className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none" />
     </button>
   )
 }
@@ -428,27 +402,23 @@ function EventDetail({
 
   return (
     <div>
-      <div className="relative -mx-5 -mt-5 mb-5 bg-linear-to-br from-brand-900 to-brand-700 px-5 pt-5 pb-6 text-white">
+      <div className="relative -mx-5 -mt-5 mb-5">
+        <EventCover
+          iso={event.starts_at}
+          label={soon ? `Starts ${timeUntil(event.starts_at, now)}` : over ? 'Already happened' : undefined}
+          large
+        />
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 rounded-full bg-white/15 px-3 py-1 text-sm font-medium hover:bg-white/25"
+          className="absolute top-3 right-3 rounded-full bg-white px-4 py-2 text-sm font-bold text-ink hover:bg-card"
         >
           Close
         </button>
-        <div className="flex items-start gap-4 pr-16">
-          <DateTile iso={event.starts_at} dark />
-          <div className="min-w-0">
-            <h2 className="font-display text-2xl leading-tight font-semibold break-words">{event.title}</h2>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {soon && <Chip tone="amber">Starts {timeUntil(event.starts_at, now)}</Chip>}
-              {over && <Chip>Already happened</Chip>}
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 space-y-1.5 text-white/90">
-          <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
-          {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
-        </div>
+      </div>
+      <h2 className="font-display text-2xl leading-tight font-bold break-words">{event.title}</h2>
+      <div className="mt-3 mb-5 space-y-1.5 text-slate-700">
+        <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
+        {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
       </div>
 
       {event.meeting_link && (

@@ -7,6 +7,7 @@ import { formatDateTime, formatEventTime, type Announcement } from '../lib/annou
 import type { EventRow } from '../lib/events'
 import { canSeeNav, NAV_ITEMS } from '../nav'
 import DashboardExtras from '../components/DashboardExtras'
+import { noticeClass } from '../components/ui'
 
 type Latest = Pick<Announcement, 'id' | 'title' | 'body' | 'pinned' | 'created_at' | 'event_at'>
 
@@ -58,7 +59,7 @@ export default function Dashboard() {
       {pollsWaiting !== null && pollsWaiting > 0 && (
         <Link
           to="/polls"
-          className="mt-8 block rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-950 hover:bg-amber-100"
+          className={noticeClass + ' mt-8 block hover:bg-secondary'}
         >
           {pollsWaiting === 1 ? "1 poll is" : `${pollsWaiting} polls are`} waiting for your vote
         </Link>

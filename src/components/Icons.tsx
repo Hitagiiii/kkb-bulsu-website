@@ -106,29 +106,26 @@ function artKey(category: string): string {
   return 'bag'
 }
 
-const TILE: Record<string, string> = {
-  shirt: 'from-brand-900 to-brand-600 text-white',
-  lace: 'from-gold-400 to-amber-600 text-brand-900',
-  pin: 'from-slate-700 to-slate-500 text-white',
-  bag: 'from-brand-700 to-gold-400 text-white',
-}
-
-/** A colored tile with a big icon, used where a product photo would go. */
-export function ProductArt({ category, className = 'h-36' }: { category: string; className?: string }) {
+/** A flat tile with a large icon, used where a product photo would go. */
+export function ProductArt({
+  category,
+  className = 'aspect-[4/3] w-full',
+}: {
+  category: string
+  className?: string
+}) {
   const key = artKey(category)
   return (
-    <div className={`relative flex items-center justify-center overflow-hidden bg-linear-to-br ${TILE[key]} ${className}`}>
-      <span aria-hidden="true" className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10" />
-      <span aria-hidden="true" className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-white/10" />
+    <div className={`flex items-center justify-center bg-secondary text-brand-700 ${className}`}>
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth={1.5}
+        strokeWidth={1.25}
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
-        className="relative h-[55%] w-[55%] opacity-95 drop-shadow"
+        className="h-[45%] w-[45%]"
       >
         {ART[key]}
       </svg>

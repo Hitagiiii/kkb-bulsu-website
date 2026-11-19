@@ -199,9 +199,9 @@ export default function Announcements() {
         </p>
       )}
 
-      <ul className="mt-8 divide-y divide-slate-200 border-y border-slate-200">
+      <ul className="mt-8 space-y-6">
         {items.map((a) => (
-          <li key={a.id} className={'py-6 ' + (a.pinned ? 'border-l-4 border-l-brand-700 pl-4' : '')}>
+          <li key={a.id} className={'overflow-hidden rounded-md border border-hairline bg-white ' + (editingId === a.id ? 'p-4 sm:p-5' : '')}>
             {editingId === a.id ? (
               <AnnouncementForm
                 initial={{
@@ -218,54 +218,59 @@ export default function Announcements() {
               />
             ) : (
               <article>
-                {a.pinned && <p className="text-xs font-semibold text-brand-700">Pinned</p>}
-                <h2 className="font-display text-xl font-semibold break-words">{a.title}</h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Posted {formatDateTime(a.created_at)} by {a.author_name || 'an officer'}
-                  {a.updated_at && ' (edited)'}
-                </p>
-
-                {a.event_at && <EventLine iso={a.event_at} now={now} />}
-
-                <p className="mt-4 whitespace-pre-wrap break-words">
-                  <Linkify text={a.body} />
-                </p>
-
                 <Photos paths={a.image_paths ?? []} urls={urls} />
+                <div className="p-4 sm:p-5">
+                  {a.pinned && (
+                    <span className="mb-2 inline-block rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-medium text-brand-900">
+                      Pinned
+                    </span>
+                  )}
+                  <h2 className="font-display text-xl font-bold break-words">{a.title}</h2>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Posted {formatDateTime(a.created_at)} by {a.author_name || 'an officer'}
+                    {a.updated_at && ' (edited)'}
+                  </p>
 
-                {canPost && (
-                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                    {deletingId === a.id ? (
-                      <>
-                        <span className="text-slate-700">Delete this announcement for good?</span>
-                        <button onClick={() => void remove(a)} className="py-1 font-semibold text-red-700 hover:underline">
-                          Yes, delete
-                        </button>
-                        <button onClick={() => setDeletingId(null)} className="py-1 text-slate-600 hover:underline">
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => void togglePin(a)} className="py-1 font-medium text-brand-700 hover:underline">
-                          {a.pinned ? 'Unpin' : 'Pin to top'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingId(a.id)
-                            setDeletingId(null)
-                          }}
-                          className="py-1 font-medium text-brand-700 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button onClick={() => setDeletingId(a.id)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
+                  {a.event_at && <EventLine iso={a.event_at} now={now} />}
+
+                  <p className="mt-4 whitespace-pre-wrap break-words">
+                    <Linkify text={a.body} />
+                  </p>
+
+                  {canPost && (
+                    <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                      {deletingId === a.id ? (
+                        <>
+                          <span className="text-slate-700">Delete this announcement for good?</span>
+                          <button onClick={() => void remove(a)} className="py-1 font-semibold text-error hover:underline">
+                            Yes, delete
+                          </button>
+                          <button onClick={() => setDeletingId(null)} className="py-1 text-slate-600 hover:underline">
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => void togglePin(a)} className="py-1 font-medium text-brand-700 hover:underline">
+                            {a.pinned ? 'Unpin' : 'Pin to top'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingId(a.id)
+                              setDeletingId(null)
+                            }}
+                            className="py-1 font-medium text-brand-700 hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button onClick={() => setDeletingId(a.id)} className="py-1 text-slate-600 hover:text-error hover:underline">
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               </article>
             )}
           </li>
@@ -283,7 +288,7 @@ function EventLine({ iso, now }: { iso: string; now: number }) {
       <span className="font-semibold text-brand-800">Event</span>
       <span>{formatEventTime(iso)}</span>
       {state === 'soon' && (
-        <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-semibold text-amber-950">
+        <span className="rounded-full bg-gold-100 px-2 py-0.5 text-xs font-semibold text-ink">
           Starts {timeUntil(iso, now)}
         </span>
       )}
@@ -293,12 +298,12 @@ function EventLine({ iso, now }: { iso: string; now: number }) {
   )
 }
 
-/* ---------- photos on a posted announcement ---------- */
+/* ---------- photos on a posted announcement (full-bleed, first in the card) ---------- */
 function Photos({ paths, urls }: { paths: string[]; urls: Record<string, string> }) {
   if (paths.length === 0) return null
   const single = paths.length === 1
   return (
-    <div className={'mt-4 grid gap-2 ' + (single ? '' : paths.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
+    <div className={'grid gap-0.5 bg-card ' + (single ? '' : paths.length === 2 ? 'grid-cols-2' : 'grid-cols-3')}>
       {paths.map((p) =>
         urls[p] ? (
           <a key={p} href={urls[p]} target="_blank" rel="noreferrer" title="Open full size">
@@ -306,14 +311,11 @@ function Photos({ paths, urls }: { paths: string[]; urls: Record<string, string>
               src={urls[p]}
               alt="Photo attached to the announcement"
               loading="lazy"
-              className={
-                'w-full rounded-lg border border-slate-200 bg-slate-100 ' +
-                (single ? 'max-h-96 object-contain' : 'aspect-square object-cover')
-              }
+              className={'w-full bg-secondary object-cover ' + (single ? 'max-h-[28rem]' : 'aspect-square')}
             />
           </a>
         ) : (
-          <div key={p} className="aspect-square animate-pulse rounded-lg bg-slate-100" />
+          <div key={p} className="aspect-square animate-pulse bg-secondary" />
         ),
       )}
     </div>

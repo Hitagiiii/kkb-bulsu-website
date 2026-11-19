@@ -39,30 +39,30 @@ export async function downloadQrPoster(link: string, title: string, when: string
 
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, W, H)
-  ctx.fillStyle = '#4e0f1b'
+  ctx.fillStyle = '#8a1c2e'
   ctx.fillRect(0, 0, W, 28)
   ctx.textAlign = 'center'
 
   ctx.fillStyle = '#8a1c2e'
-  ctx.font = '700 40px Figtree, Arial, sans-serif'
+  ctx.font = '700 40px Inter, Arial, sans-serif'
   ctx.fillText('KKB BULSU', W / 2, 110)
 
   ctx.fillStyle = '#1d1b22'
-  ctx.font = '700 64px Figtree, Arial, sans-serif'
+  ctx.font = '700 64px Inter, Arial, sans-serif'
   const lines = wrapLines(ctx, title, W - 160, 3)
   lines.forEach((l, i) => ctx.fillText(l, W / 2, 210 + i * 78))
 
   ctx.fillStyle = '#475569'
-  ctx.font = '400 36px Figtree, Arial, sans-serif'
+  ctx.font = '400 36px Inter, Arial, sans-serif'
   ctx.fillText(when, W / 2, 210 + lines.length * 78 + 20)
 
   ctx.drawImage(img, 90, 640, 900, 900)
 
   ctx.fillStyle = '#8a1c2e'
-  ctx.font = '700 52px Figtree, Arial, sans-serif'
+  ctx.font = '700 52px Inter, Arial, sans-serif'
   ctx.fillText('Scan to check in', W / 2, 1610)
   ctx.fillStyle = '#475569'
-  ctx.font = '400 30px Figtree, Arial, sans-serif'
+  ctx.font = '400 30px Inter, Arial, sans-serif'
   ctx.fillText('Use your phone camera. Sign in if asked.', W / 2, 1655)
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
