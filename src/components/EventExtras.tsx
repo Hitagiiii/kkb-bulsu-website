@@ -54,9 +54,9 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
   const full = capacity !== null && going >= capacity && mine !== 'going'
 
   return (
-    <div className="mt-6 border-t border-slate-200 pt-5">
+    <div className="mt-6 border-t border-line pt-5">
       {attended && (
-        <p className="mb-4 border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-medium text-emerald-900">
+        <p className="mb-4 border border-success-pale bg-success-pale px-3 py-3 text-sm font-medium text-success-deep">
           You are checked in for this event.
         </p>
       )}
@@ -74,7 +74,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
             onClick={() => void answer('going')}
             className={
               'min-h-11 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ' +
-              (mine === 'going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-hairline bg-white text-ink hover:bg-card')
+              (mine === 'going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink hover:bg-bg')
             }
           >
             {full ? 'Event is full' : "I'm going"}
@@ -86,7 +86,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
             onClick={() => void answer('not_going')}
             className={
               'min-h-11 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ' +
-              (mine === 'not_going' ? 'border-ink bg-ink text-white' : 'border-hairline bg-white text-ink hover:bg-card')
+              (mine === 'not_going' ? 'border-accent bg-accent text-white' : 'border-line bg-white text-ink hover:bg-bg')
             }
           >
             Can't make it
@@ -94,7 +94,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
         </div>
       )}
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-sm text-accent">
           {error}
         </p>
       )}
@@ -237,7 +237,7 @@ function OfficerPanel({
   }
 
   return (
-    <div className="mt-6 border border-hairline bg-card p-4">
+    <div className="mt-6 border border-line bg-card p-4">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -258,7 +258,7 @@ function OfficerPanel({
               hours before the event until 2 hours after it ends.
             </p>
             {qr ? (
-              <img src={qr} alt="QR code for event check-in" className="mt-3 h-56 w-56 border border-hairline bg-white" />
+              <img src={qr} alt="QR code for event check-in" className="mt-3 h-56 w-56 border border-line bg-white" />
             ) : (
               <p className="mt-3 text-sm text-slate-500">Making the QR code…</p>
             )}
@@ -282,7 +282,7 @@ function OfficerPanel({
             {attendance.length === 0 ? (
               <p className="mt-2 text-sm text-slate-500">No one has checked in yet.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-hairline border-y border-hairline bg-white text-sm">
+              <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white bg-white text-sm">
                 {attendance.map((a) => (
                   <li key={a.id} className="flex min-h-11 items-center justify-between gap-3 px-3 py-2">
                     <span className="min-w-0 break-words">
@@ -292,7 +292,7 @@ function OfficerPanel({
                         {a.method === 'manual' && ' (added by an officer)'}
                       </span>
                     </span>
-                    <button type="button" onClick={() => void removeRow(a.id)} className="min-h-11 shrink-0 px-2 text-xs text-slate-600 hover:text-red-700 hover:underline">
+                    <button type="button" onClick={() => void removeRow(a.id)} className="min-h-11 shrink-0 px-2 text-xs text-slate-600 hover:text-accent hover:underline">
                       Remove
                     </button>
                   </li>
@@ -304,7 +304,7 @@ function OfficerPanel({
                 aria-label="Add a member who could not scan"
                 value={pick}
                 onChange={(e) => setPick(e.target.value)}
-                className="min-h-11 min-w-0 flex-1 rounded-md border border-hairline bg-white px-2 py-2.5 text-base sm:text-sm"
+                className="min-h-11 min-w-0 flex-1 rounded-md border border-line bg-white px-2 py-2.5 text-base sm:text-sm"
               >
                 <option value="">Add someone who could not scan…</option>
                 {people
@@ -357,7 +357,7 @@ function OfficerPanel({
             ) : (
               <ul className="mt-2 space-y-2 text-sm">
                 {budgets.map((b) => (
-                  <li key={b.budget_id} className="border border-hairline bg-white px-3 py-3">
+                  <li key={b.budget_id} className="border border-line bg-white px-3 py-3">
                     <Link to={`/finance/${b.budget_id}`} className="font-medium text-brand-700 hover:underline">
                       {b.name}
                     </Link>

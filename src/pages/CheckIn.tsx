@@ -27,21 +27,22 @@ export default function CheckIn() {
 
   return (
     <div className="max-w-md">
-      <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Event check-in</h1>
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">Event check-in</p>
+      <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Welcome in.</h1>
 
       {state.status === 'working' && <p className="mt-6 text-sm text-slate-500">Checking you in…</p>}
 
       {state.status === 'done' && (
-        <div className="mt-6 rounded-xl border border-emerald-300 bg-emerald-50 p-5">
-          <p className="font-display text-xl font-semibold text-emerald-900">
+        <div className="mt-6 rounded-xl border border-success-pale bg-success-pale p-5">
+          <p className="text-xl font-medium text-success-deep">
             {state.already ? 'You were already checked in' : 'You are checked in'}
           </p>
-          <p className="mt-1 break-words text-emerald-900">{state.title}</p>
+          <p className="mt-1 break-words text-success-deep">{state.title}</p>
         </div>
       )}
 
       {state.status === 'error' && (
-        <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-3 text-sm text-red-700">
+        <p role="alert" className="mt-6 rounded-md bg-soft px-3 py-3 text-sm text-accent">
           {state.message}
         </p>
       )}

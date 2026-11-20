@@ -3,10 +3,13 @@ import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../lib/supabase'
 import { hasRole } from '../lib/types'
 import { formatDateTime } from '../lib/announcements'
-import { formatDay } from '../lib/events'
-import { subtleButtonClass } from '../components/ui'
+import { formatDay, PARTICIPATION_TARGET } from '../lib/events'
+import { Link } from 'react-router-dom'
+import Chip from '../components/Chip'
+import { eyebrowClass, subtleButtonClass } from '../components/ui'
 
 interface Mine {
+  event_id: string
   checked_in_at: string
   method: string
   events: { title: string; starts_at: string } | null
@@ -30,7 +33,8 @@ export default function Attendance() {
   const { profile } = useAuth()
   const isOfficer = hasRole(profile?.role, 'officer')
   const [mine, setMine] = useState<Mine[]>([])
-  const [pastCount, setPastCount] = useState(0)
+  const [pastEvents, setPastEvents] = useState<PastEvent[]>([])
+  const [nextEvent, setNextEvent] = useState<PastEvent | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [report, setReport] = useState<Report | null>(null)
@@ -41,14 +45,16 @@ export default function Attendance() {
     Promise.all([
       supabase
         .from('event_attendance')
-        .select('checked_in_at, method, events(title, starts_at)')
+        .select('event_id, checked_in_at, method, events(title, starts_at)')
         .eq('user_id', profile.id)
         .order('checked_in_at', { ascending: false }),
-      supabase.from('events').select('id', { count: 'exact', head: true }).lt('starts_at', new Date().toISOString()),
-    ]).then(([a, e]) => {
+      supabase.from('events').select('id, title, starts_at').lt('starts_at', new Date().toISOString()).order('starts_at', { ascending: false }).limit(200),
+      supabase.from('events').select('id, title, starts_at').gte('starts_at', new Date().toISOString()).order('starts_at').limit(1),
+    ]).then(([a, e, n]) => {
       if (a.error) setError(a.error.message)
       else setMine((a.data ?? []) as unknown as Mine[])
-      setPastCount(e.count ?? 0)
+      setPastEvents((e.data ?? []) as PastEvent[])
+      setNextEvent(((n.data ?? []) as PastEvent[])[0] ?? null)
       setLoading(false)
     })
   }, [profile])
@@ -87,15 +93,26 @@ export default function Attendance() {
     return { perPerson, perEvent, total: report.events.length }
   }, [report])
 
-  const attendedPast = mine.filter((m) => m.events && new Date(m.events.starts_at).getTime() < Date.now()).length
-  const shownMine = mine.filter((m) => (m.events?.title ?? 'Event removed').toLowerCase().includes(search.trim().toLowerCase()))
+  const presentIds = new Set(mine.map((m) => m.event_id))
+  const pastCount = pastEvents.length
+  const attendedPast = pastEvents.filter((e) => presentIds.has(e.id)).length
+  const rate = pastCount > 0 ? attendedPast / pastCount : 0
+  const history = pastEvents.map((e) => ({
+    id: e.id,
+    title: e.title,
+    startsAt: e.starts_at,
+    present: presentIds.has(e.id),
+    checkedIn: mine.find((m) => m.event_id === e.id)?.checked_in_at ?? null,
+  }))
+  const shownHistory = history.filter((h) => h.title.toLowerCase().includes(search.trim().toLowerCase()))
 
   return (
-    <div className="max-w-4xl print:max-w-3xl">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4 print:hidden">
+    <div className="w-full print:max-w-3xl">
+      <div className="flex flex-wrap items-end justify-between gap-3 pb-2 print:hidden">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Attendance</h1>
-          <p className="mt-1 text-sm text-slate-600">Scan the QR code at an event to check in.</p>
+          <p className={eyebrowClass}>Your participation</p>
+          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Every time you show up.</h1>
+          <p className="mt-2 text-sm text-muted">Your attendance record for AY 2026–2027. Scan the QR code at an event to check in.</p>
         </div>
         {isOfficer && report && (
           <button onClick={() => window.print()} className={subtleButtonClass + ' min-h-11'}>
@@ -105,40 +122,73 @@ export default function Attendance() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mt-6 border-l-4 border-accent bg-soft px-3 py-2 text-sm text-accent">
           {error}
         </p>
       )}
-      {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-8 text-sm text-muted">Loading…</p>}
 
       {!loading && (
-        <section className="mt-8 print:hidden" aria-label="My attendance">
-          <h2 className="font-display text-xl font-semibold">My attendance</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            {attendedPast} of {pastCount} past events attended.
-          </p>
-          {mine.length > 0 && (
-            <div className="mt-3">
-              <input aria-label="Search my attendance" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by event" className="min-h-11 w-full rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start print:hidden" aria-label="My attendance">
+          <div>
+            <div className="rounded-md border border-line bg-white p-5">
+              <p className="text-5xl font-medium tabular-nums text-ink">{Math.round(rate * 100)}%</p>
+              <p className="mt-1 text-sm font-semibold text-ink">
+                {attendedPast} of {pastCount} events attended
+              </p>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(rate * 100)} aria-label="Attendance rate">
+                <div className="h-full bg-accent" style={{ width: `${Math.round(rate * 100)}%` }} />
+              </div>
+              <p className="mt-3 text-sm text-muted">
+                {pastCount === 0
+                  ? 'No past events yet. Your record starts at the next one.'
+                  : rate >= PARTICIPATION_TARGET
+                    ? `You meet the ${PARTICIPATION_TARGET * 100}% participation guideline for active membership.`
+                    : `Active membership needs ${PARTICIPATION_TARGET * 100}% participation. Your next event counts.`}
+              </p>
             </div>
-          )}
-          {mine.length === 0 ? (
-            <p className="mt-3 border-y border-slate-200 py-4 text-sm text-slate-500">
-              No check-ins yet.
-            </p>
-          ) : (
-            <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
-              {shownMine.map((m, i) => (
-                <li key={i} className="py-3">
-                  <p className="font-medium break-words">{m.events?.title ?? 'Event removed'}</p>
-                  <p className="text-sm text-slate-500">
-                    {m.events && formatDay(m.events.starts_at)}, checked in {formatDateTime(m.checked_in_at)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-          {mine.length > 0 && shownMine.length === 0 && <p className="py-3 text-sm text-slate-500">No matching events.</p>}
+
+            <h2 className="mt-8 text-xl font-medium">Event history</h2>
+            {history.length > 0 && (
+              <div className="mt-3">
+                <input aria-label="Search my attendance" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by event" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+              </div>
+            )}
+            {history.length === 0 ? (
+              <p className="mt-3 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">No events have happened yet.</p>
+            ) : (
+              <ul className="mt-3 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+                {shownHistory.map((h) => (
+                  <li key={h.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold break-words">{h.title}</p>
+                      <p className="text-xs text-muted">
+                        {formatDay(h.startsAt)}
+                        {h.present && h.checkedIn ? ` · Checked in ${formatDateTime(h.checkedIn)}` : ' · No check-in recorded'}
+                      </p>
+                    </div>
+                    <Chip tone={h.present ? 'green' : 'red'}>{h.present ? 'Present' : 'Absent'}</Chip>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {history.length > 0 && shownHistory.length === 0 && <p className="py-3 text-sm text-muted">No matching events.</p>}
+          </div>
+
+          <aside className="space-y-4">
+            {nextEvent && (
+              <div className="rounded-md border border-line bg-white p-4">
+                <p className={eyebrowClass}>Your next chance to show up</p>
+                <p className="mt-2 text-lg font-medium break-words">{nextEvent.title}</p>
+                <p className="mt-1 text-xs text-muted">{formatDay(nextEvent.starts_at)}</p>
+                <Link to="/events" className="mt-3 inline-block text-sm font-semibold text-accent hover:underline">View event &amp; RSVP →</Link>
+              </div>
+            )}
+            <div className="rounded-md border border-line bg-white p-4">
+              <p className="text-sm font-semibold">Think a record is missing?</p>
+              <p className="mt-1 text-xs text-muted">Contact the attendance officer within 7 school days.</p>
+            </div>
+          </aside>
         </section>
       )}
 
@@ -151,11 +201,11 @@ export default function Attendance() {
           </header>
 
           <section className="mt-12 print:mt-6" aria-label="Attendance per member">
-            <h2 className="font-display text-xl font-semibold">Per member ({rows.total} past events)</h2>
+            <h2 className="text-xl font-medium">Per member ({rows.total} past events)</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-300">
+                  <tr className="border-b border-line">
                     <th className="py-2 pr-4 font-semibold">Member</th>
                     <th className="py-2 pr-4 font-semibold">Attended</th>
                     <th className="py-2 font-semibold">Rate</th>
@@ -165,7 +215,7 @@ export default function Attendance() {
                   {report.people.map((p) => {
                     const n = rows.perPerson.get(p.id) ?? 0
                     return (
-                      <tr key={p.id} className="border-b border-slate-200 break-inside-avoid">
+                      <tr key={p.id} className="border-b border-line break-inside-avoid">
                         <td className="py-2 pr-4 break-words">{p.full_name || 'Unnamed'}</td>
                         <td className="py-2 pr-4 tabular-nums">{n} / {rows.total}</td>
                         <td className="py-2 tabular-nums">{rows.total ? Math.round((n / rows.total) * 100) : 0}%</td>
@@ -178,11 +228,11 @@ export default function Attendance() {
           </section>
 
           <section className="mt-10" aria-label="Attendance per event">
-            <h2 className="font-display text-xl font-semibold">Per event</h2>
+            <h2 className="text-xl font-medium">Per event</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-300">
+                  <tr className="border-b border-line">
                     <th className="py-2 pr-4 font-semibold">Event</th>
                     <th className="py-2 pr-4 font-semibold">Date</th>
                     <th className="py-2 font-semibold">Present</th>
@@ -190,7 +240,7 @@ export default function Attendance() {
                 </thead>
                 <tbody>
                   {report.events.map((e) => (
-                    <tr key={e.id} className="border-b border-slate-200 break-inside-avoid">
+                    <tr key={e.id} className="border-b border-line break-inside-avoid">
                       <td className="py-2 pr-4 break-words">{e.title}</td>
                       <td className="py-2 pr-4 whitespace-nowrap">{formatDay(e.starts_at)}</td>
                       <td className="py-2 tabular-nums">{rows.perEvent.get(e.id) ?? 0}</td>

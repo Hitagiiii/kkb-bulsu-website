@@ -4,7 +4,7 @@ import { dayKey, formatTime, type EventRow } from '../lib/events'
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const navButton =
-  'min-h-11 rounded-md border border-hairline bg-white px-3 text-sm font-bold text-ink hover:bg-card sm:min-h-10'
+  'min-h-11 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink hover:bg-bg sm:min-h-10'
 
 export default function MonthCalendar({
   events,
@@ -46,9 +46,9 @@ export default function MonthCalendar({
   }
 
   return (
-    <div className="border border-hairline bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-3 py-3 sm:px-4">
-        <h2 className="font-display text-lg font-semibold sm:text-xl">
+    <div className="overflow-hidden rounded-md border border-line bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3 py-3 sm:px-4">
+        <h2 className="text-lg font-medium sm:text-xl">
           {cursor.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}
         </h2>
         <div className="flex gap-2">
@@ -72,7 +72,7 @@ export default function MonthCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 border-b border-hairline bg-card text-center text-xs font-bold text-slate-500">
+      <div className="grid grid-cols-7 border-b border-line bg-bg text-center text-xs font-semibold text-muted">
         {WEEKDAYS.map((d) => (
           <div key={d} className="py-2">
             <span className="sm:hidden">{d[0]}</span>
@@ -93,9 +93,9 @@ export default function MonthCalendar({
             <div
               key={key}
               className={
-                'min-h-14 border-b border-r border-hairline-soft sm:min-h-24 ' +
-                (isSelected ? 'bg-secondary ' : '') +
-                (inMonth ? '' : 'bg-card text-slate-400')
+                'min-h-14 border-b border-r border-line sm:min-h-24 ' +
+                (isSelected ? 'bg-soft ' : '') +
+                (inMonth ? '' : 'bg-bg text-slate-400')
               }
             >
               <button
@@ -108,10 +108,10 @@ export default function MonthCalendar({
                 }`}
                 className={
                   'flex min-h-11 w-full items-center gap-1 px-2 py-2 text-left text-sm font-semibold ' +
-                  (isToday ? 'text-brand-700' : 'text-ink')
+                  (isToday ? 'text-accent' : 'text-ink')
                 }
               >
-                <span className={isToday ? 'border-b-2 border-brand-700' : ''}>{date.getDate()}</span>
+                <span className={isToday ? 'border-b-2 border-accent' : ''}>{date.getDate()}</span>
                 {dayEvents.length > 0 && (
                   <span className="text-xs font-medium text-slate-500">({dayEvents.length})</span>
                 )}
@@ -123,7 +123,7 @@ export default function MonthCalendar({
                     key={e.id}
                     type="button"
                     onClick={() => onOpenEvent(e.id)}
-                    className="flex min-h-11 w-full items-center truncate border border-hairline bg-white px-2 text-left text-xs font-medium text-ink hover:bg-secondary"
+                    className="flex min-h-11 w-full items-center truncate rounded-md border border-line bg-white px-2 text-left text-xs font-medium text-ink hover:bg-soft"
                   >
                     <span className="truncate">{formatTime(e.starts_at)} {e.title}</span>
                   </button>
@@ -132,7 +132,7 @@ export default function MonthCalendar({
                   <button
                     type="button"
                     onClick={() => onSelectDay(key)}
-                    className="min-h-11 w-full px-2 text-left text-xs font-semibold text-brand-700 hover:underline"
+                    className="min-h-11 w-full px-2 text-left text-xs font-semibold text-accent hover:underline"
                   >
                     +{dayEvents.length - 2} more
                   </button>

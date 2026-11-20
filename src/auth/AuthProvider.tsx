@@ -44,11 +44,19 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         return error?.message ?? null
       },
-      signUp: async (email, password, fullName) => {
+      signUp: async (email, password, fullName, details) => {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName } },
+          options: {
+            data: {
+              full_name: fullName,
+              student_no: details?.studentNo ?? '',
+              college: details?.college ?? '',
+              program: details?.program ?? '',
+              year_section: details?.yearSection ?? '',
+            },
+          },
         })
         return { error: error?.message ?? null, needsConfirm: !error && !data.session }
       },

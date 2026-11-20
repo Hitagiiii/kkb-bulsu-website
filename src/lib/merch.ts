@@ -9,6 +9,7 @@ export interface MerchItem {
   price: number
   folder_id: string | null
   variants: string[]
+  image_paths: string[]
   stage: Stage
   order_deadline: string | null
   created_at: string

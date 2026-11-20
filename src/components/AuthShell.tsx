@@ -1,32 +1,57 @@
 import type { ReactNode } from 'react'
+import { eyebrowClass } from './ui'
 
+/**
+ * Members-only screens. Desktop: brand story and photo on the left, a quiet single-column form on the right.
+ * Phone: the form only, under a slim top bar.
+ */
 export default function AuthShell({
   title,
   subtitle,
   children,
+  aside,
 }: {
   title: string
   subtitle?: string
   children: ReactNode
+  /** Extra content under the form, e.g. a "new here?" block */
+  aside?: ReactNode
 }) {
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <aside className="hidden bg-brand-700 px-10 py-12 text-white md:flex md:min-h-screen md:flex-col md:justify-between lg:px-14">
-        <div className="font-display text-2xl font-bold tracking-tight">KKB BULSU</div>
-        <p className="max-w-sm text-sm leading-relaxed text-white/90">
-          Your organization, connected in one place.
-        </p>
-        <p className="text-xs text-white/75">Members only. New accounts are approved by an officer.</p>
-      </aside>
+    <div className="min-h-screen bg-bg">
+      <header className="flex items-center justify-between border-b border-line bg-white px-5 py-4 sm:px-8">
+        <span className="text-base font-bold tracking-tight text-accent">KKB BULSU</span>
+        <span className="text-xs text-muted">
+          <span className="hidden sm:inline">Bulacan State University · </span>Members portal
+        </span>
+      </header>
 
-      <main className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 md:px-10">
-        <div className="w-full max-w-sm">
-          <div className="font-display mb-7 text-xl font-bold tracking-tight text-brand-700 md:hidden">KKB BULSU</div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
-          {subtitle && <p className="mt-2 text-sm leading-relaxed text-slate-600">{subtitle}</p>}
-          <div className="mt-7">{children}</div>
-        </div>
-      </main>
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-8 sm:px-8 md:grid-cols-2 md:items-start md:gap-16 md:py-14">
+        <section className="hidden md:block">
+          <img
+            src="/images/community.jpg"
+            alt="KKB BULSU members chatting on campus"
+            className="aspect-[4/3] w-full rounded-md object-cover"
+          />
+          <h2 className="font-display mt-8 text-[40px] leading-[1.15] font-medium tracking-tight text-ink">
+            More than an org.
+            <br />
+            Your people on campus.
+          </h2>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
+            Connect with the KKB BULSU community. Show up, lend a hand, and make your university years count.
+          </p>
+          <p className={eyebrowClass + ' mt-6'}>Malolos, Bulacan / AY 2026–2027</p>
+        </section>
+
+        <main className="w-full max-w-md md:justify-self-start">
+          <p className={eyebrowClass}>Members only / KKB BULSU</p>
+          <h1 className="font-display mt-2 text-[28px] leading-tight font-medium tracking-tight sm:text-[32px]">{title}</h1>
+          {subtitle && <p className="mt-2 text-sm leading-relaxed text-muted">{subtitle}</p>}
+          <div className="mt-6">{children}</div>
+          {aside}
+        </main>
+      </div>
     </div>
   )
 }

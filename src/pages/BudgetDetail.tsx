@@ -172,9 +172,10 @@ export default function BudgetDetail() {
           <span className="text-slate-600">Budget</span>
         </nav>
 
-        <header className="mt-2 flex flex-wrap items-start justify-between gap-4 border-b border-hairline pb-4">
+        <header className="mt-2 flex flex-wrap items-start justify-between gap-4 pb-2">
           <div className="min-w-0">
-            <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{budget.name}</h1>
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">Finance / Budget</p>
+            <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">{budget.name}</h1>
             <p className="mt-1 text-xs text-slate-500">{live ? 'Updates live' : 'Reconnecting…'}</p>
           </div>
           <button type="button" onClick={() => void printBill()} className={subtleButtonClass + ' min-h-11'}>
@@ -183,15 +184,15 @@ export default function BudgetDetail() {
         </header>
 
         {error && (
-          <p role="alert" className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="mt-4 border border-accent bg-soft px-3 py-2 text-sm text-accent">
             {error}
           </p>
         )}
 
         <section aria-label="Budget summary" className="mt-5">
-          <div className="border-b border-hairline pb-4">
+          <div className="border-b border-line pb-4">
             <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">Money left</p>
-            <p className={'font-display mt-1 text-4xl font-bold tabular-nums sm:text-5xl ' + (over ? 'text-error' : 'text-ink')}>
+            <p className={'mt-1 text-4xl font-medium tabular-nums sm:text-5xl ' + (over ? 'text-error' : 'text-ink')}>
               {peso(Math.abs(left))}
             </p>
             <p className="mt-1 text-xs text-slate-500">{over ? 'Over budget' : `${Math.round(pct)}% of the budget used`}</p>
@@ -200,19 +201,19 @@ export default function BudgetDetail() {
             </div>
           </div>
 
-          <dl className="mt-4 grid grid-cols-3 divide-x divide-hairline border-y border-hairline">
-            <div className="px-3 py-3 first:pl-0">
+          <dl className="mt-4 grid grid-cols-3 divide-x divide-line rounded-md border border-line bg-white">
+            <div className="px-3 py-3 first:pl-1">
               <dt className="text-xs text-slate-500">Total</dt>
-              <dd className="font-display mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(budget.total_budget)}</dd>
+              <dd className="mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
             </div>
             <div className="px-3 py-3">
               <dt className="text-xs text-slate-500">Spent</dt>
-              <dd className="font-display mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(spent)}</dd>
+              <dd className="mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(spent)}</dd>
             </div>
             <div className="px-3 py-3 last:pr-0">
               <dt className="text-xs text-slate-500">Receipts missing</dt>
-              <dd className={'font-display mt-1 text-lg font-semibold tabular-nums sm:text-xl ' + (missingCount > 0 ? 'text-brand-700' : 'text-ink')}>
+              <dd className={'mt-1 text-lg font-semibold tabular-nums sm:text-xl ' + (missingCount > 0 ? 'text-brand-700' : 'text-ink')}>
                 {missingCount}
               </dd>
             </div>
@@ -247,9 +248,9 @@ export default function BudgetDetail() {
         {canEdit && <AddExpenseForm budgetId={budget.id} onAdded={load} />}
 
         <section className="mt-10" aria-label="Expenses">
-          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
             <div>
-              <h2 className="font-display text-xl font-semibold">Expenses</h2>
+              <h2 className="text-xl font-medium">Expenses</h2>
               <p className="mt-0.5 text-xs text-slate-500">{active.length} active {active.length === 1 ? 'entry' : 'entries'}</p>
             </div>
             {hasVoided && (
@@ -279,16 +280,16 @@ export default function BudgetDetail() {
           {visible.length > 0 && (
             <>
               <div className="mt-4 md:hidden">
-                <ul className="divide-y divide-hairline border-y border-hairline">
+                <ul className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
                   {visible.map((x) => <MobileExpenseRow key={x.id} expense={x} url={x.receipt_path ? urls[x.receipt_path] : undefined} onOpen={() => selectExpense(x.id)} />)}
                 </ul>
               </div>
 
               <div className="mt-4 hidden md:block">
-                <div className="overflow-x-auto border-y border-hairline">
+                <div className="overflow-x-auto rounded-md border border-line bg-white">
                   <table className="w-full min-w-[760px] border-collapse text-sm">
                     <thead>
-                      <tr className="border-b border-hairline bg-card text-left text-xs font-semibold text-slate-600">
+                      <tr className="border-b border-line bg-card text-left text-xs font-semibold text-slate-600">
                         <th className="w-14 px-2 py-2">Receipt</th>
                         <th className="px-3 py-2">Expense</th>
                         <th className="w-32 px-3 py-2">Category</th>
@@ -303,13 +304,13 @@ export default function BudgetDetail() {
                         const voided = !!x.voided_at
                         const thumb = x.receipt_path ? urls[x.receipt_path] : undefined
                         return (
-                          <tr key={x.id} className={'border-b border-hairline last:border-b-0 ' + (voided ? 'opacity-60' : '')}>
+                          <tr key={x.id} className={'border-b border-line last:border-b-0 ' + (voided ? 'opacity-60' : '')}>
                             <td className="px-2 py-2 align-middle">
                               <button type="button" onClick={() => selectExpense(x.id)} className="flex min-h-11 min-w-11 items-center justify-center" aria-label={`Open ${x.description}`}>
                                 {thumb ? (
-                                  <img src={thumb} alt="Receipt thumbnail" className="h-10 w-10 border border-hairline object-cover" />
+                                  <img src={thumb} alt="Receipt thumbnail" className="h-10 w-10 border border-line object-cover" />
                                 ) : x.receipt_path ? (
-                                  <span className="flex h-10 w-10 items-center justify-center border border-hairline bg-card text-[10px] text-slate-500">Loading</span>
+                                  <span className="flex h-10 w-10 items-center justify-center border border-line bg-card text-[10px] text-slate-500">Loading</span>
                                 ) : (
                                   <span className="flex h-10 w-10 items-center justify-center border border-dashed border-ash bg-card text-[10px] font-semibold text-slate-600">No receipt</span>
                                 )}
@@ -325,7 +326,7 @@ export default function BudgetDetail() {
                             <td className="px-3 py-2 align-middle whitespace-nowrap text-slate-600">{formatDate(x.spent_on)}</td>
                             <td className={'px-3 py-2 text-right align-middle font-semibold tabular-nums ' + (voided ? 'line-through' : '')}>{peso(x.amount)}</td>
                             <td className="px-3 py-2 align-middle">
-                              {voided ? <span className="text-xs font-semibold text-red-700">Voided</span> : x.receipt_path ? <span className="text-xs text-slate-600">Receipt attached</span> : <span className="text-xs font-semibold text-brand-700">No receipt</span>}
+                              {voided ? <span className="text-xs font-semibold text-accent">Voided</span> : x.receipt_path ? <span className="text-xs text-slate-600">Receipt attached</span> : <span className="text-xs font-semibold text-brand-700">No receipt</span>}
                             </td>
                             <td className="px-3 py-2 text-right align-middle">
                               <button type="button" onClick={() => selectExpense(x.id)} className="min-h-11 px-2 text-xs font-semibold text-brand-700 hover:underline">Open</button>
@@ -345,7 +346,7 @@ export default function BudgetDetail() {
       </div>
 
       {isDesktop && selected && (
-        <aside className="fixed inset-y-0 right-0 z-30 w-[min(28rem,40vw)] overflow-y-auto border-l border-hairline bg-white p-6 print:hidden" aria-label="Expense inspector">
+        <aside className="fixed inset-y-0 right-0 z-30 w-[min(28rem,40vw)] overflow-y-auto border-l border-line bg-white p-6 print:hidden" aria-label="Expense inspector">
           <ExpenseDetail
             expense={selected}
             url={selected.receipt_path ? urls[selected.receipt_path] : undefined}
@@ -381,9 +382,9 @@ function MobileExpenseRow({ expense, url, onOpen }: { expense: Expense; url?: st
     <li>
       <button type="button" onClick={onOpen} className={'flex min-h-16 w-full items-center gap-3 py-3 text-left ' + (voided ? 'opacity-60' : '')}>
         {url ? (
-          <img src={url} alt="Receipt thumbnail" className="h-11 w-11 shrink-0 border border-hairline object-cover" />
+          <img src={url} alt="Receipt thumbnail" className="h-11 w-11 shrink-0 border border-line object-cover" />
         ) : expense.receipt_path ? (
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-hairline bg-card text-[10px] text-slate-500">Loading</span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-line bg-card text-[10px] text-slate-500">Loading</span>
         ) : (
           <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-dashed border-ash bg-card text-center text-[9px] leading-tight font-semibold text-slate-600">No receipt</span>
         )}
@@ -445,11 +446,11 @@ function ChangeTotal({ budget, onChanged }: { budget: Budget; onChanged: () => P
         step="0.01"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="w-32 min-h-11 border border-slate-300 px-2 py-2 text-base sm:text-sm"
+        className="w-32 min-h-11 border border-line px-2 py-2 text-base sm:text-sm"
       />
       <button type="submit" disabled={busy} className={subtleButtonClass + ' min-h-11'}>Save</button>
       <button type="button" onClick={() => setOpen(false)} className="min-h-11 py-2 text-sm text-slate-500 hover:underline">Cancel</button>
-      {error && <span role="alert" className="w-full text-xs text-red-700">{error}</span>}
+      {error && <span role="alert" className="w-full text-xs text-accent">{error}</span>}
     </form>
   )
 }
@@ -505,8 +506,8 @@ function AddExpenseForm({ budgetId, onAdded }: { budgetId: string; onAdded: () =
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 border-y border-hairline bg-card px-4 py-5 sm:px-5">
-      <h2 className="font-display text-xl font-semibold">Add an expense</h2>
+    <form onSubmit={submit} className="mt-8 rounded-md border border-line bg-white p-4 sm:p-6">
+      <h2 className="text-xl font-medium">Add an expense</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="x-desc" className="text-sm font-medium">What was it for?</label>
@@ -533,7 +534,7 @@ function AddExpenseForm({ budgetId, onAdded }: { budgetId: string; onAdded: () =
           <p className="mt-1 text-xs text-slate-500">You can also add the receipt later from the saved expense.</p>
         </div>
       </div>
-      {error && <p role="alert" className="mt-4 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-4 border border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
       <div className="mt-5 sm:max-w-48">
         <button type="submit" disabled={busy} className={buttonClass + ' min-h-11'}>{busy ? 'Saving…' : 'Add expense'}</button>
       </div>
@@ -573,7 +574,7 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
     <form onSubmit={submit} className="border border-dashed border-ash bg-card p-4">
       <label htmlFor="attach-file" className="text-sm font-medium text-slate-700">This expense has no receipt yet</label>
       <input id="attach-file" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-accent">{error}</p>}
       <div className="mt-3 sm:max-w-48"><button type="submit" disabled={busy || !file} className={buttonClass + ' min-h-11'}>{busy ? 'Attaching…' : 'Attach receipt'}</button></div>
       <p className="mt-2 text-xs text-slate-700">Once attached, a receipt can't be replaced. If it's the wrong photo, void the expense and add it again.</p>
     </form>
@@ -602,9 +603,9 @@ function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { e
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4 border-b border-hairline pb-4">
+      <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
         <div className="min-w-0">
-          <p className="font-display text-2xl font-semibold tabular-nums">{peso(expense.amount)}</p>
+          <p className="text-2xl font-medium tabular-nums">{peso(expense.amount)}</p>
           <p className="mt-1 break-words">{expense.description}</p>
         </div>
         <button type="button" onClick={onClose} className="min-h-11 shrink-0 px-2 text-sm font-medium text-slate-600 hover:text-ink">Close</button>
@@ -620,7 +621,7 @@ function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { e
       <div className="mt-5">
         {url ? (
           <a href={url} target="_blank" rel="noreferrer" title="Open full size">
-            <img src={url} alt="Receipt" className="max-h-[70vh] w-full border border-hairline object-contain" />
+            <img src={url} alt="Receipt" className="max-h-[70vh] w-full border border-line object-contain" />
           </a>
         ) : expense.receipt_path ? (
           <p className="text-sm text-slate-500">Loading receipt…</p>
@@ -632,18 +633,18 @@ function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { e
       </div>
 
       {voided ? (
-        <p className="mt-5 border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <p className="mt-5 border border-accent bg-soft px-3 py-2 text-sm text-accent">
           Voided on {formatDate(expense.voided_at!)}{expense.voided_by && names[expense.voided_by] ? ` by ${names[expense.voided_by]}` : ''}. Reason: {expense.void_reason}
         </p>
       ) : canEdit && (
-        <form onSubmit={voidExpense} className="mt-5 border-t border-hairline pt-4">
+        <form onSubmit={voidExpense} className="mt-5 border-t border-line pt-4">
           <label htmlFor="void-reason" className="text-sm font-medium">Void this expense</label>
           <p className="text-xs text-slate-500">It stays in the records, marked as voided, and no longer counts toward the total.</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="min-h-11 min-w-0 flex-1 border border-slate-300 px-3 py-2.5 text-base sm:text-sm" />
+            <input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="min-h-11 min-w-0 flex-1 border border-line px-3 py-2.5 text-base sm:text-sm" />
             <button type="submit" disabled={busy} className={subtleButtonClass + ' min-h-11'}>{busy ? 'Voiding…' : 'Void expense'}</button>
           </div>
-          {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+          {error && <p role="alert" className="mt-2 text-sm text-accent">{error}</p>}
         </form>
       )}
     </div>
@@ -684,16 +685,16 @@ function ActivityLog({ budgetId, names }: { budgetId: string; names: Record<stri
 
   return (
     <section className="mt-10 mb-10" aria-label="Activity log">
-      <button type="button" onClick={() => void toggle()} aria-expanded={open} className="min-h-11 py-2 font-display text-xl font-semibold">Activity log {open ? '(hide)' : '(show)'}</button>
+      <button type="button" onClick={() => void toggle()} aria-expanded={open} className="min-h-11 py-2 text-xl font-medium">Activity log {open ? '(hide)' : '(show)'}</button>
       {open && (
         <div className="mt-3">
-          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+          {error && <p role="alert" className="text-sm text-accent">{error}</p>}
           {!rows && !error && <p className="text-sm text-slate-500">Loading…</p>}
           {rows && rows.length === 0 && <p className="text-sm text-slate-500">Nothing recorded yet.</p>}
           {rows && rows.length > 0 && (
-            <ul className="divide-y divide-hairline border-y border-hairline">
+            <ul className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
               {rows.map((r) => (
-                <li key={r.id} className="py-3 text-sm">
+                <li key={r.id} className="px-4 py-3 text-sm">
                   <p className="break-words">{describe(r)}</p>
                   <p className="text-xs text-slate-500">{r.actor ? names[r.actor] ?? 'Unknown' : 'System'}, {new Date(r.at).toLocaleString('en-PH')}</p>
                 </li>

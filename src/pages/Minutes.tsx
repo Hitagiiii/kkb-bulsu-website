@@ -7,7 +7,7 @@ import { formatDateTime } from '../lib/announcements'
 import { STATUS_LABEL, type MinutesRow, type Officer, type Task } from '../lib/work'
 import Chip from '../components/Chip'
 import Linkify from '../components/Linkify'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
 
 export default function Minutes() {
   const { profile } = useAuth()
@@ -59,20 +59,19 @@ export default function Minutes() {
   const shown = rows.filter((r) => !q || r.title.toLowerCase().includes(q) || r.body.toLowerCase().includes(q))
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
+    <div className="w-full">
+      <div className="flex flex-wrap items-end justify-between gap-3 pb-2">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Meeting minutes</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Decisions on record, with the action items that came out of them.
-          </p>
+          <p className={eyebrowClass}>Decisions, documented</p>
+          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">On the same page.</h1>
+          <p className="mt-2 text-sm text-muted">Meeting notes, decisions and the people moving them forward.</p>
         </div>
         {canWrite && !creating && (
           <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>Write minutes</button>
         )}
       </div>
 
-      {error && <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
 
       {canWrite && creating && (
         <MinutesForm
@@ -86,29 +85,29 @@ export default function Minutes() {
       )}
 
       <div className="mt-4">
-        <input aria-label="Search meeting minutes" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search minutes" className="min-h-11 w-full rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+        <input aria-label="Search meeting minutes" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search minutes" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
       </div>
       {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
       {!loading && rows.length === 0 && (
-        <p className="mt-8 rounded-md border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">
+        <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-slate-500">
           {canWrite ? 'No minutes yet. Write the first one above.' : 'No minutes have been shared with members yet.'}
         </p>
       )}
 
-      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">No minutes match.</p>}
-      <ul className="mt-5 divide-y divide-slate-200 border-y border-slate-200">
+      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">No minutes match.</p>}
+      <ul className="mt-5 grid items-start gap-4 xl:grid-cols-2">
         {shown.map((r) => {
           const open = openId === r.id
           const related = tasks.filter((t) => t.minutes_id === r.id)
           return (
-            <li key={r.id} className="py-3">
+            <li key={r.id} className="rounded-md border border-line bg-white p-4">
               <button
                 type="button"
                 onClick={() => setOpenId(open ? null : r.id)}
                 aria-expanded={open}
                 className="block w-full text-left"
               >
-                <span className="font-display block text-base font-semibold break-words">{r.title}</span>
+                <span className="block text-base font-semibold break-words">{r.title}</span>
                 <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
                   {formatDateTime(r.held_at)}
                   {canWrite && <Chip tone={r.visible_to_members ? 'green' : 'slate'}>{r.visible_to_members ? 'Shared with members' : 'Officers only'}</Chip>}
@@ -130,7 +129,7 @@ export default function Minutes() {
                   {related.length > 0 && (
                     <div className="mt-4">
                       <h3 className="text-sm font-semibold">Action items</h3>
-                      <ul className="mt-1 divide-y divide-slate-200 border-y border-slate-200 text-sm">
+                      <ul className="mt-1 divide-y divide-line border-y border-line text-sm">
                         {related.map((t) => (
                           <li key={t.id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 py-2">
                             <span className="min-w-0 break-words">
@@ -153,11 +152,11 @@ export default function Minutes() {
                       {deleting === r.id ? (
                         <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                           <span className="text-slate-700">Delete these minutes for good?</span>
-                          <button onClick={() => void remove(r)} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">Yes, delete</button>
+                          <button onClick={() => void remove(r)} className="min-h-11 py-2 font-semibold text-accent hover:underline">Yes, delete</button>
                           <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-slate-600 hover:underline">Cancel</button>
                         </span>
                       ) : (
-                        <button onClick={() => setDeleting(r.id)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
+                        <button onClick={() => setDeleting(r.id)} className="min-h-11 py-2 text-slate-600 hover:text-accent hover:underline">Delete</button>
                       )}
                     </div>
                   )}
@@ -239,8 +238,8 @@ function MinutesForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-5 border-y border-slate-200 bg-transparent py-4">
-      <h2 className="font-display text-xl font-semibold">New minutes</h2>
+    <form onSubmit={submit} className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
+      <h2 className="text-xl font-medium">New minutes</h2>
       <div className="mt-4 space-y-4">
         <div>
           <label htmlFor="m-title" className="text-sm font-medium">Title</label>
@@ -269,13 +268,13 @@ function MinutesForm({
                   value={i.title}
                   onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, title: e.target.value } : x)))}
                   placeholder="What needs to be done"
-                  className="min-w-0 rounded-md border border-slate-300 px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+                  className="min-w-0 rounded-md border border-line px-3 py-2.5 text-base sm:py-2 sm:text-sm"
                 />
                 <select
                   aria-label="Assigned to"
                   value={i.who}
                   onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, who: e.target.value } : x)))}
-                  className="rounded-md border border-slate-300 bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                  className="rounded-md border border-line bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
                 >
                   <option value="">Unassigned</option>
                   {officers.map((o) => (
@@ -287,14 +286,14 @@ function MinutesForm({
                   type="date"
                   value={i.due}
                   onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, due: e.target.value } : x)))}
-                  className="rounded-md border border-slate-300 px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                  className="rounded-md border border-line px-2 py-2.5 text-base sm:py-2 sm:text-sm"
                 />
                 {items.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setItems((prev) => prev.filter((x) => x.id !== i.id))}
                     aria-label={`Remove action item ${n + 1}`}
-                    className="rounded-md px-2 py-2 text-left text-sm text-slate-600 hover:bg-slate-100 hover:text-red-700"
+                    className="rounded-md px-2 py-2 text-left text-sm text-slate-600 hover:bg-bg hover:text-accent"
                   >
                     Remove
                   </button>
@@ -317,7 +316,7 @@ function MinutesForm({
         </label>
       </div>
 
-      {error && <p role="alert" className="mt-4 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-44">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save minutes'}</button>

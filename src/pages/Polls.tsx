@@ -5,7 +5,7 @@ import { hasRole } from '../lib/types'
 import { errorMessage } from '../lib/finance'
 import { formatDateTime, timeUntil } from '../lib/announcements'
 import { isClosed, MAX_OPTIONS, MIN_OPTIONS, type Poll, type PollOption } from '../lib/polls'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
 
 function friendly(err: unknown, fallback: string): string {
   const message = errorMessage(err, fallback)
@@ -143,9 +143,9 @@ export default function Polls() {
 
   function renderList(list: Poll[]) {
     return (
-      <ul className="mt-4 divide-y divide-slate-200 border-y border-slate-200">
+      <ul className="mt-4 grid items-start gap-4 xl:grid-cols-2">
         {list.map((p) => (
-          <li key={p.id} className="py-4">
+          <li key={p.id} className="rounded-md border border-line bg-white p-4 sm:p-5">
             <PollCard
               poll={p}
               options={options[p.id] ?? []}
@@ -164,11 +164,12 @@ export default function Polls() {
   }
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
+    <div className="w-full">
+      <div className="flex flex-wrap items-end justify-between gap-3 pb-2">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Polls</h1>
-          <p className="mt-1 text-sm text-slate-600">Vote on organization decisions. Votes are anonymous.</p>
+          <p className={eyebrowClass}>Your voice matters</p>
+          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Let’s decide together.</h1>
+          <p className="mt-2 text-sm text-muted">Small votes help shape our community. Votes are anonymous.</p>
         </div>
         {canManage && !creating && (
           <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>
@@ -178,41 +179,41 @@ export default function Polls() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="mt-6 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">
           {error}
         </p>
       )}
 
       {canManage && creating && (
-        <div className="mt-5 border-y border-slate-200 bg-transparent py-4">
-          <h2 className="font-display text-xl font-semibold">New poll</h2>
+        <div className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
+          <h2 className="text-xl font-medium">New poll</h2>
           <PollForm onSubmit={createPoll} onCancel={() => setCreating(false)} />
         </div>
       )}
 
       <div className="mt-4">
-        <input aria-label="Search polls" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search polls" className="min-h-11 w-full rounded-none border border-slate-300 bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+        <input aria-label="Search polls" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search polls" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
       </div>
       {loading && <p className="mt-6 text-sm text-slate-500">Loading polls…</p>}
 
       {!loading && polls.length === 0 && (
-        <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">
+        <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">
           {canManage ? 'No polls yet. Create the first one above.' : 'No polls yet.'}
         </p>
       )}
 
-      {!loading && matching.length === 0 && polls.length > 0 && <p className="mt-5 border-y border-slate-200 py-4 text-sm text-slate-500">No polls match.</p>}
+      {!loading && matching.length === 0 && polls.length > 0 && <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">No polls match.</p>}
 
       {open.length > 0 && (
         <section className="mt-6" aria-label="Open polls">
-          <h2 className="font-display text-base font-semibold">Open polls <span className="font-normal text-slate-500">({open.length})</span></h2>
+          <h2 className="text-xl font-medium">Open polls <span className="font-normal text-slate-500">({open.length})</span></h2>
           {renderList(open)}
         </section>
       )}
 
       {closed.length > 0 && (
         <section className="mt-7" aria-label="Closed polls">
-          <h2 className="font-display text-base font-semibold">Closed polls <span className="font-normal text-slate-500">({closed.length})</span></h2>
+          <h2 className="text-xl font-medium">Closed polls <span className="font-normal text-slate-500">({closed.length})</span></h2>
           {renderList(closed)}
         </section>
       )}
@@ -267,7 +268,7 @@ function PollCard({
 
   return (
     <article>
-      <h3 className="font-display text-base font-semibold break-words">{poll.question}</h3>
+      <h3 className="text-xl font-medium break-words">{poll.question}</h3>
       <p className="mt-1 text-sm text-slate-500">
         Posted {formatDateTime(poll.created_at)}.{' '}
         {closed
@@ -330,7 +331,7 @@ function PollCard({
                 <label
                   key={o.id}
                   className={
-                    'flex min-h-11 cursor-pointer items-center gap-3 border-b border-slate-200 py-2 text-sm ' +
+                    'flex min-h-11 cursor-pointer items-center gap-3 border-b border-line py-2 text-sm ' +
                     (choice === o.id ? 'font-medium text-brand-800' : 'text-slate-700')
                   }
                 >
@@ -347,7 +348,7 @@ function PollCard({
             </div>
           </fieldset>
           {error && (
-            <p role="alert" className="mt-3 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p role="alert" className="mt-3 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">
               {error}
             </p>
           )}
@@ -372,7 +373,7 @@ function PollCard({
           {confirmingDelete ? (
             <>
               <span className="text-slate-700">Delete this poll and all its votes?</span>
-              <button onClick={onDelete} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">
+              <button onClick={onDelete} className="min-h-11 py-2 font-semibold text-accent hover:underline">
                 Yes, delete
               </button>
               <button onClick={() => setConfirmingDelete(false)} className="min-h-11 py-2 text-slate-600 hover:underline">
@@ -402,7 +403,7 @@ function PollCard({
                   Close poll now
                 </button>
               )}
-              <button onClick={() => setConfirmingDelete(true)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">
+              <button onClick={() => setConfirmingDelete(true)} className="min-h-11 py-2 text-slate-600 hover:text-accent hover:underline">
                 Delete
               </button>
             </>
@@ -485,14 +486,14 @@ function PollForm({
                   setChoices((prev) => prev.map((x) => (x.id === c.id ? { ...x, text: e.target.value } : x)))
                 }
                 placeholder={`Option ${i + 1}`}
-                className="min-h-11 min-w-0 flex-1 rounded-none border border-slate-300 px-3 py-2 text-base sm:text-sm"
+                className="min-h-11 min-w-0 flex-1 rounded-md border border-line px-3 py-2 text-base sm:text-sm"
               />
               {choices.length > MIN_OPTIONS && (
                 <button
                   type="button"
                   onClick={() => setChoices((prev) => prev.filter((x) => x.id !== c.id))}
                   aria-label={`Remove option ${i + 1}`}
-                  className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:text-red-700"
+                  className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:text-accent"
                 >
                   Remove
                 </button>
@@ -531,7 +532,7 @@ function PollForm({
       </div>
 
       {error && (
-        <p role="alert" className="border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">
           {error}
         </p>
       )}

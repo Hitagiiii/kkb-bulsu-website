@@ -3,7 +3,7 @@ type Tone = 'default' | 'good' | 'warn' | 'bad'
 const TONES: Record<Tone, string> = {
   default: 'text-ink',
   good: 'text-success-deep',
-  warn: 'text-brand-700',
+  warn: 'text-accent',
   bad: 'text-error',
 }
 
@@ -21,10 +21,10 @@ export default function StatCard({
   className?: string
 }) {
   return (
-    <div className={'rounded-md border border-hairline bg-white p-3 ' + className}>
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className={'font-display mt-0.5 text-2xl font-bold tabular-nums break-words ' + TONES[tone]}>{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-slate-500">{hint}</p>}
+    <div className={'rounded-md border border-line bg-white p-4 ' + className}>
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{label}</p>
+      <p className={'mt-1 text-2xl font-semibold tabular-nums break-words ' + TONES[tone]}>{value}</p>
+      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   )
 }

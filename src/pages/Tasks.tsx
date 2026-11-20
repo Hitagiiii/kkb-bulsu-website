@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { errorMessage, formatDate, todayISO } from '../lib/finance'
 import { STATUS_LABEL, type Officer, type Task, type TaskStatus, type MinutesRow } from '../lib/work'
 import Chip from '../components/Chip'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
 
 export default function Tasks() {
   const { profile } = useAuth()
@@ -63,7 +63,7 @@ export default function Tasks() {
   function renderTask(t: Task) {
     const overdue = t.status !== 'done' && !!t.due_on && t.due_on < today
     return (
-      <li key={t.id} className="py-2.5">
+      <li key={t.id} className="px-4 py-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <p className={'font-medium break-words ' + (t.status === 'done' ? 'text-slate-500 line-through' : '')}>{t.title}</p>
           <Chip tone={t.status === 'done' ? 'green' : t.status === 'doing' ? 'brand' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>
@@ -72,7 +72,7 @@ export default function Tasks() {
         <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
           <span>{t.assigned_to ? names[t.assigned_to] ?? 'Unknown' : 'Unassigned'}</span>
           {t.due_on && (
-            <span className={overdue ? 'font-semibold text-red-700' : ''}>
+            <span className={overdue ? 'font-semibold text-accent' : ''}>
               {overdue ? 'Overdue: ' : 'Due '}
               {formatDate(t.due_on)}
             </span>
@@ -95,11 +95,11 @@ export default function Tasks() {
           {deleting === t.id ? (
             <>
               <span className="text-slate-700">Delete this task?</span>
-              <button onClick={() => void remove(t)} className="min-h-11 py-2 font-semibold text-red-700 hover:underline">Yes, delete</button>
+              <button onClick={() => void remove(t)} className="min-h-11 py-2 font-semibold text-accent hover:underline">Yes, delete</button>
               <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-slate-600 hover:underline">Cancel</button>
             </>
           ) : (
-            <button onClick={() => setDeleting(t.id)} className="min-h-11 py-2 text-slate-600 hover:text-red-700 hover:underline">Delete</button>
+            <button onClick={() => setDeleting(t.id)} className="min-h-11 py-2 text-slate-600 hover:text-accent hover:underline">Delete</button>
           )}
         </div>
       </li>
@@ -107,18 +107,19 @@ export default function Tasks() {
   }
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-4">
+    <div className="w-full">
+      <div className="flex flex-wrap items-end justify-between gap-3 pb-2">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Tasks</h1>
-          <p className="mt-1 text-sm text-slate-600">Who is doing what, and by when.</p>
+          <p className={eyebrowClass}>Officer workspace</p>
+          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Make things happen.</h1>
+          <p className="mt-2 text-sm text-muted">Responsibilities, owners and what’s next.</p>
         </div>
         {!creating && (
           <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>Add a task</button>
         )}
       </div>
 
-      {error && <p role="alert" className="mt-6 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
 
       {creating && (
         <TaskForm
@@ -133,7 +134,7 @@ export default function Tasks() {
         />
       )}
 
-      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
       <label className="flex items-center gap-2 py-1 text-sm text-slate-700">
         <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
         Show only my tasks
@@ -144,25 +145,25 @@ export default function Tasks() {
       {loading && <p className="mt-6 text-sm text-slate-500">Loading tasks…</p>}
 
       {!loading && (
-        <>
+        <div className="grid items-start gap-x-8 gap-y-8 xl:grid-cols-2">
           <section className="mt-6" aria-label="Open tasks">
-            <h2 className="font-display text-base font-semibold">Open <span className="font-normal text-slate-500">({open.length})</span></h2>
+            <h2 className="text-xl font-medium">Open <span className="font-normal text-slate-500">({open.length})</span></h2>
             {open.length === 0 ? (
-              <p className="mt-2 border-y border-slate-200 py-4 text-sm text-slate-500">Nothing open. Nice.</p>
+              <p className="mt-2 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">Nothing open. Nice.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200">{open.map(renderTask)}</ul>
+              <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">{open.map(renderTask)}</ul>
             )}
           </section>
 
           {done.length > 0 && (
-            <section className="mt-8" aria-label="Finished tasks">
-              <button onClick={() => setShowDone((s) => !s)} aria-expanded={showDone} className="min-h-11 font-display py-1 text-base font-semibold">
+            <section className="xl:mt-6" aria-label="Finished tasks">
+              <button onClick={() => setShowDone((s) => !s)} aria-expanded={showDone} className="min-h-11 py-1 text-xl font-medium">
                 Done ({done.length}) {showDone ? '(hide)' : '(show)'}
               </button>
-              {showDone && <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200">{done.map(renderTask)}</ul>}
+              {showDone && <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">{done.map(renderTask)}</ul>}
             </section>
           )}
-        </>
+        </div>
       )}
     </div>
   )
@@ -207,8 +208,8 @@ function TaskForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-5 border-y border-slate-200 bg-transparent py-4">
-      <h2 className="font-display text-xl font-semibold">New task</h2>
+    <form onSubmit={submit} className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
+      <h2 className="text-xl font-medium">New task</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="t-title" className="text-sm font-medium">Task</label>
@@ -243,7 +244,7 @@ function TaskForm({
           <textarea id="t-desc" rows={3} value={description} maxLength={2000} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
         </div>
       </div>
-      {error && <p role="alert" className="mt-4 border-l-2 border-red-700 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Add task'}</button>

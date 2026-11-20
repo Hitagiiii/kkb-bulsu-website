@@ -106,17 +106,19 @@ function artKey(category: string): string {
   return 'bag'
 }
 
-/** A flat tile with a large icon, used where a product photo would go. */
+/** A flat tile with a large icon, shown when an item has no photo yet. */
 export function ProductArt({
   category,
   className = 'aspect-[4/3] w-full',
 }: {
   category: string
+  /** kept so callers can pass the item name */
+  name?: string
   className?: string
 }) {
   const key = artKey(category)
   return (
-    <div className={`flex items-center justify-center bg-secondary text-brand-700 ${className}`}>
+    <div className={`flex items-center justify-center bg-secondary text-accent ${className}`}>
       <svg
         viewBox="0 0 24 24"
         fill="none"

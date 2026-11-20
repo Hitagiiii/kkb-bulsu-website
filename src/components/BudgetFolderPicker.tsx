@@ -28,14 +28,14 @@ export default function BudgetFolderPicker({ budgetId }: { budgetId: string }) {
   }
 
   return (
-    <section aria-label="Budget folder" className="mt-5 border-y border-hairline py-3">
+    <section aria-label="Budget folder" className="mt-5 border-y border-line py-3">
       <div className="flex flex-wrap items-center gap-3">
         <label htmlFor="budget-folder" className="text-sm font-semibold">Folder</label>
-        <select id="budget-folder" value={current} onChange={(e) => void move(e.target.value)} className="min-h-11 min-w-44 border border-slate-300 bg-white px-3 py-2.5 text-base sm:text-sm">
+        <select id="budget-folder" value={current} onChange={(e) => void move(e.target.value)} className="min-h-11 min-w-44 border border-line bg-white px-3 py-2.5 text-base sm:text-sm">
           <option value="">No folder</option>
           {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
         </select>
-        {error && <span role="alert" className="text-sm text-red-700">{error}</span>}
+        {error && <span role="alert" className="text-sm text-accent">{error}</span>}
       </div>
     </section>
   )

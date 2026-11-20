@@ -44,20 +44,20 @@ export default function BudgetEventLink({ budget, spent, canEdit, onChanged }: {
   if (!canEdit && !linked) return null
 
   return (
-    <section aria-label="Linked event" className="mt-8 border-y border-hairline py-4">
+    <section aria-label="Linked event" className="mt-8 border-y border-line py-4">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="font-display text-lg font-semibold">Linked event</h2>
+        <h2 className="text-lg font-medium">Linked event</h2>
         {linked && <Link to="/events" className="min-h-11 py-2 text-sm font-semibold text-brand-700 hover:underline">Open event</Link>}
       </div>
 
       {linked ? (
         <div className="mt-2 text-sm">
           <p><Link to="/events" className="font-medium text-brand-700 hover:underline">{linked.title}</Link> <span className="text-slate-500">({formatEventTime(linked.starts_at)})</span></p>
-          <dl className="mt-3 grid grid-cols-2 border-y border-hairline sm:grid-cols-4">
-            <div className="py-3 pr-4"><dt className="text-xs text-slate-500">Going</dt><dd className="font-display text-xl font-semibold tabular-nums">{going ?? '…'}</dd></div>
-            <div className="py-3 pr-4"><dt className="text-xs text-slate-500">Checked in</dt><dd className="font-display text-xl font-semibold tabular-nums">{attended ?? '…'}</dd></div>
-            <div className="py-3 pr-4"><dt className="text-xs text-slate-500">Budget per going</dt><dd className="font-display text-xl font-semibold tabular-nums">{going ? peso(budget.total_budget / going) : '-'}</dd></div>
-            <div className="py-3"><dt className="text-xs text-slate-500">Spent per attendee</dt><dd className="font-display text-xl font-semibold tabular-nums">{attended ? peso(spent / attended) : '-'}</dd></div>
+          <dl className="mt-3 grid grid-cols-2 border-y border-line sm:grid-cols-4">
+            <div className="py-3 pr-4"><dt className="text-xs text-slate-500">Going</dt><dd className="text-xl font-medium tabular-nums">{going ?? '…'}</dd></div>
+            <div className="py-3 pr-4"><dt className="text-xs text-slate-500">Checked in</dt><dd className="text-xl font-medium tabular-nums">{attended ?? '…'}</dd></div>
+            <div className="py-3 pr-4"><dt className="text-xs text-slate-500">Budget per going</dt><dd className="text-xl font-medium tabular-nums">{going ? peso(budget.total_budget / going) : '-'}</dd></div>
+            <div className="py-3"><dt className="text-xs text-slate-500">Spent per attendee</dt><dd className="text-xl font-medium tabular-nums">{attended ? peso(spent / attended) : '-'}</dd></div>
           </dl>
         </div>
       ) : <p className="mt-2 text-sm text-slate-500">This budget is not tied to an event yet.</p>}
@@ -65,13 +65,13 @@ export default function BudgetEventLink({ budget, spent, canEdit, onChanged }: {
       {canEdit && (
         <div className="mt-4">
           <label htmlFor="link-event" className="text-sm font-medium">Event</label>
-          <select id="link-event" value={eventId ?? ''} onChange={(e) => void link(e.target.value)} className="mt-1 block min-h-11 w-full max-w-sm border border-slate-300 bg-white px-2 py-2.5 text-base sm:text-sm">
+          <select id="link-event" value={eventId ?? ''} onChange={(e) => void link(e.target.value)} className="mt-1 block min-h-11 w-full max-w-sm border border-line bg-white px-2 py-2.5 text-base sm:text-sm">
             <option value="">No linked event</option>
             {events.map((e) => <option key={e.id} value={e.id}>{e.title} ({new Date(e.starts_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })})</option>)}
           </select>
         </div>
       )}
-      {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-accent">{error}</p>}
     </section>
   )
 }

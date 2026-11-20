@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { hasRole } from '../lib/types'
 import { formatDate, peso, todayISO } from '../lib/finance'
 import { ChevronRightIcon } from './Icons'
+import { eyebrowClass } from './ui'
 
 interface OrderBit {
   quantity: number
@@ -20,8 +21,9 @@ interface TaskBit {
 interface AlertRow {
   key: string
   to: string
+  eyebrow: string
   text: string
-  action: string
+  detail: string
 }
 
 /**
@@ -80,32 +82,41 @@ export default function DashboardExtras({
   const today = todayISO()
 
   const alerts: AlertRow[] = []
-  if (pollsWaiting && pollsWaiting > 0) {
+  if (owing > 0) {
     alerts.push({
-      key: 'polls',
-      to: '/polls',
-      text: pollsWaiting === 1 ? '1 poll is waiting for your vote' : `${pollsWaiting} polls are waiting for your vote`,
-      action: 'Vote',
+      key: 'owing',
+      to: '/merch',
+      eyebrow: 'Action needed',
+      text: 'Your merch order is waiting for payment',
+      detail: `You still owe ${peso(owing)}. Pay by GCash, then send your proof`,
     })
   }
   if (isFinance && proofsWaiting > 0) {
     alerts.push({
       key: 'proofs',
       to: '/merch/manage',
+      eyebrow: 'Action needed',
       text: `${proofsWaiting} payment ${proofsWaiting === 1 ? 'proof is' : 'proofs are'} waiting for you to verify`,
-      action: 'Verify',
+      detail: 'Review the screenshots and verify the payments',
     })
   }
   if (ready > 0) {
     alerts.push({
       key: 'ready',
       to: '/merch',
+      eyebrow: 'Ready to claim',
       text: `${ready} merch ${ready === 1 ? 'order is' : 'orders are'} ready to claim`,
-      action: 'View',
+      detail: 'Bring your student ID when claiming',
     })
   }
-  if (owing > 0) {
-    alerts.push({ key: 'owing', to: '/merch', text: `You still owe ${peso(owing)} for merch`, action: 'Pay' })
+  if (pollsWaiting && pollsWaiting > 0) {
+    alerts.push({
+      key: 'polls',
+      to: '/polls',
+      eyebrow: 'Member poll',
+      text: pollsWaiting === 1 ? '1 poll is waiting for your vote' : `${pollsWaiting} polls are waiting for your vote`,
+      detail: 'One vote per member. It takes a few seconds',
+    })
   }
 
   const showTasks = isOfficer && tasks.length > 0
@@ -115,19 +126,17 @@ export default function DashboardExtras({
     <section aria-label="Needs your attention" className={className}>
       {alerts.length > 0 && (
         <>
-          <h2 className="font-display text-lg font-bold">Needs your attention</h2>
-          <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+          <h2 className="text-xl font-medium text-ink">Needs your attention</h2>
+          <ul className="mt-3 space-y-3">
             {alerts.map((a) => (
               <li key={a.key}>
-                <Link to={a.to} className="flex items-center justify-between gap-3 px-1 py-3 transition-colors hover:bg-card">
-                  <span className="flex min-w-0 items-center gap-2.5">
-                    <span aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full bg-brand-700" />
-                    <span className="min-w-0 text-sm font-medium break-words text-ink">{a.text}</span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-0.5 text-sm font-bold text-brand-700">
-                    {a.action}
-                    <ChevronRightIcon size={16} />
-                  </span>
+                <Link to={a.to} className="block rounded-md border border-line bg-white p-4 transition-colors hover:bg-bg">
+                  <p className={eyebrowClass}>{a.eyebrow}</p>
+                  <p className="mt-1 text-base font-semibold break-words text-ink">{a.text}</p>
+                  <p className="mt-1 flex items-center gap-1 text-xs text-muted">
+                    {a.detail}
+                    <ChevronRightIcon size={12} />
+                  </p>
                 </Link>
               </li>
             ))}
@@ -136,20 +145,20 @@ export default function DashboardExtras({
       )}
 
       {showTasks && (
-        <div className={alerts.length > 0 ? 'mt-6' : ''}>
+        <div className={alerts.length > 0 ? 'mt-8' : ''}>
           <div className="flex items-baseline justify-between gap-4">
-            <h2 className="font-display text-lg font-bold">My tasks</h2>
-            <Link to="/tasks" className="py-1 text-sm font-medium text-brand-700 hover:underline">
+            <h2 className="text-xl font-medium text-ink">My tasks</h2>
+            <Link to="/tasks" className="py-1 text-sm font-semibold text-accent hover:underline">
               See all
             </Link>
           </div>
-          <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+          <ul className="mt-3 divide-y divide-line rounded-md border border-line bg-white">
             {tasks.map((t) => (
               <li key={t.id}>
-                <Link to="/tasks" className="block px-1 py-2.5 transition-colors hover:bg-card">
-                  <p className="text-sm font-medium break-words text-ink">{t.title}</p>
+                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-bg">
+                  <p className="text-sm font-semibold break-words text-ink">{t.title}</p>
                   {t.due_on && (
-                    <p className={'text-xs ' + (t.due_on < today ? 'font-semibold text-error' : 'text-slate-500')}>
+                    <p className={'text-xs ' + (t.due_on < today ? 'font-semibold text-error' : 'text-muted')}>
                       {t.due_on < today ? 'Overdue: ' : 'Due '}
                       {formatDate(t.due_on)}
                     </p>

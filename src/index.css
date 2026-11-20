@@ -1,61 +1,76 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/*
+ * KKB BULSU members portal: UI foundations.
+ * Inter only. 40 / 28 / 20 / 16 / 14 / 12 px. 8 px spacing rhythm. 6 px corners.
+ * Maroon for action and selection. Gold for one tiny signal. No gradients, no heavy shadows.
+ */
 @theme {
-  /* Inter is the open substitute for Pin Sans (see DESIGN.md, "Note on Font Substitutes") */
   --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* Brand: maroon replaces Pinterest red. Gold is a tiny highlight only. */
-  --color-brand-50: #fbf2f3;
-  --color-brand-100: #f5dfe2;
+  /* Design tokens: bg, white, ink, muted, line, accent, soft, gold */
+  --color-bg: #f7f5f1;
+  --color-ink: #242220;
+  --color-muted: #746f69;
+  --color-line: #e5e0d9;
+  --color-accent: #8a1c2e;
+  --color-soft: #f7eaed;
+  --color-gold: #b79349;
+
+  /* Brand scale built around accent #8A1C2E */
+  --color-brand-50: #f7eaed;
+  --color-brand-100: #f1d9de;
   --color-brand-600: #a3263a;
   --color-brand-700: #8a1c2e;
   --color-brand-800: #6f1625;
   --color-brand-900: #4e0f1b;
-  --color-gold-100: #fbf1d6;
-  --color-gold-400: #d9ac45;
+  --color-gold-100: #f4ecda;
+  --color-gold-400: #b79349;
 
-  /* Surfaces and text (DESIGN.md colors) */
-  --color-canvas: #ffffff;
+  /* Names the existing pages already use, pointed at the new palette */
+  --color-canvas: #f7f5f1;
   --color-paper: #ffffff;
-  --color-soft: #fbfbf9;
-  --color-card: #f6f6f3;
-  --color-secondary: #e5e5e0;
-  --color-secondary-pressed: #c8c8c1;
-  --color-hairline: #dadad3;
-  --color-ink: #000000;
-  --color-body: #33332e;
-  --color-mute: #62625b;
-  --color-ash: #91918c;
+  --color-card: #f7f5f1;
+  --color-secondary: #efebe5;
+  --color-secondary-pressed: #e5e0d9;
+  --color-hairline: #e5e0d9;
+  --color-body: #242220;
+  --color-mute: #746f69;
+  --color-ash: #9a948c;
 
-  /* Semantic */
   --color-error: #9e0a0a;
-  --color-success-deep: #103c25;
-  --color-success-pale: #c7f0da;
+  --color-success-deep: #1d4d33;
+  --color-success-pale: #e3f1e8;
 
-  /* The app uses slate-* everywhere. Point it at the warm cream neutrals. */
-  --color-slate-50: #fbfbf9;
-  --color-slate-100: #f6f6f3;
-  --color-slate-200: #e5e5e0;
-  --color-slate-300: #c8c8c1;
-  --color-slate-400: #91918c;
-  --color-slate-500: #62625b;
-  --color-slate-600: #4d4d47;
-  --color-slate-700: #33332e;
-  --color-slate-800: #262622;
-  --color-slate-900: #211922;
+  /* The app uses slate-* everywhere. Point it at the warm neutrals. */
+  --color-slate-50: #fbfaf7;
+  --color-slate-100: #f7f5f1;
+  --color-slate-200: #e5e0d9;
+  --color-slate-300: #d3ccc3;
+  --color-slate-400: #9a948c;
+  --color-slate-500: #746f69;
+  --color-slate-600: #5f5a54;
+  --color-slate-700: #3f3b37;
+  --color-slate-800: #2e2b28;
+  --color-slate-900: #242220;
 
-  /* Shape: 8px (rare), 16px (default), 32px (modals, large cards), pill */
-  --radius-xs: 8px;
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 16px;
-  --radius-xl: 16px;
-  --radius-2xl: 16px;
-  --radius-3xl: 32px;
+  /* 6 px corners everywhere; pills stay pills */
+  --radius-xs: 4px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+  --radius-2xl: 6px;
+  --radius-3xl: 6px;
 
-  /* Flat surfaces throughout the app */
+  /* Type scale */
+  --text-display: 40px;
+  --text-title: 28px;
+  --text-heading: 20px;
+
+  /* Flat surfaces throughout */
   --shadow-*: initial;
 }
 
@@ -68,10 +83,12 @@
 
   body {
     margin: 0;
-    background: var(--color-canvas);
-    color: var(--color-body);
+    background: var(--color-bg);
+    color: var(--color-ink);
     font-family: var(--font-sans);
+    font-size: 14px;
     -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
   }
 
   h1,
@@ -82,12 +99,17 @@
   }
 
   .font-display {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-ink);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
-}
 
+  @media print {
+    body {
+      background: #fff;
+    }
+  }
+}

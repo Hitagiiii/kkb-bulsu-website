@@ -80,3 +80,6 @@ export function linkHost(url: string): string {
     return url
   }
 }
+
+/** Share of past events a member should attend to count as active (per the membership guidelines) */
+export const PARTICIPATION_TARGET = 0.75

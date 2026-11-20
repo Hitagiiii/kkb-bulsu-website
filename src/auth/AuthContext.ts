@@ -2,6 +2,13 @@ import { createContext, useContext } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import type { Profile } from '../lib/types'
 
+export interface SignUpDetails {
+  studentNo?: string
+  college?: string
+  program?: string
+  yearSection?: string
+}
+
 export interface AuthState {
   session: Session | null
   profile: Profile | null
@@ -11,6 +18,7 @@ export interface AuthState {
     email: string,
     password: string,
     fullName: string,
+    details?: SignUpDetails,
   ) => Promise<{ error: string | null; needsConfirm: boolean }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>

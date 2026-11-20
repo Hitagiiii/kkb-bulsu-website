@@ -17,7 +17,7 @@ export default function ProgressRing({ pct, over, size = 56 }: { pct: number; ov
         strokeDasharray={c}
         strokeDashoffset={c * (1 - shown / 100)}
         transform="rotate(-90 28 28)"
-        className={over ? 'text-red-600' : 'text-brand-700'}
+        className={over ? 'text-accent' : 'text-brand-700'}
       />
       <text x="28" y="32.5" textAnchor="middle" fontSize="12" fontWeight="600" className="fill-slate-700">
         {Math.round(shown)}%

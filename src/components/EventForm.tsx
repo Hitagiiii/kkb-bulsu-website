@@ -77,7 +77,7 @@ export default function EventForm({
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      <h2 className="font-display text-xl font-semibold">{initial ? 'Edit event' : 'New event'}</h2>
+      <h2 className="text-xl font-medium">{initial ? 'Edit event' : 'New event'}</h2>
 
       <div>
         <label htmlFor={`${uid}-title`} className="text-sm font-medium">Title</label>
@@ -149,7 +149,7 @@ export default function EventForm({
       </div>
 
       {error && (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-accent">
           {error}
         </p>
       )}

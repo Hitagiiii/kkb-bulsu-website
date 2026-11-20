@@ -4,6 +4,9 @@ export interface Profile {
   id: string
   full_name: string
   student_no: string | null
+  college: string | null
+  program: string | null
+  year_section: string | null
   role: Role
   approved: boolean
   created_at: string

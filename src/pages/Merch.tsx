@@ -23,10 +23,13 @@ import {
   type PaymentProof,
 } from '../lib/merch'
 import Chip from '../components/Chip'
-import { CheckIcon, ClockIcon, MinusIcon, PlusIcon, ProductArt } from '../components/Icons'
+import { CheckIcon, ClockIcon, MinusIcon, PlusIcon } from '../components/Icons'
+import MerchPhoto from '../components/MerchPhoto'
 import PaymentInfoCard from '../components/PaymentInfoCard'
 import StatCard from '../components/StatCard'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, cardClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
+import PageHeader from '../components/PageHeader'
+import Stepper from '../components/Stepper'
 
 type Tab = 'all' | 'pay' | 'progress' | 'ready' | 'done'
 
@@ -56,6 +59,7 @@ export default function Merch() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('all')
+  const [section, setSection] = useState<'shop' | 'orders'>('shop')
 
   const load = useCallback(async () => {
     if (!profile) return
@@ -108,26 +112,53 @@ export default function Merch() {
   }
   const shown = orders.filter((o) => tab === 'all' || classify(o, byId[o.item_id]) === tab)
 
+  const activeCount = orders.filter((o) => classify(o, byId[o.item_id]) !== 'done').length
+
   return (
-    <div className="max-w-3xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Merch</h1>
-          <p className="mt-2 text-slate-600">Order, pay by GCash, send your screenshot, then claim it when it arrives.</p>
-        </div>
-        {isFinance && (
-          <Link to="/merch/manage" className={subtleButtonClass}>
-            Manage sales
-          </Link>
-        )}
+    <div className="w-full">
+      <PageHeader
+        eyebrow={section === 'shop' ? 'The KKB collection' : 'Your orders'}
+        title={section === 'shop' ? 'Wear your community.' : 'From us, to you.'}
+        subtitle={
+          section === 'shop'
+            ? 'Grace upon grace in every season. Designed to carry peace into your daily routine.'
+            : 'Track every order, from payment to pickup.'
+        }
+        action={
+          isFinance ? (
+            <Link to="/merch/manage" className={subtleButtonClass}>
+              Manage sales
+            </Link>
+          ) : undefined
+        }
+      />
+
+      <div role="group" aria-label="Merch sections" className="mt-6 flex gap-5 border-b border-line text-sm">
+        {([
+          ['shop', 'Shop'],
+          ['orders', `My orders (${activeCount})`],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={section === id}
+            onClick={() => setSection(id)}
+            className={
+              '-mb-px min-h-11 border-b-2 transition-colors ' +
+              (section === id ? 'border-accent font-semibold text-accent' : 'border-transparent text-muted hover:text-ink')
+            }
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      {error && <p role="alert" className="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-4 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
 
       {loading && (
         <div className="mt-8 grid gap-4 sm:grid-cols-2" aria-label="Loading">
           {[0, 1].map((n) => (
-            <div key={n} className="h-72 animate-pulse rounded-2xl bg-slate-200/70" />
+            <div key={n} className="h-72 animate-pulse rounded-md bg-secondary" />
           ))}
         </div>
       )}
@@ -135,84 +166,96 @@ export default function Merch() {
       {!loading && (
         <>
           {orders.length > 0 && (
-            <div className="mt-8 grid grid-cols-2 gap-4">
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:max-w-xl">
               <StatCard label="You owe" value={peso(owing)} tone={owing > 0 ? 'warn' : 'good'} hint={owing > 0 ? 'Pay by GCash, then send proof' : 'All paid up'} />
               <StatCard label="Ready to claim" value={readyCount} tone={readyCount > 0 ? 'good' : 'default'} hint={readyCount > 0 ? 'Show this page to the finance head' : 'Nothing waiting yet'} />
             </div>
           )}
 
-          <div className="mt-8">
-            <PaymentInfoCard />
-          </div>
+          {section === 'shop' && (
+            <>
+              <div className="mt-6">
+                <PaymentInfoCard />
+              </div>
 
-          <section className="mt-12" aria-label="Open for orders">
-            <h2 className="font-display text-xl font-semibold">Shop</h2>
-            {available.length === 0 ? (
-              <p className="mt-3 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
-                Nothing is open for orders right now.
-              </p>
-            ) : (
-              <ul className="mt-4 grid gap-5 sm:grid-cols-2">
-                {available.map((item) => (
-                  <li key={item.id}>
-                    <ProductCard item={item} folder={item.folder_id ? folderName[item.folder_id] : undefined} onOrdered={load} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="mt-12" aria-label="My orders">
-            <h2 className="font-display text-xl font-semibold">My orders</h2>
-
-            {orders.length === 0 ? (
-              <p className="mt-3 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
-                You have not ordered anything yet.
-              </p>
-            ) : (
-              <>
-                <div role="group" aria-label="Filter orders" className="mt-4 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-                  {TABS.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      aria-pressed={tab === t.id}
-                      onClick={() => setTab(t.id)}
-                      className={
-                        'shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors sm:py-1.5 ' +
-                        (tab === t.id
-                          ? 'border-ink bg-ink text-white'
-                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50')
-                      }
-                    >
-                      {t.label} <span className={tab === t.id ? 'text-white/80' : 'text-slate-500'}>({counts[t.id]})</span>
-                    </button>
-                  ))}
-                </div>
-
-                {shown.length === 0 ? (
-                  <p className="mt-4 text-sm text-slate-500">No orders in this tab.</p>
+              <section className="mt-8" aria-label="Open for orders">
+                {available.length === 0 ? (
+                  <div className={cardClass + ' px-4 py-10 text-center'}>
+                    <p className="text-base font-semibold">Nothing is open for orders right now.</p>
+                    <p className="mt-1 text-sm text-muted">New drops show up here as soon as officers open them.</p>
+                  </div>
                 ) : (
-                  <ul className="mt-4 space-y-4">
-                    {shown.map((o) => (
-                      <li key={o.id}>
-                        <OrderCard
-                          order={o}
-                          item={byId[o.item_id]}
-                          folder={byId[o.item_id]?.folder_id ? folderName[byId[o.item_id].folder_id!] : undefined}
-                          payments={payments.filter((x) => x.order_id === o.id && !x.voided_at)}
-                          proofs={proofs.filter((x) => x.order_id === o.id)}
-                          proofUrls={proofUrls}
-                          onChanged={load}
-                          onError={setError}
-                        />
+                  <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {available.map((item) => (
+                      <li key={item.id}>
+                        <ProductCard item={item} folder={item.folder_id ? folderName[item.folder_id] : undefined} onOrdered={load} />
                       </li>
                     ))}
                   </ul>
                 )}
-              </>
-            )}
-          </section>
+                <div className="mt-8 border-t border-line pt-5">
+                  <p className="text-base font-medium">Made together, not mass produced.</p>
+                  <p className="mt-1 text-sm text-muted">Payment confirms your order. Bring your student ID when claiming.</p>
+                </div>
+              </section>
+            </>
+          )}
+
+          {section === 'orders' && (
+            <section className="mt-6" aria-label="My orders">
+              {orders.length === 0 ? (
+                <div className={cardClass + ' px-4 py-12 text-center'}>
+                  <p className="text-xl font-medium">Your first KKB find is waiting.</p>
+                  <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
+                    You haven’t placed an order yet. Browse the collection and find your everyday essential.
+                  </p>
+                  <button type="button" onClick={() => setSection('shop')} className={buttonClass + ' mx-auto mt-5 !w-auto'}>
+                    Explore merch
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div role="group" aria-label="Filter orders" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                    {TABS.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        aria-pressed={tab === t.id}
+                        onClick={() => setTab(t.id)}
+                        className={
+                          'shrink-0 rounded-md border px-3 py-2 text-sm font-medium transition-colors sm:py-1.5 ' +
+                          (tab === t.id ? 'border-accent bg-soft text-accent' : 'border-line bg-white text-muted hover:bg-bg')
+                        }
+                      >
+                        {t.label} <span className="opacity-70">({counts[t.id]})</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {shown.length === 0 ? (
+                    <p className="mt-4 text-sm text-muted">No orders in this tab.</p>
+                  ) : (
+                    <ul className="mt-4 grid gap-4 lg:grid-cols-2">
+                      {shown.map((o) => (
+                        <li key={o.id}>
+                          <OrderCard
+                            order={o}
+                            item={byId[o.item_id]}
+                            folder={byId[o.item_id]?.folder_id ? folderName[byId[o.item_id].folder_id!] : undefined}
+                            payments={payments.filter((x) => x.order_id === o.id && !x.voided_at)}
+                            proofs={proofs.filter((x) => x.order_id === o.id)}
+                            proofUrls={proofUrls}
+                            onChanged={load}
+                            onError={setError}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </section>
+          )}
         </>
       )}
     </div>
@@ -249,14 +292,14 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
   }
 
   return (
-    <form onSubmit={submit} className="overflow-hidden rounded-md border border-hairline bg-white">
+    <form onSubmit={submit} className="h-full overflow-hidden rounded-md border border-line bg-white">
       <div className="relative">
-        <ProductArt category={item.category} className="aspect-[4/3] w-full" />
-        <span className="absolute bottom-3 left-3 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-ink">
+        <MerchPhoto paths={item.image_paths ?? []} category={item.category} name={item.name} className="aspect-square w-full" gallery />
+        <span className="absolute top-3 right-3 rounded-md bg-white px-2.5 py-1 text-sm font-semibold text-ink tabular-nums">
           {peso(item.price)}
         </span>
         {item.order_deadline && (
-          <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-ink">
+          <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-accent">
             <ClockIcon size={13} />
             Closes {timeUntil(item.order_deadline)}
           </span>
@@ -264,7 +307,7 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
       </div>
 
       <div className="p-4">
-        <h3 className="font-display text-lg font-semibold break-words">{item.name}</h3>
+        <h3 className="text-lg font-medium break-words">{item.name}</h3>
         <p className="text-sm text-slate-500">
           {item.category}
           {folder && ` · ${folder}`}
@@ -284,7 +327,7 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
                     onChange={() => setVariant(v)}
                     className="peer sr-only"
                   />
-                  <span className="inline-flex min-w-11 items-center justify-center rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-600 hover:bg-slate-50 peer-checked:hover:bg-ink">
+                  <span className="inline-flex min-w-11 items-center justify-center rounded-md border border-line bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors peer-checked:border-accent peer-checked:bg-accent peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent hover:bg-bg peer-checked:hover:bg-brand-800">
                     {v}
                   </span>
                 </label>
@@ -294,13 +337,13 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
         )}
 
         <div className="mt-4 flex items-center justify-between gap-3">
-          <div className="flex items-center rounded-full border border-slate-300" role="group" aria-label="Quantity">
+          <div className="flex items-center rounded-md border border-line" role="group" aria-label="Quantity">
             <button
               type="button"
               aria-label="One less"
               disabled={qty <= 1}
               onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="rounded-full p-3 text-slate-700 hover:bg-slate-100 disabled:opacity-40 sm:p-2.5"
+              className="rounded-md p-3 text-slate-700 hover:bg-bg disabled:opacity-40 sm:p-2.5"
             >
               <MinusIcon />
             </button>
@@ -310,17 +353,17 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
               aria-label="One more"
               disabled={qty >= 10}
               onClick={() => setQty((q) => Math.min(10, q + 1))}
-              className="rounded-full p-3 text-slate-700 hover:bg-slate-100 disabled:opacity-40 sm:p-2.5"
+              className="rounded-md p-3 text-slate-700 hover:bg-bg disabled:opacity-40 sm:p-2.5"
             >
               <PlusIcon />
             </button>
           </div>
-          <p className="font-display text-lg font-semibold tabular-nums">{peso(item.price * qty)}</p>
+          <p className="text-lg font-semibold tabular-nums">{peso(item.price * qty)}</p>
         </div>
 
-        {error && <p role="alert" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="mt-3 rounded-md bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
         {done && (
-          <p role="status" className="mt-3 flex items-start gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+          <p role="status" className="mt-3 flex items-start gap-2 rounded-md bg-success-pale px-3 py-2 text-sm text-success-deep">
             <CheckIcon size={16} className="mt-0.5 shrink-0" />
             Order placed. Pay with the GCash details above, then send your proof under "My orders".
           </p>
@@ -333,31 +376,6 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
         </div>
       </div>
     </form>
-  )
-}
-
-/* ---------- step tracker (ordered, paid, arrived, claimed) ---------- */
-function Steps({ steps }: { steps: { label: string; done: boolean }[] }) {
-  const current = steps.findIndex((s) => !s.done)
-  return (
-    <ol className="mt-5 flex items-start" aria-label="Order progress">
-      {steps.map((s, i) => (
-        <li key={s.label} className="relative flex flex-1 flex-col items-center text-center" aria-current={i === current ? 'step' : undefined}>
-          {i > 0 && (
-            <span aria-hidden="true" className={'absolute top-3 -left-1/2 h-0.5 w-full ' + (s.done ? 'bg-brand-700' : 'bg-slate-200')} />
-          )}
-          <span
-            className={
-              'relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-white ' +
-              (s.done ? 'bg-brand-700' : i === current ? 'border-2 border-gold-400 bg-white' : 'bg-slate-200')
-            }
-          >
-            {s.done && <CheckIcon size={14} />}
-          </span>
-          <span className={'mt-1.5 text-xs ' + (s.done ? 'font-medium text-ink' : 'text-slate-500')}>{s.label}</span>
-        </li>
-      ))}
-    </ol>
   )
 }
 
@@ -399,12 +417,12 @@ function OrderCard({
   }
 
   return (
-    <article className={'overflow-hidden rounded-2xl border bg-white shadow-sm ' + (cancelled ? 'border-slate-200 opacity-70' : 'border-slate-200')}>
+    <article className={'overflow-hidden rounded-md border border-line bg-white ' + (cancelled ? 'opacity-70' : '')}>
       <div className="flex gap-4 p-4 sm:p-5">
-        <ProductArt category={item?.category ?? ''} className="h-16 w-16 shrink-0 rounded-xl" />
+        <MerchPhoto paths={item?.image_paths ?? []} category={item?.category ?? ''} name={item?.name ?? 'Item'} className="h-16 w-16 shrink-0 rounded-md" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-            <h3 className="font-display text-lg leading-snug font-semibold break-words">
+            <h3 className="text-lg leading-snug font-medium break-words">
               {item?.name ?? 'Item'}
               {o.variant && <span className="font-sans text-base font-normal text-slate-600"> ({o.variant})</span>}
             </h3>
@@ -417,21 +435,20 @@ function OrderCard({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 px-4 pb-4 sm:px-5 sm:pb-5">
+      <div className="border-t border-line px-4 pb-4 sm:px-5 sm:pb-5">
         {cancelled ? (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+          <p className="mt-4 rounded-md bg-soft px-3 py-2 text-sm text-accent">
             This order was cancelled{o.cancel_reason ? `: ${o.cancel_reason}` : '.'}
             {o.amount_paid > 0 && ' Ask the finance head about your refund.'}
           </p>
         ) : (
-          <Steps
-            steps={[
-              { label: 'Ordered', done: true },
-              { label: 'Paid', done: balance <= 0 },
-              { label: 'Arrived', done: hasArrived(item) },
-              { label: 'Claimed', done: !!o.claimed_at },
-            ]}
-          />
+          <div className="mt-4">
+            <Stepper
+              steps={['Ordered', 'Paid', 'Arrived', 'Claimed']}
+              done={[true, balance <= 0, hasArrived(item), !!o.claimed_at].findIndex((x) => !x) === -1 ? 4 : [true, balance <= 0, hasArrived(item), !!o.claimed_at].findIndex((x) => !x)}
+            />
+            <p className="mt-3 text-xs text-muted">{st.label}</p>
+          </div>
         )}
 
         <div className="mt-5">
@@ -442,11 +459,11 @@ function OrderCard({
             </span>
             {!cancelled && <Chip tone={PAY_TONE[p]}>{PAY_LABEL[p]}</Chip>}
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
-            <div className="h-full rounded-full bg-brand-700 transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${pct}%` }} />
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
+            <div className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${pct}%` }} />
           </div>
           {!cancelled && balance > 0 && (
-            <p className="mt-1.5 text-sm font-medium text-brand-700">Balance {peso(balance)}</p>
+            <p className="mt-1.5 text-sm font-semibold text-accent">Balance {peso(balance)}</p>
           )}
           {o.claimed_at && <p className="mt-1.5 text-xs text-slate-500">Claimed {formatDateTime(o.claimed_at)}</p>}
         </div>
@@ -455,7 +472,7 @@ function OrderCard({
           <ul className="mt-4 space-y-2 text-sm">
             {payments.map((x) => (
               <li key={x.id} className="flex items-start gap-2 text-slate-700">
-                <CheckIcon size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+                <CheckIcon size={16} className="mt-0.5 shrink-0 text-success-deep" />
                 <span>
                   Payment of {peso(x.amount)} confirmed ({METHOD_LABEL[x.method]}, {formatDateTime(x.received_at)})
                 </span>
@@ -467,14 +484,14 @@ function OrderCard({
                 <li key={x.id} className="flex flex-wrap items-center gap-2 text-slate-700">
                   {proofUrls[x.image_path] && (
                     <a href={proofUrls[x.image_path]} target="_blank" rel="noreferrer">
-                      <img src={proofUrls[x.image_path]} alt="Your payment screenshot" className="h-10 w-10 rounded border border-slate-200 object-cover" />
+                      <img src={proofUrls[x.image_path]} alt="Your payment screenshot" className="h-10 w-10 rounded border border-line object-cover" />
                     </a>
                   )}
                   <span>
                     Proof of {peso(x.amount)} sent {formatDateTime(x.created_at)}
                   </span>
                   <Chip tone={PROOF_TONE[x.status]}>{PROOF_LABEL[x.status]}</Chip>
-                  {x.status === 'rejected' && x.reject_reason && <span className="text-xs text-red-700">Reason: {x.reject_reason}</span>}
+                  {x.status === 'rejected' && x.reject_reason && <span className="text-xs text-accent">Reason: {x.reject_reason}</span>}
                 </li>
               ))}
           </ul>
@@ -487,7 +504,7 @@ function OrderCard({
             {cancelling ? (
               <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="text-slate-700">Cancel this order?</span>
-                <button onClick={() => void cancel()} className="py-1 font-semibold text-red-700 hover:underline">
+                <button onClick={() => void cancel()} className="py-1 font-semibold text-accent hover:underline">
                   Yes, cancel it
                 </button>
                 <button onClick={() => setCancelling(false)} className="py-1 text-slate-600 hover:underline">
@@ -495,7 +512,7 @@ function OrderCard({
                 </button>
               </span>
             ) : (
-              <button onClick={() => setCancelling(true)} className="py-1 text-slate-600 hover:text-red-700 hover:underline">
+              <button onClick={() => setCancelling(true)} className="py-1 text-slate-600 hover:text-accent hover:underline">
                 Cancel order
               </button>
             )}
@@ -513,6 +530,7 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
   const [amount, setAmount] = useState(String(orderBalance(order)))
   const [reference, setReference] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -523,9 +541,9 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
           setAmount(String(orderBalance(order)))
           setOpen(true)
         }}
-        className="mt-4 rounded-full bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
+        className={buttonClass + ' mt-4'}
       >
-        I paid. Send proof of payment
+        Pay {peso(orderBalance(order))} via GCash
       </button>
     )
   }
@@ -535,6 +553,7 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
     if (!profile) return
     const v = Number(amount)
     if (!file) return setError('Choose the screenshot of your payment.')
+    if (!confirmed) return setError('Please confirm this proof is for this order.')
     if (!(v > 0)) return setError('Enter the amount you paid.')
     if (Math.round(v * 100) > Math.round(orderBalance(order) * 100)) {
       return setError(`That is more than your balance of ${peso(orderBalance(order))}.`)
@@ -559,6 +578,7 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
       setOpen(false)
       setFile(null)
       setReference('')
+      setConfirmed(false)
       await onSent()
     } catch (err) {
       setError(errorMessage(err, 'Could not send the proof.'))
@@ -568,33 +588,50 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
-      <div className="sm:col-span-2">
-        <label htmlFor={`pf-${order.id}`} className="text-sm font-medium">Screenshot of your payment</label>
-        <input
-          id={`pf-${order.id}`}
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100"
-        />
-      </div>
-      <div>
-        <label htmlFor={`pa-${order.id}`} className="text-sm font-medium">Amount you paid (PHP)</label>
-        <input id={`pa-${order.id}`} type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} />
-      </div>
-      <div>
-        <label htmlFor={`pr-${order.id}`} className="text-sm font-medium">GCash reference no. (optional)</label>
-        <input id={`pr-${order.id}`} value={reference} maxLength={60} onChange={(e) => setReference(e.target.value)} className={inputClass} />
-      </div>
-      {error && <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 sm:col-span-2">{error}</p>}
-      <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
-        <div className="w-full sm:w-auto sm:min-w-44">
-          <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Sending…' : 'Send to finance'}</button>
+    <form onSubmit={submit} className="mt-4 rounded-md border border-line bg-bg p-4">
+      <p className={eyebrowClass}>GCash / Send money</p>
+      <p className="mt-1 text-sm text-muted">Amount to send</p>
+      <p className="text-3xl font-medium tabular-nums text-ink">{peso(orderBalance(order))}</p>
+      <ol className="mt-3 space-y-1 text-sm text-ink">
+        <li>1 Pay the exact amount in GCash using the details in the Shop tab.</li>
+        <li>2 Save your successful transaction receipt.</li>
+        <li>3 Upload it below with the reference number.</li>
+      </ol>
+      <p className="mt-2 text-xs text-muted">Never share your MPIN or OTP. GCash fees are not included.</p>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label htmlFor={`pf-${order.id}`} className="text-sm font-semibold">Payment receipt</label>
+          <input
+            id={`pf-${order.id}`}
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border file:border-line file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-semibold hover:file:bg-bg"
+          />
+          <p className="mt-1 text-xs text-muted">PNG or JPG. Keep amount, date and reference visible.</p>
         </div>
-        <button type="button" onClick={() => setOpen(false)} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+        <div>
+          <label htmlFor={`pa-${order.id}`} className="text-sm font-semibold">Amount you paid (PHP)</label>
+          <input id={`pa-${order.id}`} type="number" inputMode="decimal" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label htmlFor={`pr-${order.id}`} className="text-sm font-semibold">GCash reference number</label>
+          <input id={`pr-${order.id}`} value={reference} maxLength={60} placeholder="13-digit reference number" onChange={(e) => setReference(e.target.value)} className={inputClass} />
+        </div>
+        <label className="flex items-start gap-2 text-sm sm:col-span-2">
+          <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 accent-accent" />
+          I confirm this proof is for this order.
+        </label>
+        {error && <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-accent sm:col-span-2">{error}</p>}
+        <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+          <div className="w-full sm:w-auto sm:min-w-44">
+            <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Submitting…' : 'Submit for verification'}</button>
+          </div>
+          <button type="button" onClick={() => setOpen(false)} className="py-2 text-sm text-muted hover:underline">Cancel</button>
+        </div>
+        <p className="text-xs text-muted sm:col-span-2">Your order moves to Paid after the treasurer verifies it, usually within 1 school day.</p>
       </div>
     </form>
   )
 }
-

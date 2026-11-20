@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { ROLE_LABEL } from '../lib/types'
-import { formatEventTime, timeUntil } from '../lib/announcements'
+import { timeUntil } from '../lib/announcements'
 import { useUpcoming } from '../lib/useUpcoming'
 import { canSeeNav, NAV_ITEMS } from '../nav'
+import NavIcon from './NavIcon'
 
 const STORAGE_KEY = 'kkb.sidebar.collapsed'
+const HELP_EMAIL = 'membership@kkbbulsu.org'
 
 function readCollapsed(): boolean {
   try {
@@ -16,42 +18,26 @@ function readCollapsed(): boolean {
   }
 }
 
-const iconProps = {
-  width: 22,
-  height: 22,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 2,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-  'aria-hidden': true,
+/** Breadcrumb label for the current route */
+function pageLabel(pathname: string): string {
+  if (pathname === '/account') return 'Account settings'
+  const exact = NAV_ITEMS.find((i) => i.to === pathname)
+  if (exact) return exact.label === 'Home' ? 'Home' : exact.label
+  const parent = [...NAV_ITEMS].filter((i) => i.to !== '/').sort((a, b) => b.to.length - a.to.length).find((i) => pathname.startsWith(i.to + '/'))
+  return parent ? parent.label : 'Home'
 }
-
-const MenuIcon = () => (
-  <svg {...iconProps}>
-    <path d="M4 6h16M4 12h16M4 18h16" />
-  </svg>
-)
-const CloseIcon = () => (
-  <svg {...iconProps}>
-    <path d="M6 6l12 12M18 6L6 18" />
-  </svg>
-)
-const ChevronLeftIcon = () => (
-  <svg {...iconProps}>
-    <path d="M15 6l-6 6 6 6" />
-  </svg>
-)
 
 export default function Layout() {
   const { profile, session, signOut } = useAuth()
-  const [collapsed, setCollapsed] = useState(readCollapsed) // desktop: sidebar hidden
-  const [drawerOpen, setDrawerOpen] = useState(false) // phone: sidebar slides over the page
+  const location = useLocation()
+  const [collapsed, setCollapsed] = useState(readCollapsed) // desktop: 64px rail
+  const [drawerOpen, setDrawerOpen] = useState(false) // phone: drawer slides over the page
   const { upcoming, dismiss, permission, enableAlerts } = useUpcoming()
 
   const items = NAV_ITEMS.filter((i) => canSeeNav(i, profile?.role))
   const name = profile?.full_name || session?.user.email || 'Member'
+  const role = profile ? ROLE_LABEL[profile.role] : 'Member'
+  const next = upcoming[0]
   const badgeFor = (to: string) =>
     to === '/announcements'
       ? upcoming.filter((u) => u.source === 'announcement').length
@@ -68,11 +54,6 @@ export default function Layout() {
     }
   }
 
-  function openMenu() {
-    if (window.matchMedia('(min-width: 768px)').matches) setCollapsedAndRemember(false)
-    else setDrawerOpen(true)
-  }
-
   useEffect(() => {
     if (!drawerOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -82,62 +63,82 @@ export default function Layout() {
     return () => document.removeEventListener('keydown', onKey)
   }, [drawerOpen])
 
+  const navLinkClass = (isActive: boolean, rail: boolean) =>
+    'group relative flex items-center rounded-md text-sm transition-colors ' +
+    (rail ? 'md:justify-center md:px-0 md:py-2.5 ' : '') +
+    'gap-3 px-3 py-3 md:py-2 ' +
+    (isActive ? 'bg-soft font-semibold text-accent' : 'text-ink hover:bg-bg')
+
   return (
     <div className="min-h-screen md:flex">
       {drawerOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden print:hidden"
-          onClick={() => setDrawerOpen(false)}
-          aria-hidden="true"
-        />
+        <div className="fixed inset-0 z-30 bg-ink/40 md:hidden print:hidden" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
       )}
 
       <aside
         id="sidebar"
         className={
-          'fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] flex-col overflow-y-auto border-r border-hairline bg-white text-ink ' +
+          'fixed inset-y-0 left-0 z-40 flex w-80 max-w-[90vw] flex-col overflow-y-auto border-r border-line bg-white ' +
           'transition-[transform,visibility] duration-200 motion-reduce:transition-none ' +
           (drawerOpen ? 'translate-x-0 ' : '-translate-x-full max-md:invisible ') +
-          'md:sticky md:top-0 md:bottom-auto md:h-screen md:w-64 md:max-w-none md:shrink-0 md:translate-x-0 ' +
-          (collapsed ? 'md:hidden ' : '') +
+          'md:sticky md:top-0 md:bottom-auto md:h-screen md:max-w-none md:shrink-0 md:translate-x-0 ' +
+          (collapsed ? 'md:w-16 ' : 'md:w-56 ') +
           'print:hidden'
         }
       >
-        <div className="flex items-center justify-between px-5 py-5">
-          <span className="font-display text-xl font-bold tracking-tight text-brand-700">KKB BULSU</span>
-          <button
-            type="button"
-            onClick={() => setDrawerOpen(false)}
-            aria-label="Close menu"
-            className="rounded-md p-2 text-slate-600 hover:bg-card hover:text-ink md:hidden"
-          >
-            <CloseIcon />
-          </button>
-          <button
-            type="button"
-            onClick={() => setCollapsedAndRemember(true)}
-            aria-label="Hide menu"
-            className="hidden rounded-md p-2 text-slate-600 hover:bg-card hover:text-ink md:block"
-          >
-            <ChevronLeftIcon />
-          </button>
+        <div className={'px-5 pt-6 pb-4 ' + (collapsed ? 'md:px-0' : '')}>
+          <div className={'flex items-start justify-between gap-2 ' + (collapsed ? 'md:flex-col md:items-center' : '')}>
+            <div className={collapsed ? 'md:text-center' : ''}>
+              <p className="text-base font-bold tracking-tight text-accent">
+                <span className={collapsed ? 'md:hidden' : ''}>KKB BULSU</span>
+                {collapsed && <span className="hidden md:inline">KKB</span>}
+              </p>
+              <p className={'mt-0.5 text-[10px] tracking-[0.06em] text-muted uppercase ' + (collapsed ? 'md:hidden' : '')}>
+                Bulacan State University
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCollapsedAndRemember(!collapsed)}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-expanded={!collapsed}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line text-muted transition-colors hover:bg-bg hover:text-ink md:flex"
+            >
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={collapsed ? 'rotate-180' : ''}>
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M9 4v16M15 10l-2 2 2 2" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              aria-label="Close menu"
+              className="-mt-1 rounded-md px-2 py-1 text-sm text-muted hover:bg-bg hover:text-ink md:hidden"
+            >
+              Close ×
+            </button>
+          </div>
         </div>
 
-        <nav aria-label="Main" className="flex-1 space-y-1 px-3">
+        <nav aria-label="Main" className="flex-1 space-y-0.5 px-3">
           {items.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
+              title={item.label}
               onClick={() => setDrawerOpen(false)}
-              className={({ isActive }) =>
-                'flex items-center justify-between rounded-md px-3 py-3 text-base font-semibold transition-colors md:py-2 md:text-sm ' +
-                (isActive ? 'bg-ink text-white' : 'text-ink hover:bg-card')
-              }
+              className={({ isActive }) => navLinkClass(isActive, collapsed)}
             >
-              {item.label}
+              {collapsed && (
+                <span className="hidden md:block">
+                  <NavIcon to={item.to} />
+                </span>
+              )}
+              <span className={'flex-1 ' + (collapsed ? 'md:sr-only' : '')}>{item.label}</span>
               {badgeFor(item.to) > 0 && (
-                <span className="rounded-full bg-gold-400 px-2 py-0.5 text-xs font-bold text-ink">
+                <span className="rounded-full bg-gold px-1.5 py-0.5 text-[11px] font-bold text-white">
                   {badgeFor(item.to)}
                   <span className="sr-only"> starting within 24 hours</span>
                 </span>
@@ -146,68 +147,85 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="mt-6 border-t border-hairline p-4">
-          <p className="truncate text-sm font-semibold text-ink">{name}</p>
-          <p className="text-xs text-slate-500">{profile ? ROLE_LABEL[profile.role] : ''}</p>
+        <div className={'mt-6 border-t border-line p-4 ' + (collapsed ? 'md:px-2 md:text-center' : '')}>
+          <p className={'text-[10px] tracking-[0.06em] text-muted uppercase ' + (collapsed ? 'md:hidden' : '')}>AY 2026–2027</p>
+          <Link to="/account" onClick={() => setDrawerOpen(false)} title="Account settings" className={'mt-1 block rounded-md hover:bg-bg ' + (collapsed ? 'md:py-2' : '')}>
+            <span className={'block truncate text-sm font-semibold text-ink ' + (collapsed ? 'md:hidden' : '')}>{name}</span>
+            <span className={'block text-xs text-muted ' + (collapsed ? 'md:hidden' : '')}>{role} · Account settings</span>
+            {collapsed && <span className="hidden text-xs font-semibold text-ink md:block">{name.slice(0, 1).toUpperCase()}</span>}
+          </Link>
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-3 py-1 text-sm text-slate-600 underline-offset-2 hover:text-ink hover:underline"
+            className="mt-2 py-1 text-sm text-muted underline-offset-2 hover:text-ink hover:underline"
           >
-            Sign out
+            {collapsed ? <span className="hidden md:inline">↩</span> : null}
+            <span className={collapsed ? 'md:sr-only' : ''}>Sign out</span>
           </button>
         </div>
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header
-          className={
-            'sticky top-0 z-20 flex items-center gap-2 border-b border-hairline bg-white/90 px-3 py-2 backdrop-blur print:hidden ' +
-            (collapsed ? '' : 'md:hidden')
-          }
-        >
+        {/* Phone top bar */}
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-white px-4 py-3 md:hidden print:hidden">
           <button
             type="button"
-            onClick={openMenu}
+            onClick={() => setDrawerOpen(true)}
             aria-label="Open menu"
             aria-controls="sidebar"
-            className="rounded-md p-2 text-ink hover:bg-card"
+            className="-ml-2 px-2 py-1 text-sm font-semibold text-accent"
           >
-            <MenuIcon />
+            Menu
           </button>
-          <span className="font-display text-lg font-bold text-brand-700">KKB BULSU</span>
+          <span className="text-base font-bold tracking-tight text-accent">KKB BULSU</span>
+          <span className="text-xs text-muted">{role}</span>
         </header>
 
-        {upcoming.length > 0 && (
+        {/* Desktop breadcrumb bar */}
+        <div className="hidden items-center justify-between px-10 pt-6 text-xs text-muted md:flex print:hidden">
+          <p>
+            Members portal <span className="mx-1.5">/</span>
+            <span className="text-ink">{pageLabel(location.pathname)}</span>
+          </p>
+          <p className="flex items-center gap-1.5">
+            {permission === 'default' ? (
+              <button type="button" onClick={() => void enableAlerts()} className="hover:text-ink hover:underline">
+                Notifications
+              </button>
+            ) : (
+              <span>Notifications</span>
+            )}
+            <span>·</span>
+            <a href={`mailto:${HELP_EMAIL}`} className="hover:text-ink hover:underline">
+              Help
+            </a>
+          </p>
+        </div>
+
+        {next && (
           <div
             role="status"
-            className="border-b border-hairline bg-card px-4 py-3 text-sm text-ink sm:px-6 md:px-10 print:hidden"
+            className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 bg-soft px-4 py-2 text-xs text-accent sm:px-6 md:px-10 print:hidden"
           >
-            <ul className="space-y-2">
-              {upcoming.map((u) => (
-                <li key={`${u.source}:${u.id}@${u.at}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                  <span className="min-w-0 break-words">
-                    <strong>Starts {timeUntil(u.at)}:</strong>{' '}
-                    <Link to={u.to} className="underline underline-offset-2">
-                      {u.title}
-                    </Link>
-                    <span className="text-slate-500"> ({formatEventTime(u.at)})</span>
-                  </span>
-                  <button type="button" onClick={() => dismiss(u)} className="py-1 text-slate-600 underline underline-offset-2 hover:text-ink">
-                    Dismiss
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {permission === 'default' && (
-              <button type="button" onClick={() => void enableAlerts()} className="mt-2 py-1 underline underline-offset-2">
-                Turn on device alerts
+            <p className="min-w-0 break-words">
+              <span className="font-semibold tracking-[0.06em] uppercase">Up next</span>
+              <span className="mx-2">·</span>
+              <span>
+                {next.title} starts {timeUntil(next.at)}
+              </span>
+            </p>
+            <p className="flex items-center gap-4">
+              <Link to={next.to} className="font-semibold hover:underline">
+                View event →
+              </Link>
+              <button type="button" onClick={() => dismiss(next)} className="py-1 hover:underline">
+                Dismiss
               </button>
-            )}
+            </p>
           </div>
         )}
 
-        <main className="px-4 py-6 sm:px-6 md:px-10 md:py-10 print:p-0">
+        <main className="px-4 py-6 sm:px-6 md:px-10 md:py-8 print:p-0">
           <Outlet />
         </main>
       </div>

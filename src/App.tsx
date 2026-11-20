@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AuthProvider from './auth/AuthProvider'
 import RequireAuth from './auth/RequireAuth'
 import Layout from './components/Layout'
+import Account from './pages/Account'
 import Announcements from './pages/Announcements'
 import Attendance from './pages/Attendance'
 import BudgetDetail from './pages/BudgetDetail'
@@ -10,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import Documents from './pages/Documents'
 import Events from './pages/Events'
 import Finance from './pages/Finance'
+import ForgotPassword from './pages/ForgotPassword'
 import Login from './pages/Login'
 import Members from './pages/Members'
 import Merch from './pages/Merch'
@@ -18,6 +20,7 @@ import Minutes from './pages/Minutes'
 import Pending from './pages/Pending'
 import Polls from './pages/Polls'
 import Register from './pages/Register'
+import ResetPassword from './pages/ResetPassword'
 import Tasks from './pages/Tasks'
 
 export default function App() {
@@ -28,6 +31,8 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/pending" element={<Pending />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Everything below needs an approved account */}
           <Route element={<RequireAuth />}>
@@ -41,6 +46,7 @@ export default function App() {
               <Route path="merch" element={<Merch />} />
               <Route path="documents" element={<Documents />} />
               <Route path="minutes" element={<Minutes />} />
+              <Route path="account" element={<Account />} />
 
               {/* Officers, treasurer and admin */}
               <Route element={<RequireAuth minRole="officer" />}>

@@ -18,14 +18,15 @@ import {
 } from '../lib/events'
 import EventExtras from '../components/EventExtras'
 import EventForm, { type EventValues } from '../components/EventForm'
-import { CalendarIcon, ClockIcon, MapPinIcon, VideoIcon } from '../components/Icons'
+import { CalendarIcon, ClockIcon, MapPinIcon } from '../components/Icons'
 import Linkify from '../components/Linkify'
 import MapView from '../components/MapView'
 import Modal from '../components/Modal'
 import MonthCalendar from '../components/MonthCalendar'
-import { buttonClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, eyebrowClass, subtleButtonClass } from '../components/ui'
+import PageHeader from '../components/PageHeader'
 
-type View = 'list' | 'calendar'
+type View = 'list' | 'calendar' | 'rsvps'
 type Rsvp = 'going' | 'not_going'
 
 function dayLabel(key: string, nowMs: number): string {
@@ -171,40 +172,41 @@ export default function Events() {
   )
 
   return (
-    <div className="max-w-6xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">Events</h1>
-          <p className="mt-2 text-slate-600">What is happening, where, and who is going.</p>
-        </div>
-        {canEdit && (
-          <button type="button" onClick={() => setFormFor('new')} className={buttonClass + ' min-h-11 sm:w-auto'}>
-            Add an event
-          </button>
-        )}
-      </div>
+    <div className="w-full">
+      <PageHeader
+        eyebrow="Show up. Belong."
+        title="Good things ahead."
+        subtitle="Gatherings, service and everything in between."
+        action={
+          canEdit ? (
+            <button type="button" onClick={() => setFormFor('new')} className={buttonClass + ' min-h-11 sm:w-auto'}>
+              Add an event
+            </button>
+          ) : undefined
+        }
+      />
 
       {error && (
-        <p role="alert" className="mt-6 border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+        <p role="alert" className="mt-6 border-l-4 border-accent bg-soft px-3 py-3 text-sm text-accent">
           {error}
         </p>
       )}
 
       <div className="mt-6 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_380px]">
         <main className="min-w-0">
-          <div role="group" aria-label="View" className="inline-flex rounded-md border border-hairline bg-card p-1">
-            {(['list', 'calendar'] as const).map((v) => (
+          <div role="group" aria-label="View" className="flex gap-5 border-b border-line text-sm">
+            {(['list', 'calendar', 'rsvps'] as const).map((v) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => setView(v)}
                 aria-pressed={view === v}
                 className={
-                  'min-h-11 rounded-md px-4 text-sm font-bold transition-colors ' +
-                  (view === v ? 'bg-ink text-white' : 'text-ink hover:bg-secondary')
+                  '-mb-px min-h-11 border-b-2 transition-colors ' +
+                  (view === v ? 'border-accent font-semibold text-accent' : 'border-transparent text-muted hover:text-ink')
                 }
               >
-                {v === 'list' ? 'List' : 'Month'}
+                {v === 'list' ? 'List' : v === 'calendar' ? 'Month' : 'My RSVPs'}
               </button>
             ))}
           </div>
@@ -212,7 +214,7 @@ export default function Events() {
           {loading && (
             <div className="mt-6 space-y-3" aria-label="Loading events">
               {[0, 1, 2].map((n) => (
-                <div key={n} className="h-20 border border-hairline bg-card" />
+                <div key={n} className="h-20 border border-line bg-card" />
               ))}
             </div>
           )}
@@ -228,9 +230,9 @@ export default function Events() {
                   onOpen={() => selectEvent(next.id)}
                 />
               ) : (
-                <div className="mt-6 border border-dashed border-hairline bg-card px-6 py-10 text-center">
+                <div className="mt-6 rounded-md border border-dashed border-line bg-white px-6 py-10 text-center">
                   <CalendarIcon size={36} className="mx-auto text-brand-700" />
-                  <p className="font-display mt-3 text-xl font-semibold">Nothing coming up</p>
+                  <p className="mt-3 text-xl font-medium">Nothing coming up</p>
                   <p className="mt-1 text-sm text-slate-500">
                     {canEdit ? 'Add the first event and members will see it here.' : 'New events will show up here.'}
                   </p>
@@ -239,32 +241,48 @@ export default function Events() {
 
               {groups.map((g) => (
                 <section key={g.key} className="mt-8" aria-label={dayLabel(g.key, now)}>
-                  <h2 className="text-sm font-bold tracking-wide text-slate-500 uppercase">{dayLabel(g.key, now)}</h2>
-                  <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+                  <h2 className={eyebrowClass + ' !text-muted'}>{dayLabel(g.key, now)}</h2>
+                  <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
                     {g.items.map((e) => card(e))}
                   </ul>
                 </section>
               ))}
 
               {past.length > 0 && (
-                <section className="mt-8 border-t border-hairline pt-5">
+                <section className="mt-8 border-t border-line pt-5">
                   <button
                     type="button"
                     onClick={() => setShowPast((s) => !s)}
                     aria-expanded={showPast}
                     className="flex min-h-11 w-full items-center justify-between gap-4 text-left"
                   >
-                    <span className="font-display text-lg font-semibold">Past events ({past.length})</span>
+                    <span className="text-lg font-medium">Past events ({past.length})</span>
                     <span className="text-sm font-medium text-slate-500">{showPast ? 'Hide' : 'Show'}</span>
                   </button>
                   {showPast && (
-                    <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+                    <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
                       {past.slice(0, 30).map((e) => card(e))}
                     </ul>
                   )}
                 </section>
               )}
             </>
+          )}
+
+          {!loading && view === 'rsvps' && (
+            <section className="mt-6" aria-label="Events I said I am going to">
+              {(() => {
+                const mine = upcoming.filter((e) => rsvps[e.id] === 'going')
+                return mine.length === 0 ? (
+                  <div className="rounded-md border border-dashed border-line bg-white px-6 py-10 text-center">
+                    <p className="text-xl font-medium">No RSVPs yet</p>
+                    <p className="mt-1 text-sm text-muted">Open an event and press “I’m going” to save your seat.</p>
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">{mine.map((e) => card(e))}</ul>
+                )
+              })()}
+            </section>
           )}
 
           {!loading && view === 'calendar' && (
@@ -277,15 +295,15 @@ export default function Events() {
               />
               <section className="mt-6" aria-label="Events on the selected day">
                 <div className="flex items-baseline justify-between gap-4">
-                  <h2 className="font-display text-lg font-semibold">{formatDay(selectedDay + 'T00:00:00')}</h2>
+                  <h2 className="text-lg font-medium">{formatDay(selectedDay + 'T00:00:00')}</h2>
                   <span className="text-sm text-slate-500">{dayEvents.length} event{dayEvents.length === 1 ? '' : 's'}</span>
                 </div>
                 {dayEvents.length === 0 ? (
-                  <p className="mt-2 border border-dashed border-hairline bg-card px-4 py-5 text-sm text-slate-500">
+                  <p className="mt-2 rounded-md border border-dashed border-line bg-white px-4 py-5 text-sm text-slate-500">
                     No events on this day.
                   </p>
                 ) : (
-                  <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+                  <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
                     {dayEvents.map((e) => card(e))}
                   </ul>
                 )}
@@ -305,8 +323,8 @@ export default function Events() {
                 onDelete={() => void deleteEvent(selected.id)}
               />
             ) : (
-              <div className="border border-hairline bg-card p-5">
-                <p className="font-display text-lg font-semibold">Event details</p>
+              <div className="rounded-md border border-line bg-white p-5">
+                <p className="text-lg font-medium">Event details</p>
                 <p className="mt-2 text-sm text-slate-500">Select an event to see its time, place, links, RSVP and attendance information.</p>
               </div>
             )}
@@ -345,12 +363,12 @@ export default function Events() {
 function EventCover({ iso, label }: { iso: string; label?: string }) {
   const d = new Date(iso)
   return (
-    <div className="flex min-w-20 flex-col justify-center bg-secondary px-3 py-3 sm:min-w-24 sm:px-4">
-      {label && <p className="text-xs font-bold text-slate-600">{label}</p>}
-      <p className="mt-1 text-xs font-bold tracking-wide text-brand-700 uppercase">
-        {d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short' })}
+    <div className="flex min-w-20 flex-col justify-center bg-soft px-3 py-3 sm:min-w-24 sm:px-4">
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">
+        {d.toLocaleDateString('en-PH', { month: 'short' })}
       </p>
-      <p className="font-display text-3xl leading-none font-bold text-ink">{d.getDate()}</p>
+      <p className="text-3xl leading-none font-medium text-ink">{d.getDate()}</p>
+      {label && <p className="mt-1.5 text-[11px] font-medium text-muted">{label}</p>}
     </div>
   )
 }
@@ -380,17 +398,17 @@ function NextUp({
 }) {
   const live = new Date(event.starts_at).getTime() <= now
   return (
-    <section aria-label="Next event" className="mt-6 border border-hairline bg-white">
+    <section aria-label="Next event" className="mt-6 overflow-hidden rounded-md border border-line bg-white">
       <button
         type="button"
         onClick={onOpen}
         aria-pressed={selected}
-        className="flex min-h-20 w-full items-stretch text-left hover:bg-card"
+        className="flex min-h-20 w-full items-stretch text-left hover:bg-bg"
       >
         <EventCover iso={event.starts_at} label={live ? 'Now' : `Next · ${timeUntil(event.starts_at, now)}`} />
         <span className="min-w-0 flex-1 p-3 sm:p-4">
-          <span className="block text-xs font-bold tracking-wide text-brand-700 uppercase">Next up</span>
-          <span className="mt-0.5 block break-words font-display text-base font-bold sm:text-lg">{event.title}</span>
+          <span className={eyebrowClass + ' block'}>Next up</span>
+          <span className="mt-0.5 block break-words text-base font-semibold sm:text-lg">{event.title}</span>
           <span className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 sm:text-sm">
             <span>{formatRange(event.starts_at, event.ends_at)}</span>
             {event.location_name && <span>{event.location_name}</span>}
@@ -398,7 +416,7 @@ function NextUp({
           </span>
         </span>
       </button>
-      {rsvp === 'going' && <p className="border-t border-hairline px-3 py-2 text-xs font-semibold text-brand-700 sm:px-4">You are going</p>}
+      {rsvp === 'going' && <p className="border-t border-line px-3 py-2 text-xs font-semibold text-brand-700 sm:px-4">You are going</p>}
     </section>
   )
 }
@@ -430,14 +448,14 @@ function EventCard({
       onClick={onOpen}
       aria-pressed={selected}
       className={
-        'flex min-h-20 w-full items-stretch text-left hover:bg-card ' +
+        'flex min-h-20 w-full items-stretch text-left hover:bg-bg ' +
         (over ? 'opacity-70 ' : '') +
-        (selected ? 'bg-card' : 'bg-white')
+        (selected ? 'bg-bg' : 'bg-white')
       }
     >
       <EventCover iso={event.starts_at} label={timeLabel} />
       <span className="min-w-0 flex-1 p-3 sm:p-4">
-        <span className="block break-words font-display text-base font-bold">{event.title}</span>
+        <span className="block break-words text-base font-semibold">{event.title}</span>
         {event.location_name && (
           <span className="mt-1 block text-sm text-slate-600">
             <Meta icon={<MapPinIcon size={15} />}>{event.location_name}</Meta>
@@ -480,20 +498,20 @@ function EventDetail({
   const soon = !over && eventState(event.starts_at, now) === 'soon'
 
   return (
-    <div className="border border-hairline bg-white p-4 sm:p-5">
+    <div className="rounded-md border border-line bg-white p-4 sm:p-5">
       {onClose && (
         <div className="mb-4 flex justify-end md:hidden">
-          <button type="button" onClick={onClose} className="min-h-11 rounded-md bg-secondary px-4 text-sm font-bold text-ink">
+          <button type="button" onClick={onClose} className={subtleButtonClass + ' min-h-11'}>
             Close
           </button>
         </div>
       )}
 
-      <div className="border-b border-hairline pb-4">
-        <p className="text-xs font-bold tracking-wide text-brand-700 uppercase">
+      <div className="border-b border-line pb-4">
+        <p className={eyebrowClass}>
           {soon ? `Starts ${timeUntil(event.starts_at, now)}` : over ? 'Already happened' : 'Event details'}
         </p>
-        <h2 className="font-display mt-1 text-2xl leading-tight font-bold break-words">{event.title}</h2>
+        <h2 className="mt-1 text-2xl leading-tight font-medium break-words">{event.title}</h2>
         <div className="mt-3 space-y-2 text-slate-700">
           <Meta icon={<ClockIcon size={16} />}>{formatRange(event.starts_at, event.ends_at)}</Meta>
           {event.location_name && <Meta icon={<MapPinIcon size={16} />}>{event.location_name}</Meta>}
@@ -512,7 +530,7 @@ function EventDetail({
         <div className="mt-5">
           {hasPin && (
             <>
-              <MapView lat={event.latitude} lng={event.longitude} className="h-52 w-full border border-hairline" />
+              <MapView lat={event.latitude} lng={event.longitude} className="h-52 w-full border border-line" />
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href={googleDirections(event.latitude!, event.longitude!)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass + ' min-h-11'}>
                   Directions in Google Maps
@@ -540,11 +558,11 @@ function EventDetail({
       <EventExtras event={event} canEdit={canEdit} over={over} />
 
       {canEdit && (
-        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-hairline pt-4 text-sm">
+        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-4 text-sm">
           {confirming ? (
             <>
               <span className="text-slate-700">Delete this event for good?</span>
-              <button type="button" onClick={onDelete} className="min-h-11 px-2 font-semibold text-red-700 hover:underline">
+              <button type="button" onClick={onDelete} className="min-h-11 px-2 font-semibold text-accent hover:underline">
                 Yes, delete
               </button>
               <button type="button" onClick={() => setConfirming(false)} className="min-h-11 px-2 text-slate-600 hover:underline">
@@ -556,7 +574,7 @@ function EventDetail({
               <button type="button" onClick={onEdit} className="min-h-11 px-2 font-medium text-brand-700 hover:underline">
                 Edit
               </button>
-              <button type="button" onClick={() => setConfirming(true)} className="min-h-11 px-2 text-slate-600 hover:text-red-700 hover:underline">
+              <button type="button" onClick={() => setConfirming(true)} className="min-h-11 px-2 text-slate-600 hover:text-accent hover:underline">
                 Delete
               </button>
             </>

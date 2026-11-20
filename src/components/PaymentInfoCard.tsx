@@ -50,21 +50,21 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
   }
 
   const dark = !(editing && editable)
-  const lightBtn = 'min-h-11 rounded-md bg-secondary px-4 py-2 text-sm font-bold text-ink transition-colors hover:bg-secondary-pressed'
+  const lightBtn = 'min-h-11 rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-bg'
 
   return (
     <section
       aria-label="How to pay"
       className={
-        'border border-hairline p-4 sm:p-5 ' +
-        (dark ? 'bg-card text-ink' : 'bg-white')
+        'rounded-md border border-line bg-white p-4 sm:p-5 ' +
+        (dark ? '' : 'ring-1 ring-soft')
       }
     >
       
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold tracking-wide text-brand-700 uppercase">Pay with GCash</p>
-          <h2 className="font-display text-xl font-semibold">How to pay</h2>
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">GCash / Send money</p>
+          <h2 className="text-xl font-medium">How to pay</h2>
         </div>
         {editable && !editing && (
           <button onClick={() => setEditing(true)} className={lightBtn}>
@@ -86,14 +86,14 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
       ) : hasInfo ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
           {qrUrl && (
-            <a href={qrUrl} target="_blank" rel="noreferrer" title="Open full size to save it" className="justify-self-start border border-hairline bg-white p-2">
+            <a href={qrUrl} target="_blank" rel="noreferrer" title="Open full size to save it" className="justify-self-start border border-line bg-white p-2">
               <img src={qrUrl} alt="GCash QR code" className="h-40 w-40 object-contain" />
             </a>
           )}
           <div className="min-w-0">
             {settings?.gcash_number && (
               <p className="flex flex-wrap items-center gap-3">
-                <span className="font-display text-3xl font-bold tracking-wide text-brand-700">{settings.gcash_number}</span>
+                <span className="text-3xl font-medium tracking-wide text-accent tabular-nums">{settings.gcash_number}</span>
                 <button type="button" onClick={() => void copyNumber()} className={lightBtn}>
                   {copied ? 'Copied' : 'Copy number'}
                 </button>
@@ -211,7 +211,7 @@ function PaymentForm({
           </label>
         )}
       </div>
-      {error && <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
       <div className="flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save details'}</button>
