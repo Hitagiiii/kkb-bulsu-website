@@ -28,7 +28,11 @@ No gradients, no shadows. Money is PHP with tabular figures. Payment channel is 
 ## Imagery
 `public/images/community.jpg` and `outreach.jpg` are sample photos from the design file (used on the sign-in screens). They are placeholders, not university documentation. Merch photos are now uploaded by finance per item.
 
+## Setup
+See `SETUP.md` for the full checklist (database updates, the Supabase password-reset redirect, notifications).
+
 ## Database
 Run these in the Supabase SQL editor, in order:
 1. `supabase/013_member_details.sql`: college, program and year/section from the sign-up form.
 2. `supabase/014_merch_photos_removals.sql`: merch photos (`merch-images` bucket), removing orders (`delete_order`), declining applicants (`decline_member`).
+3. `supabase/015_stock_waitlist_deactivate_notifications.sql`: stock limit and waitlist, deactivating members, in-app notifications.

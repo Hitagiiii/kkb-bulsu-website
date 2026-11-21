@@ -200,7 +200,7 @@ function PaymentForm({
         <input
           id="pi-qr"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           className="mt-1 block w-full min-h-11 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-secondary-pressed"
         />

@@ -48,10 +48,32 @@ export function todayISO(): string {
   return new Date().toLocaleDateString('en-CA') // YYYY-MM-DD in local time
 }
 
-/** Shrink a receipt photo before upload so the free storage lasts. */
+/** Biggest photo we will even try to read. Phone cameras are 3 to 8 MB; we shrink it before upload anyway. */
+export const MAX_IMAGE_BYTES = 15 * 1024 * 1024
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+/** Returns a friendly message when a picked file is not a usable photo, otherwise null. */
+export function imageProblem(file: File): string | null {
+  if (!IMAGE_TYPES.includes(file.type)) {
+    return /heic|heif/i.test(file.type + file.name)
+      ? 'HEIC photos are not supported. Take a screenshot of the photo or set your camera to “Most compatible” (JPG).'
+      : 'Use a JPG, PNG or WebP image.'
+  }
+  if (file.size < 1024) return 'That image looks empty. Choose another one.'
+  if (file.size > MAX_IMAGE_BYTES) return `That image is ${(file.size / 1024 / 1024).toFixed(1)} MB. The limit is ${MAX_IMAGE_BYTES / 1024 / 1024} MB.`
+  return null
+}
+
+/** Shrink a photo before upload so the free storage lasts. Rejects wrong types, huge files and unreadable images. */
 export async function compressImage(file: File, maxSide = 1600, quality = 0.8): Promise<Blob> {
-  if (!file.type.startsWith('image/')) throw new Error('The receipt must be an image file.')
-  const bitmap = await createImageBitmap(file)
+  const problem = imageProblem(file)
+  if (problem) throw new Error(problem)
+  let bitmap: ImageBitmap
+  try {
+    bitmap = await createImageBitmap(file)
+  } catch {
+    throw new Error('That image could not be read. It may be damaged. Choose another one.')
+  }
   const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height))
   const canvas = document.createElement('canvas')
   canvas.width = Math.round(bitmap.width * scale)

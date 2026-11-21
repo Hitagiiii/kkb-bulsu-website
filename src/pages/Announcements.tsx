@@ -543,7 +543,7 @@ function AnnouncementForm({
         <input
           id={`${uid}-photos`}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           multiple
           disabled={room <= 0}
           onChange={(e) => {

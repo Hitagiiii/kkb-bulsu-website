@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { imageProblem } from '../lib/finance'
 import { MAX_MERCH_PHOTOS, merchPhotoUrls } from '../lib/merchImages'
 
 function Preview({ file, onRemove }: { file: File; onRemove: () => void }) {
@@ -51,10 +52,13 @@ export default function PhotoPicker({
   }, [key])
 
   function pick(list: FileList | null) {
-    const images = Array.from(list ?? []).filter((f) => f.type.startsWith('image/'))
+    const all = Array.from(list ?? [])
+    const bad = all.map((f) => ({ f, problem: imageProblem(f) })).find((x) => x.problem)
+    const images = all.filter((f) => !imageProblem(f))
     const accepted = images.slice(0, Math.max(room, 0))
     onFilesChange([...files, ...accepted])
-    setNote(images.length > accepted.length ? `Only ${MAX_MERCH_PHOTOS} photos fit on one item, so ${images.length - accepted.length} were skipped.` : null)
+    if (bad) setNote(`${bad.f.name}: ${bad.problem}`)
+    else setNote(images.length > accepted.length ? `Only ${MAX_MERCH_PHOTOS} photos fit on one item, so ${images.length - accepted.length} were skipped.` : null)
   }
 
   return (
@@ -65,7 +69,7 @@ export default function PhotoPicker({
       <input
         id={id}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         multiple
         disabled={room <= 0}
         onChange={(e) => {

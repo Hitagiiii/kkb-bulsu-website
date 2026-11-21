@@ -202,7 +202,7 @@ export default function BudgetDetail() {
           </div>
 
           <dl className="mt-4 grid grid-cols-3 divide-x divide-line rounded-md border border-line bg-white">
-            <div className="px-3 py-3 first:pl-1">
+            <div className="px-3 py-3 first:pl-0">
               <dt className="text-xs text-slate-500">Total</dt>
               <dd className="mt-1 text-lg font-semibold tabular-nums sm:text-xl">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
@@ -530,7 +530,7 @@ function AddExpenseForm({ budgetId, onAdded }: { budgetId: string; onAdded: () =
         </div>
         <div>
           <label htmlFor="x-file" className="text-sm font-medium">Receipt photo (optional)</label>
-          <input id="x-file" ref={fileRef} type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-1 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
+          <input id="x-file" ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-1 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
           <p className="mt-1 text-xs text-slate-500">You can also add the receipt later from the saved expense.</p>
         </div>
       </div>
@@ -573,7 +573,7 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
   return (
     <form onSubmit={submit} className="border border-dashed border-ash bg-card p-4">
       <label htmlFor="attach-file" className="text-sm font-medium text-slate-700">This expense has no receipt yet</label>
-      <input id="attach-file" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
+      <input id="attach-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-slate-100" />
       {error && <p role="alert" className="mt-2 text-sm text-accent">{error}</p>}
       <div className="mt-3 sm:max-w-48"><button type="submit" disabled={busy || !file} className={buttonClass + ' min-h-11'}>{busy ? 'Attaching…' : 'Attach receipt'}</button></div>
       <p className="mt-2 text-xs text-slate-700">Once attached, a receipt can't be replaced. If it's the wrong photo, void the expense and add it again.</p>

@@ -10,6 +10,8 @@ export interface MerchItem {
   folder_id: string | null
   variants: string[]
   image_paths: string[]
+  /** total pieces on offer; null means no limit */
+  stock_limit: number | null
   stage: Stage
   order_deadline: string | null
   created_at: string
@@ -143,3 +145,12 @@ export const PROOF_LABEL: Record<ProofStatus, string> = {
   rejected: 'Rejected',
 }
 export const PROOF_TONE: Record<ProofStatus, ChipTone> = { pending: 'amber', verified: 'green', rejected: 'red' }
+
+export interface WaitlistRow {
+  id: string
+  item_id: string
+  user_id: string
+  variant: string | null
+  quantity: number
+  created_at: string
+}

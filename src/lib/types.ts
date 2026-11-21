@@ -9,6 +9,7 @@ export interface Profile {
   year_section: string | null
   role: Role
   approved: boolean
+  deactivated_at: string | null
   created_at: string
 }
 

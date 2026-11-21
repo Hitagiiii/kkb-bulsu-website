@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import Documents from './pages/Documents'
 import Events from './pages/Events'
 import Finance from './pages/Finance'
+import Deactivated from './pages/Deactivated'
 import ForgotPassword from './pages/ForgotPassword'
 import Login from './pages/Login'
 import Members from './pages/Members'
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/pending" element={<Pending />} />
+          <Route path="/deactivated" element={<Deactivated />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 

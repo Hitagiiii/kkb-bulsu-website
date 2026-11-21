@@ -19,6 +19,7 @@ import {
   type MerchPayment,
   type PaymentProof,
   type Stage,
+  type WaitlistRow,
 } from '../lib/merch'
 import Chip from '../components/Chip'
 import OrderRow from '../components/OrderRow'
@@ -44,6 +45,7 @@ export default function MerchManage() {
   const [people, setPeople] = useState<Person[]>([])
   const [folders, setFolders] = useState<MerchFolder[]>([])
   const [costs, setCosts] = useState<Record<string, number>>({})
+  const [waitlist, setWaitlist] = useState<WaitlistRow[]>([])
   const [proofUrls, setProofUrls] = useState<Record<string, string>>({})
   const [folderFilter, setFolderFilter] = useState('all') // 'all' | 'none' | folder id
   const [loading, setLoading] = useState(true)
@@ -52,7 +54,7 @@ export default function MerchManage() {
   const urlCache = useRef<Record<string, string>>({})
 
   const load = useCallback(async () => {
-    const [i, o, p, m, f, c, pr] = await Promise.all([
+    const [i, o, p, m, f, c, pr, wl] = await Promise.all([
       supabase.from('merch_items').select('*').order('created_at', { ascending: false }),
       supabase.from('merch_orders').select('*').order('created_at'),
       supabase.from('merch_payments').select('*').order('received_at'),
@@ -60,7 +62,9 @@ export default function MerchManage() {
       supabase.from('merch_folders').select('*').order('created_at'),
       supabase.from('merch_item_costs').select('item_id, unit_cost'),
       supabase.from('merch_payment_proofs').select('*').order('created_at'),
+      supabase.from('merch_waitlist').select('*').order('created_at'),
     ])
+    setWaitlist((wl.data ?? []) as WaitlistRow[]) // empty until the stock/waitlist update is installed
     const err = i.error ?? o.error ?? p.error ?? m.error ?? f.error ?? c.error ?? pr.error
     if (err) {
       setError(err.message)
@@ -170,6 +174,7 @@ export default function MerchManage() {
             item={item}
             cost={costs[item.id] ?? 0}
             orders={orders.filter((o) => o.item_id === item.id)}
+            waitlist={waitlist.filter((w) => w.item_id === item.id)}
             payments={payments}
             proofs={proofs}
             proofUrls={proofUrls}
@@ -360,6 +365,7 @@ function NewItemForm({
   const [price, setPrice] = useState('')
   const [cost, setCost] = useState('')
   const [variants, setVariants] = useState('')
+  const [stock, setStock] = useState('')
   const [deadline, setDeadline] = useState('')
   const [photos, setPhotos] = useState<File[]>([])
   const [busy, setBusy] = useState(false)
@@ -371,6 +377,7 @@ function NewItemForm({
     const c = cost === '' ? 0 : Number(cost)
     if (!name.trim()) return setError('Give the item a name.')
     if (!(p >= 0) || price === '') return setError('Enter the selling price.')
+    if (stock.trim() !== '' && !(Number(stock) >= 0 && Number.isFinite(Number(stock)))) return setError('Stock must be a number, or leave it empty for no limit.')
     if (!(c >= 0)) return setError('The supplier cost must be a number.')
     let closes: string | null = null
     if (deadline) {
@@ -396,6 +403,7 @@ function NewItemForm({
         price: Math.round(p * 100) / 100,
         variants: parseVariants(variants),
         order_deadline: closes,
+        stock_limit: stock.trim() === '' ? null : Math.max(0, Math.floor(Number(stock))),
         image_paths: imagePaths,
       })
       .select('id')
@@ -448,9 +456,16 @@ function NewItemForm({
           <label htmlFor="mi-cost" className="text-sm font-medium">Supplier cost each (PHP, only you see this)</label>
           <input id="mi-cost" type="number" inputMode="decimal" min="0" step="0.01" value={cost} onChange={(e) => setCost(e.target.value)} className={inputClass} />
         </div>
-        <div className="sm:col-span-2">
-          <label htmlFor="mi-dl" className="text-sm font-medium">Order deadline (optional)</label>
-          <input id="mi-dl" type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass + ' sm:max-w-xs'} />
+        <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+          <div>
+            <label htmlFor="mi-dl" className="text-sm font-medium">Order deadline (optional)</label>
+            <input id="mi-dl" type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label htmlFor="mi-stock" className="text-sm font-medium">Stock limit (optional)</label>
+            <input id="mi-stock" type="number" inputMode="numeric" min="0" step="1" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="No limit" className={inputClass} />
+            <p className="mt-1 text-xs text-muted">Total pieces on offer. When it runs out, members can join a waitlist.</p>
+          </div>
         </div>
         <div className="sm:col-span-2">
           <PhotoPicker id="mi-photos" files={photos} onFilesChange={setPhotos} />
@@ -474,6 +489,7 @@ function ItemSection({
   item,
   cost,
   orders,
+  waitlist,
   payments,
   proofs,
   proofUrls,
@@ -486,6 +502,7 @@ function ItemSection({
   item: MerchItem
   cost: number
   orders: MerchOrder[]
+  waitlist: WaitlistRow[]
   payments: MerchPayment[]
   proofs: PaymentProof[]
   proofUrls: Record<string, string>
@@ -620,7 +637,9 @@ function ItemSection({
       )}
       {error && <p role="alert" className="mt-2 text-sm text-accent">{error}</p>}
 
+      {item.stock_limit !== null && item.stock_limit !== undefined && <StockLine item={item} orders={orders} />}
       {canEdit && <ItemTools item={item} hasOrders={orders.length > 0} onChanged={onChanged} />}
+      {canEdit && waitlist.length > 0 && <WaitlistPanel item={item} waitlist={waitlist} names={names} orders={orders} onChanged={onChanged} />}
 
       <details className="mt-4 rounded-md border border-line bg-white px-4 py-3">
         <summary className="cursor-pointer py-1 text-sm font-semibold">Order sheet for the supplier</summary>
@@ -715,6 +734,95 @@ function ItemSection({
   )
 }
 
+/* ---------- stock summary line ---------- */
+function StockLine({ item, orders }: { item: MerchItem; orders: MerchOrder[] }) {
+  const taken = orders.filter((o) => !o.cancelled_at).reduce((s, o) => s + o.quantity, 0)
+  const limit = item.stock_limit ?? 0
+  const left = Math.max(limit - taken, 0)
+  return (
+    <p className="mt-3 text-sm">
+      <span className="font-semibold">
+        {taken} of {limit} pieces ordered
+      </span>
+      <span className={left === 0 ? 'text-accent' : 'text-muted'}> · {left === 0 ? 'sold out' : `${left} left`}</span>
+    </p>
+  )
+}
+
+/* ---------- finance: the waitlist for one item ---------- */
+function WaitlistPanel({
+  item,
+  waitlist,
+  names,
+  orders,
+  onChanged,
+}: {
+  item: MerchItem
+  waitlist: WaitlistRow[]
+  names: Record<string, string>
+  orders: MerchOrder[]
+  onChanged: () => Promise<void>
+}) {
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const taken = orders.filter((o) => !o.cancelled_at).reduce((s, o) => s + o.quantity, 0)
+  const left = Math.max((item.stock_limit ?? 0) - taken, 0)
+
+  async function promote(w: WaitlistRow) {
+    setBusy(w.id)
+    setError(null)
+    const { error } = await supabase.rpc('promote_waitlist', { p_id: w.id })
+    setBusy(null)
+    if (error) return setError(errorMessage(error, 'Could not place the order.'))
+    await onChanged()
+  }
+
+  async function drop(w: WaitlistRow) {
+    setBusy(w.id)
+    const { error } = await supabase.from('merch_waitlist').delete().eq('id', w.id)
+    setBusy(null)
+    if (error) return setError(errorMessage(error, 'Could not remove the entry.'))
+    await onChanged()
+  }
+
+  return (
+    <section aria-label="Waitlist" className="mt-4 rounded-md border border-line bg-bg p-4">
+      <h3 className="text-base font-semibold">Waitlist ({waitlist.length})</h3>
+      <p className="mt-0.5 text-xs text-muted">
+        In the order they asked.{' '}
+        {left > 0
+          ? `${left} ${left === 1 ? 'piece is' : 'pieces are'} free right now.`
+          : 'No pieces are free, so nobody can be moved yet.'}
+      </p>
+      <ul className="mt-3 divide-y divide-line rounded-md border border-line bg-white">
+        {waitlist.map((w, i) => (
+          <li key={w.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm">
+            <span className="min-w-0 break-words">
+              <span className="text-muted">{i + 1}.</span> <span className="font-semibold">{names[w.user_id] ?? 'Member'}</span>
+              <span className="text-muted">
+                {' '}· {w.quantity} × {w.variant ?? item.name}
+              </span>
+            </span>
+            <span className="flex items-center gap-2">
+              <button disabled={busy === w.id || left < w.quantity} onClick={() => void promote(w)} className={subtleButtonClass}>
+                {busy === w.id ? 'Working…' : 'Move to orders'}
+              </button>
+              <button disabled={busy === w.id} onClick={() => void drop(w)} className="min-h-11 px-2 text-muted underline underline-offset-2 hover:text-accent">
+                Remove
+              </button>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-accent">
+          {error}
+        </p>
+      )}
+    </section>
+  )
+}
+
 /* ---------- finance: photos, details and removal for one item ---------- */
 function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders: boolean; onChanged: () => Promise<void> }) {
   const [panel, setPanel] = useState<null | 'photos' | 'edit' | 'remove'>(null)
@@ -724,6 +832,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
   const [category, setCategory] = useState(item.category)
   const [price, setPrice] = useState(String(item.price))
   const [variants, setVariants] = useState(item.variants.join(', '))
+  const [stock, setStock] = useState(item.stock_limit === null || item.stock_limit === undefined ? '' : String(item.stock_limit))
   const [deadline, setDeadline] = useState(item.order_deadline ? toLocalInput(item.order_deadline) : '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -739,6 +848,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
       setCategory(item.category)
       setPrice(String(item.price))
       setVariants(item.variants.join(', '))
+      setStock(item.stock_limit === null || item.stock_limit === undefined ? '' : String(item.stock_limit))
       setDeadline(item.order_deadline ? toLocalInput(item.order_deadline) : '')
     }
     setPanel(panel === next ? null : next)
@@ -771,6 +881,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
     const p = Number(price)
     if (!name.trim()) return setError('Give the item a name.')
     if (!(p >= 0) || price === '') return setError('Enter the selling price.')
+    if (stock.trim() !== '' && !(Number(stock) >= 0 && Number.isFinite(Number(stock)))) return setError('Stock must be a number, or leave it empty for no limit.')
     let closes: string | null = null
     if (deadline) {
       const d = new Date(deadline)
@@ -781,7 +892,14 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
     setError(null)
     const { error } = await supabase
       .from('merch_items')
-      .update({ name: name.trim(), category, price: Math.round(p * 100) / 100, variants: parseVariants(variants), order_deadline: closes })
+      .update({
+        name: name.trim(),
+        category,
+        price: Math.round(p * 100) / 100,
+        variants: parseVariants(variants),
+        order_deadline: closes,
+        stock_limit: stock.trim() === '' ? null : Math.max(0, Math.floor(Number(stock))),
+      })
       .eq('id', item.id)
     setBusy(false)
     if (error) return setError(errorMessage(error, 'Could not save the changes.'))
@@ -856,9 +974,14 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
             <label htmlFor={`ev-${item.id}`} className="text-sm font-medium">Sizes or types</label>
             <input id={`ev-${item.id}`} value={variants} onChange={(e) => setVariants(e.target.value)} placeholder="S, M, L, XL" className={inputClass} />
           </div>
-          <div className="sm:col-span-2">
+          <div>
             <label htmlFor={`ed-${item.id}`} className="text-sm font-medium">Order deadline (optional)</label>
-            <input id={`ed-${item.id}`} type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass + ' sm:max-w-xs'} />
+            <input id={`ed-${item.id}`} type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className={inputClass} />
+          </div>
+          <div>
+            <label htmlFor={`es-${item.id}`} className="text-sm font-medium">Stock limit (optional)</label>
+            <input id={`es-${item.id}`} type="number" inputMode="numeric" min="0" step="1" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="No limit" className={inputClass} />
+            <p className="mt-1 text-xs text-muted">Cancelled orders give their pieces back.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <div className="w-full sm:w-auto sm:min-w-40">

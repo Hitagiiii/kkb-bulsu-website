@@ -6,7 +6,7 @@ import { buttonClass, cardClass, dangerButtonClass, eyebrowClass, inputClass } f
 
 const ROLES: Role[] = ['member', 'officer', 'treasurer', 'admin']
 
-type Tab = 'all' | 'pending' | 'officers'
+type Tab = 'all' | 'pending' | 'officers' | 'deactivated'
 
 /** "2024 010284 · CICT, BSIT 3A" from whatever the person gave on the form */
 function detailLine(p: Profile): string {
@@ -25,6 +25,7 @@ export default function Members() {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState<Tab>('all')
   const [declining, setDeclining] = useState<string | null>(null)
+  const [pausing, setPausing] = useState<string | null>(null)
 
   useEffect(() => {
     supabase
@@ -53,17 +54,27 @@ export default function Members() {
     setRows((prev) => prev.filter((p) => p.id !== id))
   }
 
+  async function setActive(id: string, active: boolean) {
+    setError(null)
+    const { error } = await supabase.rpc('set_member_active', { p_id: id, p_active: active })
+    setPausing(null)
+    if (error) return setError(error.message)
+    setRows((prev) => prev.map((p) => (p.id === id ? { ...p, deactivated_at: active ? null : new Date().toISOString() } : p)))
+  }
+
   const q = search.trim().toLowerCase()
   const matches = (p: Profile) =>
     !q || [p.full_name, p.student_no, p.college, p.program].some((x) => (x ?? '').toLowerCase().includes(q))
   const pending = rows.filter((r) => !r.approved && matches(r))
-  const approvedAll = rows.filter((r) => r.approved)
-  const approved = approvedAll.filter((r) => matches(r) && (tab !== 'officers' || r.role !== 'member'))
+  const approvedAll = rows.filter((r) => r.approved && !r.deactivated_at)
+  const pausedAll = rows.filter((r) => r.approved && r.deactivated_at)
+  const approved = (tab === 'deactivated' ? pausedAll : approvedAll).filter((r) => matches(r) && (tab !== 'officers' || r.role !== 'member'))
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'all', label: 'All members' },
     { id: 'pending', label: 'Pending approval' },
     { id: 'officers', label: 'Officers' },
+    { id: 'deactivated', label: `Deactivated (${pausedAll.length})` },
   ]
 
   return (
@@ -117,7 +128,7 @@ export default function Members() {
 
       {!loading && (
         <>
-          {tab !== 'officers' && (
+          {(tab === 'all' || tab === 'pending') && (
             <section className="mt-6" aria-label="Waiting for approval">
               <h2 className="text-xl font-medium">
                 {pending.length} {pending.length === 1 ? 'application needs' : 'applications need'} review
@@ -159,15 +170,16 @@ export default function Members() {
           {tab !== 'pending' && (
             <section className="mt-8" aria-label="Approved members">
               <h2 className="text-xl font-medium">
-                {tab === 'officers' ? 'Officers' : 'Approved members'} <span className="text-base text-muted">({approved.length})</span>
+                {tab === 'officers' ? 'Officers' : tab === 'deactivated' ? 'Deactivated members' : 'Approved members'} <span className="text-base text-muted">({approved.length})</span>
               </h2>
               <div className={cardClass + ' mt-3 overflow-x-auto'}>
-                <table className="w-full min-w-[34rem] border-collapse text-left text-sm">
+                <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
                   <thead>
                     <tr className="border-b border-line text-[11px] tracking-[0.08em] text-muted uppercase">
                       <th className="px-4 py-3 font-semibold">Name / Student no.</th>
                       <th className="px-4 py-3 font-semibold">College / Year</th>
                       <th className="px-4 py-3 font-semibold">Role</th>
+                      <th className="px-4 py-3 font-semibold">Access</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -196,17 +208,36 @@ export default function Members() {
                             ))}
                           </select>
                         </td>
+                        <td className="px-4 py-3">
+                          {p.id === me?.id ? (
+                            <span className="text-xs text-muted">—</span>
+                          ) : p.deactivated_at ? (
+                            <button onClick={() => void setActive(p.id, true)} className="min-h-11 text-sm font-semibold text-accent hover:underline">
+                              Reactivate
+                            </button>
+                          ) : pausing === p.id ? (
+                            <span className="flex flex-wrap items-center gap-x-3 text-xs">
+                              <span className="text-ink">Pause their access?</span>
+                              <button onClick={() => void setActive(p.id, false)} className="min-h-11 font-semibold text-accent hover:underline">Yes, deactivate</button>
+                              <button onClick={() => setPausing(null)} className="min-h-11 text-muted hover:underline">Keep</button>
+                            </span>
+                          ) : (
+                            <button onClick={() => setPausing(p.id)} className="min-h-11 text-sm text-muted hover:text-accent hover:underline">
+                              Deactivate
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                     {approved.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="px-4 py-6 text-muted">No members match.</td>
+                        <td colSpan={4} className="px-4 py-6 text-muted">No members match.</td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
-              <p className="mt-3 text-xs text-muted">Role changes are restricted to admins.</p>
+              <p className="mt-3 text-xs text-muted">Role changes and access are restricted to admins. Deactivating keeps a member’s orders, attendance and records; they just can’t sign in to use the portal.</p>
             </section>
           )}
         </>

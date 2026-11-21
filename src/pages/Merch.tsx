@@ -21,6 +21,7 @@ import {
   type MerchOrder,
   type MerchPayment,
   type PaymentProof,
+  type WaitlistRow,
 } from '../lib/merch'
 import Chip from '../components/Chip'
 import { CheckIcon, ClockIcon, MinusIcon, PlusIcon } from '../components/Icons'
@@ -60,16 +61,23 @@ export default function Merch() {
   const [error, setError] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('all')
   const [section, setSection] = useState<'shop' | 'orders'>('shop')
+  const [stockLeft, setStockLeft] = useState<Record<string, number>>({})
+  const [waiting, setWaiting] = useState<WaitlistRow[]>([])
 
   const load = useCallback(async () => {
     if (!profile) return
-    const [i, o, p, pr, f] = await Promise.all([
+    const [i, o, p, pr, f, st, wl] = await Promise.all([
       supabase.from('merch_items').select('*').order('created_at', { ascending: false }),
       supabase.from('merch_orders').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }),
       supabase.from('merch_payments').select('*').order('received_at'),
       supabase.from('merch_payment_proofs').select('*').eq('user_id', profile.id).order('created_at'),
       supabase.from('merch_folders').select('*').order('created_at'),
+      supabase.rpc('merch_stock_left'),
+      supabase.from('merch_waitlist').select('*').eq('user_id', profile.id),
     ])
+    // stock and waitlist come from a newer database update; the shop still works without them
+    setStockLeft(Object.fromEntries(((st.data ?? []) as { item_id: string; stock_left: number }[]).map((x) => [x.item_id, x.stock_left])))
+    setWaiting((wl.data ?? []) as WaitlistRow[])
     const err = i.error ?? o.error ?? p.error ?? pr.error ?? f.error
     if (err) {
       setError(err.message)
@@ -121,7 +129,7 @@ export default function Merch() {
         title={section === 'shop' ? 'Wear your community.' : 'From us, to you.'}
         subtitle={
           section === 'shop'
-            ? 'Grace upon grace in every season. Designed to carry peace into your daily routine.'
+            ? 'Thoughtful org essentials. Made for everyday campus life.'
             : 'Track every order, from payment to pickup.'
         }
         action={
@@ -188,7 +196,13 @@ export default function Merch() {
                   <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {available.map((item) => (
                       <li key={item.id}>
-                        <ProductCard item={item} folder={item.folder_id ? folderName[item.folder_id] : undefined} onOrdered={load} />
+                        <ProductCard
+                          item={item}
+                          folder={item.folder_id ? folderName[item.folder_id] : undefined}
+                          left={item.stock_limit !== null && item.stock_limit !== undefined ? stockLeft[item.id] ?? item.stock_limit : undefined}
+                          waiting={waiting.find((w) => w.item_id === item.id)}
+                          onOrdered={load}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -263,18 +277,62 @@ export default function Merch() {
 }
 
 /* ---------- a product in the shop ---------- */
-function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: string; onOrdered: () => Promise<void> }) {
+function ProductCard({
+  item,
+  folder,
+  left,
+  waiting,
+  onOrdered,
+}: {
+  item: MerchItem
+  folder?: string
+  /** pieces left; undefined means no limit */
+  left?: number
+  waiting?: WaitlistRow
+  onOrdered: () => Promise<void>
+}) {
   const { profile } = useAuth()
   const [variant, setVariant] = useState('')
   const [qty, setQty] = useState(1)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const [joined, setJoined] = useState(false)
+  const soldOut = left !== undefined && qty > left
+  const maxQty = left === undefined ? 10 : Math.max(1, Math.min(10, left))
+
+  async function joinWaitlist() {
+    if (!profile) return
+    if (item.variants.length > 0 && !variant) return setError('Choose a size or type first.')
+    setBusy(true)
+    setError(null)
+    const { error } = await supabase.from('merch_waitlist').insert({
+      item_id: item.id,
+      user_id: profile.id,
+      variant: item.variants.length > 0 ? variant : null,
+      quantity: qty,
+    })
+    setBusy(false)
+    if (error) return setError(errorMessage(error, 'Could not join the waitlist.'))
+    setJoined(true)
+    await onOrdered()
+  }
+
+  async function leaveWaitlist() {
+    if (!waiting) return
+    setBusy(true)
+    const { error } = await supabase.from('merch_waitlist').delete().eq('id', waiting.id)
+    setBusy(false)
+    if (error) return setError(errorMessage(error, 'Could not leave the waitlist.'))
+    setJoined(false)
+    await onOrdered()
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault()
     setDone(false)
     if (!profile) return
+    if (soldOut) return
     if (item.variants.length > 0 && !variant) return setError('Choose a size or type first.')
     setBusy(true)
     setError(null)
@@ -302,6 +360,11 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
           <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-accent">
             <ClockIcon size={13} />
             Closes {timeUntil(item.order_deadline)}
+          </span>
+        )}
+        {left !== undefined && (
+          <span className={'absolute right-3 bottom-3 rounded-md px-2.5 py-1 text-xs font-semibold ' + (left === 0 ? 'bg-ink text-white' : left <= 5 ? 'bg-gold-100 text-[#6b5320]' : 'bg-white text-ink')}>
+            {left === 0 ? 'Sold out' : `${left} left`}
           </span>
         )}
       </div>
@@ -351,8 +414,8 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
             <button
               type="button"
               aria-label="One more"
-              disabled={qty >= 10}
-              onClick={() => setQty((q) => Math.min(10, q + 1))}
+              disabled={qty >= maxQty && left !== 0}
+              onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
               className="rounded-md p-3 text-slate-700 hover:bg-bg disabled:opacity-40 sm:p-2.5"
             >
               <PlusIcon />
@@ -369,11 +432,34 @@ function ProductCard({ item, folder, onOrdered }: { item: MerchItem; folder?: st
           </p>
         )}
 
-        <div className="mt-4">
-          <button type="submit" disabled={busy} className={buttonClass}>
-            {busy ? 'Placing order…' : 'Place order'}
-          </button>
-        </div>
+        {waiting ? (
+          <div className="mt-4 rounded-md bg-bg p-3 text-sm">
+            <p className="font-semibold text-ink">You’re on the waitlist</p>
+            <p className="mt-0.5 text-muted">
+              {waiting.quantity} × {item.name}
+              {waiting.variant ? ` (${waiting.variant})` : ''}. We’ll notify you if a piece opens up.
+            </p>
+            <button type="button" disabled={busy} onClick={() => void leaveWaitlist()} className="mt-2 min-h-11 py-2 text-muted underline underline-offset-2 hover:text-accent">
+              Leave waitlist
+            </button>
+          </div>
+        ) : soldOut ? (
+          <div className="mt-4">
+            <p className="mb-2 text-sm text-muted">
+              {left === 0 ? 'This item is sold out.' : `Only ${left} left, fewer than you picked.`} Join the waitlist and we’ll tell you if a piece frees up.
+            </p>
+            <button type="button" disabled={busy} onClick={() => void joinWaitlist()} className={subtleButtonClass + ' w-full'}>
+              {busy ? 'Joining…' : 'Join the waitlist'}
+            </button>
+            {joined && <p role="status" className="mt-2 text-sm text-success-deep">You’re on the list.</p>}
+          </div>
+        ) : (
+          <div className="mt-4">
+            <button type="submit" disabled={busy} className={buttonClass}>
+              {busy ? 'Placing order…' : 'Place order'}
+            </button>
+          </div>
+        )}
       </div>
     </form>
   )
@@ -605,7 +691,7 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
           <input
             id={`pf-${order.id}`}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border file:border-line file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-semibold hover:file:bg-bg"
           />

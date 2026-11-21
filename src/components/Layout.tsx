@@ -6,6 +6,8 @@ import { timeUntil } from '../lib/announcements'
 import { useUpcoming } from '../lib/useUpcoming'
 import { canSeeNav, NAV_ITEMS } from '../nav'
 import NavIcon from './NavIcon'
+import NotificationsMenu from './NotificationsMenu'
+import { useNotifications } from '../lib/useNotifications'
 
 const STORAGE_KEY = 'kkb.sidebar.collapsed'
 const HELP_EMAIL = 'membership@kkbbulsu.org'
@@ -33,6 +35,7 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(readCollapsed) // desktop: 64px rail
   const [drawerOpen, setDrawerOpen] = useState(false) // phone: drawer slides over the page
   const { upcoming, dismiss, permission, enableAlerts } = useUpcoming()
+  const notifications = useNotifications(profile?.id)
 
   const items = NAV_ITEMS.filter((i) => canSeeNav(i, profile?.role))
   const name = profile?.full_name || session?.user.email || 'Member'
@@ -178,7 +181,7 @@ export default function Layout() {
             Menu
           </button>
           <span className="text-base font-bold tracking-tight text-accent">KKB BULSU</span>
-          <span className="text-xs text-muted">{role}</span>
+          <NotificationsMenu data={notifications} permission={permission} enableAlerts={enableAlerts} />
         </header>
 
         {/* Desktop breadcrumb bar */}
@@ -188,13 +191,7 @@ export default function Layout() {
             <span className="text-ink">{pageLabel(location.pathname)}</span>
           </p>
           <p className="flex items-center gap-1.5">
-            {permission === 'default' ? (
-              <button type="button" onClick={() => void enableAlerts()} className="hover:text-ink hover:underline">
-                Notifications
-              </button>
-            ) : (
-              <span>Notifications</span>
-            )}
+            <NotificationsMenu data={notifications} permission={permission} enableAlerts={enableAlerts} />
             <span>·</span>
             <a href={`mailto:${HELP_EMAIL}`} className="hover:text-ink hover:underline">
               Help
