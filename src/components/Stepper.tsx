@@ -26,16 +26,16 @@ export default function Stepper({
               {i > 0 && (
                 <span
                   aria-hidden="true"
-                  className={'absolute top-3 right-1/2 h-px w-full ' + (i <= done ? 'bg-accent' : 'bg-line')}
+                  className={'absolute top-3 right-1/2 h-px w-full ' + (i <= done ? 'bg-brand-700' : 'bg-line')}
                 />
               )}
               <span
                 className={
                   'relative z-10 flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ' +
                   (complete
-                    ? 'border-accent bg-accent text-white'
+                    ? 'border-brand-700 bg-brand-700 text-white'
                     : current
-                      ? 'border-accent bg-white text-accent'
+                      ? 'border-brand-700 bg-white text-brand-700'
                       : 'border-line bg-white text-muted')
                 }
               >

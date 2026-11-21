@@ -39,11 +39,11 @@ export default function MerchPhoto({
   const url = shown ? urls[shown] : undefined
 
   if (paths.length === 0) return <ProductArt category={category} name={name} className={className} />
-  if (!url) return <div className={'animate-pulse bg-secondary ' + className} aria-hidden="true" />
+  if (!url) return <div className={'animate-pulse bg-sand ' + className} aria-hidden="true" />
 
   return (
     <div>
-      <img src={url} alt={name} loading="lazy" className={'bg-secondary object-cover ' + className} />
+      <img src={url} alt={name} loading="lazy" className={'bg-sand object-cover ' + className} />
       {gallery && paths.length > 1 && (
         <ul className="mt-2 flex gap-2" aria-label={`Photos of ${name}`}>
           {paths.map((p, i) => (
@@ -53,9 +53,9 @@ export default function MerchPhoto({
                 onClick={() => setIndex(i)}
                 aria-label={`Show photo ${i + 1}`}
                 aria-pressed={i === index}
-                className={'block overflow-hidden rounded-md border-2 ' + (i === index ? 'border-accent' : 'border-line')}
+                className={'block overflow-hidden rounded-md border-2 ' + (i === index ? 'border-brand-700' : 'border-line')}
               >
-                {urls[p] ? <img src={urls[p]} alt="" className="h-12 w-12 object-cover" /> : <span className="block h-12 w-12 bg-secondary" />}
+                {urls[p] ? <img src={urls[p]} alt="" className="h-12 w-12 object-cover" /> : <span className="block h-12 w-12 bg-sand" />}
               </button>
             </li>
           ))}

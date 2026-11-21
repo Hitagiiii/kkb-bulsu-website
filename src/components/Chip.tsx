@@ -4,10 +4,10 @@ import type { ChipTone } from '../lib/merch'
 // Status pills. Brand/red use the soft maroon tint, green the quiet success pair, gold is the one tiny signal.
 const TONES: Record<ChipTone, string> = {
   green: 'bg-success-pale text-success-deep',
-  amber: 'bg-gold-100 text-[#6b5320]',
-  red: 'bg-soft text-accent',
-  slate: 'bg-secondary text-muted',
-  brand: 'bg-soft text-accent',
+  amber: 'bg-accent-100 text-accent-700',
+  red: 'bg-soft text-brand-700',
+  slate: 'bg-sand text-muted',
+  brand: 'bg-soft text-brand-700',
 }
 
 export default function Chip({ tone = 'slate', children }: { tone?: ChipTone; children: ReactNode }) {

@@ -50,7 +50,7 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
   }
 
   const dark = !(editing && editable)
-  const lightBtn = 'min-h-11 rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-bg'
+  const lightBtn = 'min-h-11 rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-paper'
 
   return (
     <section
@@ -63,7 +63,7 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
       
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">GCash / Send money</p>
+          <p className="text-[11px] font-semibold tracking-[0.08em] text-brand-700 uppercase">GCash / Send money</p>
           <h2 className="text-xl font-medium">How to pay</h2>
         </div>
         {editable && !editing && (
@@ -93,20 +93,20 @@ export default function PaymentInfoCard({ editable = false }: { editable?: boole
           <div className="min-w-0">
             {settings?.gcash_number && (
               <p className="flex flex-wrap items-center gap-3">
-                <span className="text-3xl font-medium tracking-wide text-accent tabular-nums">{settings.gcash_number}</span>
+                <span className="text-3xl font-medium tracking-wide text-brand-700 tabular-nums">{settings.gcash_number}</span>
                 <button type="button" onClick={() => void copyNumber()} className={lightBtn}>
                   {copied ? 'Copied' : 'Copy number'}
                 </button>
               </p>
             )}
-            {settings?.gcash_name && <p className="mt-1 text-sm text-slate-600">Account name: {settings.gcash_name}</p>}
+            {settings?.gcash_name && <p className="mt-1 text-sm text-umber">Account name: {settings.gcash_name}</p>}
             {settings?.instructions && (
-              <p className="mt-3 text-sm break-words whitespace-pre-wrap text-slate-700">{settings.instructions}</p>
+              <p className="mt-3 text-sm break-words whitespace-pre-wrap text-ink">{settings.instructions}</p>
             )}
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-slate-600">
+        <p className="mt-3 text-sm text-umber">
           Members will see these details when they order. Add your GCash number, a QR image, or both.
         </p>
       )}
@@ -202,7 +202,7 @@ function PaymentForm({
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="mt-1 block w-full min-h-11 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-secondary-pressed"
+          className="mt-1 block w-full min-h-11 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-sand file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-sand-pressed"
         />
         {settings?.qr_path && !file && (
           <label className="mt-2 flex min-h-11 items-center gap-2 py-1 text-sm">
@@ -211,12 +211,12 @@ function PaymentForm({
           </label>
         )}
       </div>
-      {error && <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
+      {error && <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
       <div className="flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save details'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-umber hover:underline">Cancel</button>
       </div>
     </form>
   )

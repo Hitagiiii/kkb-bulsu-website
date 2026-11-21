@@ -130,7 +130,7 @@ export default function DashboardExtras({
           <ul className="mt-3 space-y-3">
             {alerts.map((a) => (
               <li key={a.key}>
-                <Link to={a.to} className="block rounded-md border border-line bg-white p-4 transition-colors hover:bg-bg">
+                <Link to={a.to} className="block rounded-md border border-line bg-white p-4 transition-colors hover:bg-paper">
                   <p className={eyebrowClass}>{a.eyebrow}</p>
                   <p className="mt-1 text-base font-semibold break-words text-ink">{a.text}</p>
                   <p className="mt-1 flex items-center gap-1 text-xs text-muted">
@@ -148,14 +148,14 @@ export default function DashboardExtras({
         <div className={alerts.length > 0 ? 'mt-8' : ''}>
           <div className="flex items-baseline justify-between gap-4">
             <h2 className="text-xl font-medium text-ink">My tasks</h2>
-            <Link to="/tasks" className="py-1 text-sm font-semibold text-accent hover:underline">
+            <Link to="/tasks" className="py-1 text-sm font-semibold text-brand-700 hover:underline">
               See all
             </Link>
           </div>
           <ul className="mt-3 divide-y divide-line rounded-md border border-line bg-white">
             {tasks.map((t) => (
               <li key={t.id}>
-                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-bg">
+                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-paper">
                   <p className="text-sm font-semibold break-words text-ink">{t.title}</p>
                   {t.due_on && (
                     <p className={'text-xs ' + (t.due_on < today ? 'font-semibold text-error' : 'text-muted')}>

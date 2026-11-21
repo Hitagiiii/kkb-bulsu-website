@@ -118,7 +118,7 @@ export function ProductArt({
 }) {
   const key = artKey(category)
   return (
-    <div className={`flex items-center justify-center bg-secondary text-accent ${className}`}>
+    <div className={`flex items-center justify-center bg-sand text-brand-700 ${className}`}>
       <svg
         viewBox="0 0 24 24"
         fill="none"

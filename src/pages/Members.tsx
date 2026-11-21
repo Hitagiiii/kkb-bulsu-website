@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../lib/supabase'
 import { ROLE_LABEL, type Profile, type Role } from '../lib/types'
-import { buttonClass, cardClass, dangerButtonClass, eyebrowClass, inputClass } from '../components/ui'
+import { buttonClass, cardClass, dangerButtonClass, inputClass } from '../components/ui'
+import PageHeader from '../components/PageHeader'
 
 const ROLES: Role[] = ['member', 'officer', 'treasurer', 'admin']
 
@@ -79,21 +80,17 @@ export default function Members() {
 
   return (
     <div className="w-full">
-      <header>
-        <p className={eyebrowClass}>Admin workspace</p>
-        <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">People make the org.</h1>
-        <p className="mt-2 text-sm text-muted">Membership approvals and account access.</p>
-      </header>
+      <PageHeader eyebrow="Admin workspace" title="People make the org." subtitle="Membership approvals and account access." />
 
       {!loading && (
         <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-1 text-sm">
           <div className="flex gap-1.5"><dt className="text-muted">Active</dt><dd className="font-semibold">{approvedAll.length}</dd></div>
-          <div className="flex gap-1.5"><dt className="text-muted">Pending approval</dt><dd className="font-semibold text-accent">{rows.filter((r) => !r.approved).length}</dd></div>
+          <div className="flex gap-1.5"><dt className="text-muted">Pending approval</dt><dd className="font-semibold text-brand-700">{rows.filter((r) => !r.approved).length}</dd></div>
         </dl>
       )}
 
       {error && (
-        <p role="alert" className="mt-6 border-l-4 border-accent bg-soft px-3 py-2 text-sm text-accent">
+        <p role="alert" className="mt-6 border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
           {error}
         </p>
       )}
@@ -108,7 +105,7 @@ export default function Members() {
               onClick={() => setTab(t.id)}
               className={
                 '-mb-px min-h-11 border-b-2 transition-colors ' +
-                (tab === t.id ? 'border-accent font-semibold text-accent' : 'border-transparent text-muted hover:text-ink')
+                (tab === t.id ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent text-muted hover:text-ink')
               }
             >
               {t.label}
@@ -147,7 +144,7 @@ export default function Members() {
                       {declining === p.id ? (
                         <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                           <span className="text-ink">Decline and delete this application?</span>
-                          <button onClick={() => void decline(p.id)} className="min-h-11 font-semibold text-accent hover:underline">Yes, decline</button>
+                          <button onClick={() => void decline(p.id)} className="min-h-11 font-semibold text-brand-700 hover:underline">Yes, decline</button>
                           <button onClick={() => setDeclining(null)} className="min-h-11 text-muted hover:underline">Keep</button>
                         </div>
                       ) : (
@@ -212,17 +209,17 @@ export default function Members() {
                           {p.id === me?.id ? (
                             <span className="text-xs text-muted">—</span>
                           ) : p.deactivated_at ? (
-                            <button onClick={() => void setActive(p.id, true)} className="min-h-11 text-sm font-semibold text-accent hover:underline">
+                            <button onClick={() => void setActive(p.id, true)} className="min-h-11 text-sm font-semibold text-brand-700 hover:underline">
                               Reactivate
                             </button>
                           ) : pausing === p.id ? (
                             <span className="flex flex-wrap items-center gap-x-3 text-xs">
                               <span className="text-ink">Pause their access?</span>
-                              <button onClick={() => void setActive(p.id, false)} className="min-h-11 font-semibold text-accent hover:underline">Yes, deactivate</button>
+                              <button onClick={() => void setActive(p.id, false)} className="min-h-11 font-semibold text-brand-700 hover:underline">Yes, deactivate</button>
                               <button onClick={() => setPausing(null)} className="min-h-11 text-muted hover:underline">Keep</button>
                             </span>
                           ) : (
-                            <button onClick={() => setPausing(p.id)} className="min-h-11 text-sm text-muted hover:text-accent hover:underline">
+                            <button onClick={() => setPausing(p.id)} className="min-h-11 text-sm text-muted hover:text-brand-700 hover:underline">
                               Deactivate
                             </button>
                           )}

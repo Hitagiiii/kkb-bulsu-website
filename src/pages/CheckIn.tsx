@@ -27,10 +27,10 @@ export default function CheckIn() {
 
   return (
     <div className="max-w-md">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">Event check-in</p>
+      <p className="text-[11px] font-semibold tracking-[0.08em] text-brand-700 uppercase">Event check-in</p>
       <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Welcome in.</h1>
 
-      {state.status === 'working' && <p className="mt-6 text-sm text-slate-500">Checking you in…</p>}
+      {state.status === 'working' && <p className="mt-6 text-sm text-muted">Checking you in…</p>}
 
       {state.status === 'done' && (
         <div className="mt-6 rounded-xl border border-success-pale bg-success-pale p-5">
@@ -42,7 +42,7 @@ export default function CheckIn() {
       )}
 
       {state.status === 'error' && (
-        <p role="alert" className="mt-6 rounded-md bg-soft px-3 py-3 text-sm text-accent">
+        <p role="alert" className="mt-6 rounded-md bg-soft px-3 py-3 text-sm text-brand-700">
           {state.message}
         </p>
       )}

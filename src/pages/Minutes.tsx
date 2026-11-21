@@ -8,6 +8,7 @@ import { STATUS_LABEL, type MinutesRow, type Officer, type Task } from '../lib/w
 import Chip from '../components/Chip'
 import Linkify from '../components/Linkify'
 import { buttonClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
+import PageHeader from '../components/PageHeader'
 
 export default function Minutes() {
   const { profile } = useAuth()
@@ -60,18 +61,16 @@ export default function Minutes() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap items-end justify-between gap-3 pb-2">
-        <div>
-          <p className={eyebrowClass}>Decisions, documented</p>
-          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">On the same page.</h1>
-          <p className="mt-2 text-sm text-muted">Meeting notes, decisions and the people moving them forward.</p>
-        </div>
-        {canWrite && !creating && (
+      <PageHeader
+        eyebrow="Decisions, documented"
+        title="On the same page."
+        subtitle="Meeting notes, decisions and the people moving them forward."
+        action={canWrite && !creating ? (
           <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>Write minutes</button>
-        )}
-      </div>
+        ) : undefined}
+      />
 
-      {error && <p role="alert" className="mt-6 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-2 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
 
       {canWrite && creating && (
         <MinutesForm
@@ -87,60 +86,68 @@ export default function Minutes() {
       <div className="mt-4">
         <input aria-label="Search meeting minutes" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search minutes" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
       </div>
-      {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-muted">Loading…</p>}
       {!loading && rows.length === 0 && (
-        <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-slate-500">
+        <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-muted">
           {canWrite ? 'No minutes yet. Write the first one above.' : 'No minutes have been shared with members yet.'}
         </p>
       )}
 
-      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">No minutes match.</p>}
-      <ul className="mt-5 grid items-start gap-4 xl:grid-cols-2">
-        {shown.map((r) => {
-          const open = openId === r.id
-          const related = tasks.filter((t) => t.minutes_id === r.id)
-          return (
-            <li key={r.id} className="rounded-md border border-line bg-white p-4">
-              <button
-                type="button"
-                onClick={() => setOpenId(open ? null : r.id)}
-                aria-expanded={open}
-                className="block w-full text-left"
-              >
-                <span className="block text-base font-semibold break-words">{r.title}</span>
-                <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                  {formatDateTime(r.held_at)}
-                  {canWrite && <Chip tone={r.visible_to_members ? 'green' : 'slate'}>{r.visible_to_members ? 'Shared with members' : 'Officers only'}</Chip>}
-                </span>
-              </button>
+      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 border border-line bg-white px-4 py-6 text-sm text-muted">No minutes match.</p>}
+      {!loading && shown.length > 0 && (
+        <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,34rem)]">
+          <section aria-label="Meeting list">
+            <div className="border-y border-line bg-white">
+              {shown.map((r) => {
+                const open = openId === r.id
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setOpenId(r.id)}
+                    aria-expanded={open}
+                    className={'block min-h-11 w-full border-b border-line px-4 py-4 text-left last:border-b-0 hover:bg-paper ' + (open ? 'bg-paper' : '')}
+                  >
+                    <span className="block text-base font-semibold break-words text-ink">{r.title}</span>
+                    <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+                      {formatDateTime(r.held_at)}
+                      {canWrite && <Chip tone={r.visible_to_members ? 'green' : 'slate'}>{r.visible_to_members ? 'Shared with members' : 'Officers only'}</Chip>}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
 
-              {open && (
-                <div className="mt-4">
+          <aside className="border border-line bg-white p-4 sm:p-5 lg:sticky lg:top-6" aria-label="Selected meeting details">
+            {(() => {
+              const r = shown.find((item) => item.id === openId) ?? shown[0]
+              const related = tasks.filter((t) => t.minutes_id === r.id)
+              return (
+                <>
+                  <p className={eyebrowClass}>{r.visible_to_members ? 'Approved / shared' : 'Officer notes'} · {formatDate(r.held_at)}</p>
+                  <h2 className="mt-1 text-xl font-medium break-words">{r.title}</h2>
+                  <p className="mt-1 text-sm text-muted">{formatDateTime(r.held_at)}</p>
                   {r.attendees && (
-                    <p className="text-sm text-slate-600">
-                      <span className="font-medium">Present:</span> {r.attendees}
-                    </p>
+                    <p className="mt-4 text-sm text-umber"><span className="font-medium text-ink">Present:</span> {r.attendees}</p>
                   )}
-                  <p className="mt-3 break-words whitespace-pre-wrap">
-                    <Linkify text={r.body} />
-                  </p>
-                  <p className="mt-3 text-xs text-slate-500">Recorded by {r.author_name || 'an officer'}</p>
+                  <div className="mt-4 border-t border-line pt-4">
+                    <p className="break-words whitespace-pre-wrap leading-6"><Linkify text={r.body} /></p>
+                    <p className="mt-4 text-xs text-muted">Recorded by {r.author_name || 'an officer'}</p>
+                  </div>
 
                   {related.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="text-sm font-semibold">Action items</h3>
-                      <ul className="mt-1 divide-y divide-line border-y border-line text-sm">
+                    <div className="mt-5 border-t border-line pt-4">
+                      <h3 className="text-sm font-semibold">Decisions &amp; action items</h3>
+                      <ul className="mt-2 divide-y divide-line border-y border-line text-sm">
                         {related.map((t) => (
-                          <li key={t.id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 py-2">
-                            <span className="min-w-0 break-words">
-                              {t.title}
-                              <span className="text-slate-500">
-                                {' '}
-                                ({t.assigned_to ? names[t.assigned_to] ?? 'Unknown' : 'Unassigned'}
-                                {t.due_on && `, due ${formatDate(t.due_on)}`})
-                              </span>
-                            </span>
-                            <Chip tone={t.status === 'done' ? 'green' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>
+                          <li key={t.id} className="py-3">
+                            <p className="font-medium break-words text-ink">{t.title}</p>
+                            <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                              <span>{t.assigned_to ? names[t.assigned_to] ?? 'Unknown' : 'Unassigned'}</span>
+                              {t.due_on && <span>Due {formatDate(t.due_on)}</span>}
+                              <Chip tone={t.status === 'done' ? 'green' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>
+                            </p>
                           </li>
                         ))}
                       </ul>
@@ -148,24 +155,24 @@ export default function Minutes() {
                   )}
 
                   {canWrite && (
-                    <div className="mt-4 text-sm">
+                    <div className="mt-4">
                       {deleting === r.id ? (
-                        <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                          <span className="text-slate-700">Delete these minutes for good?</span>
-                          <button onClick={() => void remove(r)} className="min-h-11 py-2 font-semibold text-accent hover:underline">Yes, delete</button>
-                          <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-slate-600 hover:underline">Cancel</button>
+                        <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                          <span className="text-ink">Delete these minutes for good?</span>
+                          <button onClick={() => void remove(r)} className="min-h-11 font-semibold text-brand-700 hover:underline">Yes, delete</button>
+                          <button onClick={() => setDeleting(null)} className="min-h-11 text-umber hover:underline">Cancel</button>
                         </span>
                       ) : (
-                        <button onClick={() => setDeleting(r.id)} className="min-h-11 py-2 text-slate-600 hover:text-accent hover:underline">Delete</button>
+                        <button onClick={() => setDeleting(r.id)} className="min-h-11 text-sm text-umber hover:text-brand-700 hover:underline">Delete</button>
                       )}
                     </div>
                   )}
-                </div>
-              )}
-            </li>
-          )
-        })}
-      </ul>
+                </>
+              )
+            })()}
+          </aside>
+        </div>
+      )}
     </div>
   )
 }
@@ -293,7 +300,7 @@ function MinutesForm({
                     type="button"
                     onClick={() => setItems((prev) => prev.filter((x) => x.id !== i.id))}
                     aria-label={`Remove action item ${n + 1}`}
-                    className="rounded-md px-2 py-2 text-left text-sm text-slate-600 hover:bg-bg hover:text-accent"
+                    className="rounded-md px-2 py-2 text-left text-sm text-umber hover:bg-paper hover:text-brand-700"
                   >
                     Remove
                   </button>
@@ -316,12 +323,12 @@ function MinutesForm({
         </label>
       </div>
 
-      {error && <p role="alert" className="mt-4 border-l-2 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-2 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="w-full sm:w-auto sm:min-w-44">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save minutes'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-slate-600 hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">Cancel</button>
       </div>
     </form>
   )

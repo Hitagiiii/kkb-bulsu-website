@@ -76,7 +76,7 @@ export default function Account() {
           </div>
           <div>
             <label htmlFor="acc-email" className="block text-sm font-semibold">University email</label>
-            <input id="acc-email" value={session?.user.email ?? ''} disabled className={inputClass + ' bg-bg text-muted'} />
+            <input id="acc-email" value={session?.user.email ?? ''} disabled className={inputClass + ' bg-paper text-muted'} />
           </div>
           <div>
             <label htmlFor="acc-sn" className="block text-sm font-semibold">Student number</label>
@@ -99,7 +99,7 @@ export default function Account() {
             <label htmlFor="acc-ys" className="block text-sm font-semibold">Year & section</label>
             <input id="acc-ys" value={yearSection} onChange={(e) => setYearSection(e.target.value)} placeholder="3rd year · BSIT 3A" className={inputClass} />
           </div>
-          {error && <p role="alert" className="border-l-4 border-accent bg-soft px-3 py-2.5 text-sm text-accent">{error}</p>}
+          {error && <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>}
           {saved && <p role="status" className="rounded-md bg-success-pale px-3 py-2.5 text-sm text-success-deep">Saved.</p>}
           <button type="submit" disabled={saving} className={buttonClass + ' sm:w-auto'}>{saving ? 'Saving…' : 'Save changes'}</button>
         </form>
@@ -116,7 +116,7 @@ export default function Account() {
             <input id="acc-pw2" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={inputClass} />
           </div>
           {pwMessage && (
-            <p role={pwMessage.ok ? 'status' : 'alert'} className={pwMessage.ok ? 'rounded-md bg-success-pale px-3 py-2.5 text-sm text-success-deep' : 'border-l-4 border-accent bg-soft px-3 py-2.5 text-sm text-accent'}>
+            <p role={pwMessage.ok ? 'status' : 'alert'} className={pwMessage.ok ? 'rounded-md bg-success-pale px-3 py-2.5 text-sm text-success-deep' : 'border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700'}>
               {pwMessage.text}
             </p>
           )}

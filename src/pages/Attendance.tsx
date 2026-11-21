@@ -7,6 +7,7 @@ import { formatDay, PARTICIPATION_TARGET } from '../lib/events'
 import { Link } from 'react-router-dom'
 import Chip from '../components/Chip'
 import { eyebrowClass, subtleButtonClass } from '../components/ui'
+import PageHeader from '../components/PageHeader'
 
 interface Mine {
   event_id: string
@@ -108,21 +109,19 @@ export default function Attendance() {
 
   return (
     <div className="w-full print:max-w-3xl">
-      <div className="flex flex-wrap items-end justify-between gap-3 pb-2 print:hidden">
-        <div>
-          <p className={eyebrowClass}>Your participation</p>
-          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Every time you show up.</h1>
-          <p className="mt-2 text-sm text-muted">Your attendance record for AY 2026–2027. Scan the QR code at an event to check in.</p>
-        </div>
-        {isOfficer && report && (
-          <button onClick={() => window.print()} className={subtleButtonClass + ' min-h-11'}>
-            Print report
-          </button>
-        )}
+      <div className="print:hidden">
+        <PageHeader
+          eyebrow="Your participation"
+          title="Every time you show up."
+          subtitle="Your attendance record for AY 2026–2027. Scan the QR code at an event to check in."
+          action={isOfficer && report ? (
+            <button onClick={() => window.print()} className={subtleButtonClass + ' min-h-11'}>Print report</button>
+          ) : undefined}
+        />
       </div>
 
       {error && (
-        <p role="alert" className="mt-6 border-l-4 border-accent bg-soft px-3 py-2 text-sm text-accent">
+        <p role="alert" className="mt-6 border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
           {error}
         </p>
       )}
@@ -136,8 +135,8 @@ export default function Attendance() {
               <p className="mt-1 text-sm font-semibold text-ink">
                 {attendedPast} of {pastCount} events attended
               </p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(rate * 100)} aria-label="Attendance rate">
-                <div className="h-full bg-accent" style={{ width: `${Math.round(rate * 100)}%` }} />
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-sand" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(rate * 100)} aria-label="Attendance rate">
+                <div className="h-full bg-brand-700" style={{ width: `${Math.round(rate * 100)}%` }} />
               </div>
               <p className="mt-3 text-sm text-muted">
                 {pastCount === 0
@@ -181,7 +180,7 @@ export default function Attendance() {
                 <p className={eyebrowClass}>Your next chance to show up</p>
                 <p className="mt-2 text-lg font-medium break-words">{nextEvent.title}</p>
                 <p className="mt-1 text-xs text-muted">{formatDay(nextEvent.starts_at)}</p>
-                <Link to="/events" className="mt-3 inline-block text-sm font-semibold text-accent hover:underline">View event &amp; RSVP →</Link>
+                <Link to="/events" className="mt-3 inline-block text-sm font-semibold text-brand-700 hover:underline">View event &amp; RSVP →</Link>
               </div>
             )}
             <div className="rounded-md border border-line bg-white p-4">

@@ -18,9 +18,9 @@ export default function AuthShell({
   aside?: ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-paper">
       <header className="flex items-center justify-between border-b border-line bg-white px-5 py-4 sm:px-8">
-        <span className="text-base font-bold tracking-tight text-accent">KKB BULSU</span>
+        <span className="text-base font-bold tracking-tight text-brand-700">KKB BULSU</span>
         <span className="text-xs text-muted">
           <span className="hidden sm:inline">Bulacan State University · </span>Members portal
         </span>

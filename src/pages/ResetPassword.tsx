@@ -20,7 +20,7 @@ export default function ResetPassword() {
   if (!session) {
     return (
       <AuthShell title="This link has expired." subtitle="Reset links only work once and for a short time.">
-        <Link to="/forgot-password" className="inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">Send a new link</Link>
+        <Link to="/forgot-password" className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700 hover:underline">Send a new link</Link>
       </AuthShell>
     )
   }
@@ -49,7 +49,7 @@ export default function ResetPassword() {
           <label htmlFor="confirm" className="block text-sm font-semibold text-ink">Confirm new password</label>
           <input id="confirm" type="password" required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={inputClass} />
         </div>
-        {error && <p role="alert" className="border-l-4 border-accent bg-soft px-3 py-2.5 text-sm text-accent">{error}</p>}
+        {error && <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>}
         <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save new password'}</button>
       </form>
     </AuthShell>

@@ -109,7 +109,7 @@ export default function EventForm({
 
       <div>
         <p className="text-sm font-medium">Map pin (optional)</p>
-        <p className="mb-2 text-xs text-slate-500">Members get a Directions button that opens their maps app.</p>
+        <p className="mb-2 text-xs text-muted">Members get a Directions button that opens their maps app.</p>
         <LocationPicker
           lat={lat}
           lng={lng}
@@ -133,7 +133,7 @@ export default function EventForm({
           placeholder="Paste a Google Meet or Zoom link"
           className={inputClass}
         />
-        <p className="mt-1 text-xs text-slate-500">Members will see a Join button for this event.</p>
+        <p className="mt-1 text-xs text-muted">Members will see a Join button for this event.</p>
       </div>
 
       <div>
@@ -149,7 +149,7 @@ export default function EventForm({
       </div>
 
       {error && (
-        <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-accent">
+        <p role="alert" className="rounded-md bg-soft px-3 py-2 text-sm text-brand-700">
           {error}
         </p>
       )}
@@ -160,7 +160,7 @@ export default function EventForm({
             {busy ? 'Saving…' : submitLabel}
           </button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-slate-600 hover:underline">
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">
           Cancel
         </button>
       </div>

@@ -5,20 +5,11 @@ import { supabase } from '../lib/supabase'
 import { errorMessage, peso, type BudgetSummary } from '../lib/finance'
 import type { Folder } from '../lib/folders'
 import { FolderIcon, PlusIcon } from '../components/Icons'
-import { buttonClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import PageHeader from '../components/PageHeader'
 
 type Row = BudgetSummary & { folder_id: string | null }
 type Panel = null | 'budget' | 'folder'
-
-function Stat({ label, value, hint, tone = '' }: { label: string; value: string | number; hint?: string; tone?: string }) {
-  return (
-    <div className="min-w-0 rounded-md border border-line bg-white p-4">
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted">{label}</dt>
-      <dd className={'mt-1 text-2xl font-semibold leading-tight tabular-nums break-words ' + (tone || 'text-ink')}>{value}</dd>
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
-    </div>
-  )
-}
 
 function ProgressRing({ percent, label }: { percent: number; label: string }) {
   const size = 44
@@ -30,7 +21,7 @@ function ProgressRing({ percent, label }: { percent: number; label: string }) {
   return (
     <span className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center" aria-label={`${label}: ${Math.round(percent)}% spent`}>
       <svg viewBox={`0 0 ${size} ${size}`} className="h-11 w-11 -rotate-90" aria-hidden="true">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-slate-200" />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-sand" />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -146,7 +137,7 @@ export default function Finance() {
 
   function renderBudgets(list: Row[]) {
     return (
-      <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+      <ul className="mt-4 divide-y divide-line border-y border-line bg-white">
         {list.map((r) => {
           const pct = r.total_budget > 0 ? Math.min(100, (r.total_spent / r.total_budget) * 100) : r.total_spent > 0 ? 100 : 0
           const over = r.money_left < 0
@@ -155,27 +146,27 @@ export default function Finance() {
             <li key={r.budget_id}>
               <Link
                 to={`/finance/${r.budget_id}`}
-                className="grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-2 py-2.5 hover:bg-bg sm:grid-cols-[minmax(0,1fr)_12rem_10rem_4.5rem] sm:gap-x-5 sm:px-3"
+                className="grid min-h-[5rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-4 transition-colors hover:bg-paper sm:grid-cols-[minmax(0,1fr)_12rem_10rem_5rem] sm:gap-x-6 sm:px-5"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ink">{r.name}</p>
-                  <p className="mt-0.5 text-xs text-slate-500 sm:hidden">
+                  <p className="mt-0.5 text-xs text-muted sm:hidden">
                     {peso(r.total_spent)} spent of {peso(r.total_budget)}
                   </p>
                 </div>
 
                 <div className={'text-right text-sm font-semibold tabular-nums sm:order-2 ' + (over ? 'text-error' : 'text-ink')}>
                   {peso(Math.abs(r.money_left))}{' '}
-                  <span className="font-normal text-slate-500">{over ? 'over' : 'left'}</span>
+                  <span className="font-normal text-muted">{over ? 'over' : 'left'}</span>
                 </div>
 
-                <div className="hidden text-right text-sm text-slate-500 tabular-nums sm:block sm:order-3">
+                <div className="hidden text-right text-sm text-muted tabular-nums sm:block sm:order-3">
                   {peso(r.total_spent)} of {peso(r.total_budget)}
                 </div>
 
                 <div className="col-span-2 flex items-center gap-2 sm:col-span-1 sm:order-4 sm:justify-end" aria-label={`${progressLabel} ${Math.round(pct)} percent`}>
                   <ProgressRing percent={pct} label={progressLabel} />
-                  <span className="hidden text-[10px] font-medium uppercase tracking-wide text-slate-500 sm:inline">{progressLabel}</span>
+                  <span className="hidden text-[10px] font-medium uppercase tracking-wide text-muted sm:inline">{progressLabel}</span>
                 </div>
               </Link>
             </li>
@@ -192,28 +183,26 @@ export default function Finance() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-wrap items-start justify-between gap-3 pb-2">
-        <div>
-          <p className={eyebrowClass}>Financial transparency</p>
-          <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">Every peso, accounted for.</h1>
-          <p className="mt-2 text-sm text-muted">AY 2026–2027 · Budgets, expenses and receipts, grouped into folders.</p>
-        </div>
-        {canEdit && (
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => setPanel(panel === 'folder' ? null : 'folder')} className={subtleButtonClass}>
-              <FolderIcon size={16} className="mr-1.5" /> New folder
+      <PageHeader
+        eyebrow="Financial transparency"
+        title="Every peso, accounted for."
+        subtitle="AY 2026–2027 · Budgets, expenses and receipts, grouped into folders."
+        action={canEdit ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-line bg-white p-2">
+            <button type="button" onClick={() => setPanel(panel === 'folder' ? null : 'folder')} className={subtleButtonClass + ' min-h-11'}>
+              <FolderIcon size={16} className="mr-2" /> New folder
             </button>
-            <button onClick={() => setPanel(panel === 'budget' ? null : 'budget')} className={buttonClass + ' sm:w-auto'}>
-              <PlusIcon size={16} className="mr-1.5" /> New budget
+            <button type="button" onClick={() => setPanel(panel === 'budget' ? null : 'budget')} className={buttonClass + ' min-h-11 sm:w-auto'}>
+              <PlusIcon size={16} className="mr-2" /> New budget
             </button>
           </div>
-        )}
-      </div>
+        ) : undefined}
+      />
 
-      {error && <p role="alert" className="mt-4 border-l-4 border-accent bg-soft px-3 py-2 text-sm text-accent">{error}</p>}
+      {error && <p role="alert" className="mt-4 border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
 
       {canEdit && panel === 'folder' && (
-        <form onSubmit={createFolder} className="mt-4 flex flex-wrap items-end gap-3 rounded-md border border-line bg-white p-4">
+        <form onSubmit={createFolder} className="mt-5 grid gap-4 rounded-md border border-line bg-white p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-5">
           <div className="min-w-0 flex-1 sm:max-w-sm">
             <label htmlFor="f-name" className="text-sm font-medium">Folder name</label>
             <input id="f-name" value={newFolder} maxLength={80} onChange={(e) => setNewFolder(e.target.value)} placeholder="e.g. A.Y. 2026-2027" className={inputClass} />
@@ -223,7 +212,7 @@ export default function Finance() {
       )}
 
       {canEdit && panel === 'budget' && (
-        <form onSubmit={createBudget} className="mt-4 grid gap-3 rounded-md border border-line bg-white p-4 sm:grid-cols-[1fr_10rem_12rem_auto] sm:items-end">
+        <form onSubmit={createBudget} className="mt-5 grid gap-4 rounded-md border border-line bg-white p-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(9rem,.7fr)_minmax(11rem,.9fr)_auto] sm:items-end sm:p-5">
           <div>
             <label htmlFor="b-name" className="text-sm font-medium">Budget name</label>
             <input id="b-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Foundation Day" className={inputClass} />
@@ -245,50 +234,60 @@ export default function Finance() {
         </form>
       )}
 
-      {loading && <div className="mt-6 border border-line bg-white px-4 py-6 text-sm text-slate-500" aria-label="Loading">Loading finance…</div>}
+      {loading && <div className="mt-6 border border-line bg-white px-4 py-6 text-sm text-muted" aria-label="Loading">Loading finance…</div>}
 
       {!loading && (
-        <dl aria-label="Overview" className="mt-5 grid gap-3 sm:grid-cols-3">
-          <Stat
-            label={totalLeft < 0 ? 'Over budget by' : 'Money left'}
-            value={peso(Math.abs(totalLeft))}
-            hint={`${peso(totalSpent)} spent of ${peso(totalBudget)}`}
-            tone={totalLeft < 0 ? 'text-error' : ''}
-          />
-          <Stat label="Budgets" value={rows.length} hint={folders.length > 0 ? `${folders.length} ${folders.length === 1 ? 'folder' : 'folders'}` : 'No folders yet'} />
-          <Stat
-            label="Missing receipts"
-            value={missing}
-            hint={missing > 0 ? 'Open a budget to attach them' : 'Everything has a receipt'}
-            tone={missing > 0 ? 'text-brand-700' : 'text-success-deep'}
-          />
+        <>
+        <dl aria-label="Overview" className="mt-6 grid gap-3 sm:grid-cols-[1.25fr_1fr_1fr]">
+          <div className="rounded-md border border-brand-100 border-t-4 border-t-brand-700 bg-white p-5 sm:p-6">
+            <dt className="text-[11px] font-bold tracking-[0.14em] text-brand-700 uppercase">{totalLeft < 0 ? 'Over budget by' : 'Money left'}</dt>
+            <dd className="mt-2 break-words text-3xl font-semibold tracking-tight tabular-nums text-brand-900 sm:text-4xl">{peso(Math.abs(totalLeft))}</dd>
+            <p className="mt-2 text-sm text-muted">{peso(totalSpent)} spent from {peso(totalBudget)} allocated</p>
+            <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-brand-50"><div className="h-full rounded-full bg-brand-700" style={{ width: `${totalBudget > 0 ? Math.max(0, Math.min(100, totalSpent / totalBudget * 100)) : 0}%` }} /></div>
+          </div>
+          <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-5 sm:p-6">
+            <dt className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Approved budget</dt>
+            <dd className="mt-2 text-2xl font-semibold tabular-nums text-ink sm:text-3xl">{peso(totalBudget)}</dd>
+            <p className="mt-2 text-sm text-muted">Across {rows.length} {rows.length === 1 ? 'budget' : 'budgets'}</p>
+          </div>
+          <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-5 sm:p-6">
+            <dt className="text-[11px] font-bold tracking-[0.12em] text-muted uppercase">Total spent</dt>
+            <dd className="mt-2 text-2xl font-semibold tabular-nums text-ink sm:text-3xl">{peso(totalSpent)}</dd>
+            <p className="mt-2 text-sm text-muted">{missing > 0 ? `${missing} expenses still need receipts` : 'All recorded expenses have receipts'}</p>
+          </div>
         </dl>
+        {missing > 0 && (
+          <p className="mt-3 border-l-4 border-accent-500 bg-accent-100 px-4 py-3 text-sm text-accent-700">
+            {missing} {missing === 1 ? 'expense is' : 'expenses are'} missing a receipt. Open the relevant budget to review them.
+          </p>
+        )}
+        </>
       )}
 
       {!loading && rows.length === 0 && folders.length === 0 && (
-        <p className="mt-5 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-slate-500">
+        <p className="mt-5 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
           No budgets yet. Create the first one with "New budget".
         </p>
       )}
 
-      <div className="mt-7 space-y-7">
+      <div className="mt-9 space-y-9">
         {folders.map((f) => {
           const list = rows.filter((r) => r.folder_id === f.id)
           const spent = list.reduce((s, r) => s + Math.round(r.total_spent * 100), 0) / 100
           const budget = list.reduce((s, r) => s + Math.round(r.total_budget * 100), 0) / 100
           return (
             <section key={f.id} aria-label={f.name}>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line pb-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-brand-700 pb-3">
                 <h2 className="flex items-center gap-2 text-xl font-medium">
                   <FolderIcon size={17} className="text-brand-700" /> {f.name}
                 </h2>
-                <p className="text-xs text-slate-500 tabular-nums">
+                <p className="text-xs text-muted tabular-nums">
                   {list.length} {list.length === 1 ? 'budget' : 'budgets'} · {peso(spent)} of {peso(budget)}
                 </p>
               </div>
 
               {canEdit && (
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-xs">
                   {renaming === f.id ? (
                     <>
                       <input
@@ -299,13 +298,13 @@ export default function Finance() {
                         className="min-w-0 min-h-11 border border-ash px-2 text-base sm:min-h-8 sm:text-sm"
                       />
                       <button onClick={() => void renameFolder(f.id)} className="min-h-11 px-1 font-semibold text-brand-700 hover:underline sm:min-h-8">Save</button>
-                      <button onClick={() => setRenaming(null)} className="min-h-11 px-1 text-slate-600 hover:underline sm:min-h-8">Cancel</button>
+                      <button onClick={() => setRenaming(null)} className="min-h-11 px-1 text-umber hover:underline sm:min-h-8">Cancel</button>
                     </>
                   ) : deleting === f.id ? (
                     <>
-                      <span className="text-slate-700">Delete this folder? Its budgets are kept and move to "No folder".</span>
+                      <span className="text-ink">Delete this folder? Its budgets are kept and move to "No folder".</span>
                       <button onClick={() => void deleteFolder(f.id)} className="min-h-11 px-1 font-semibold text-error hover:underline sm:min-h-8">Yes, delete</button>
-                      <button onClick={() => setDeleting(null)} className="min-h-11 px-1 text-slate-600 hover:underline sm:min-h-8">Cancel</button>
+                      <button onClick={() => setDeleting(null)} className="min-h-11 px-1 text-umber hover:underline sm:min-h-8">Cancel</button>
                     </>
                   ) : (
                     <>
@@ -318,14 +317,14 @@ export default function Finance() {
                       >
                         Rename
                       </button>
-                      <button onClick={() => setDeleting(f.id)} className="min-h-11 px-1 text-slate-600 hover:text-error hover:underline sm:min-h-8">Delete folder</button>
+                      <button onClick={() => setDeleting(f.id)} className="min-h-11 px-1 text-umber hover:text-error hover:underline sm:min-h-8">Delete folder</button>
                     </>
                   )}
                 </div>
               )}
 
               {list.length === 0 ? (
-                <p className="mt-2 rounded-md border border-dashed border-line bg-white px-4 py-4 text-sm text-slate-500">
+                <p className="mt-2 rounded-md border border-dashed border-line bg-white px-4 py-4 text-sm text-muted">
                   Empty. Open a budget and choose this folder to move it here.
                 </p>
               ) : (

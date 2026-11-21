@@ -45,7 +45,7 @@ export default function NotificationsMenu({
       >
         Notifications
         {unread > 0 && (
-          <span className="rounded-full bg-accent px-1.5 py-0.5 text-[11px] font-bold text-white">
+          <span className="rounded-full bg-brand-700 px-1.5 py-0.5 text-[11px] font-bold text-white">
             {unread > 9 ? '9+' : unread}
             <span className="sr-only"> unread</span>
           </span>
@@ -64,7 +64,7 @@ export default function NotificationsMenu({
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <p className="text-sm font-semibold text-ink">Notifications</p>
             {unread > 0 && (
-              <button onClick={() => void markRead(items.filter((n) => !n.read_at).map((n) => n.id))} className="text-xs font-semibold text-accent hover:underline">
+              <button onClick={() => void markRead(items.filter((n) => !n.read_at).map((n) => n.id))} className="text-xs font-semibold text-brand-700 hover:underline">
                 Mark all as read
               </button>
             )}
@@ -83,10 +83,10 @@ export default function NotificationsMenu({
                       setOpen(false)
                       if (n.link) navigate(n.link)
                     }}
-                    className={'block w-full px-4 py-3 text-left hover:bg-bg ' + (n.read_at ? '' : 'bg-soft/50')}
+                    className={'block w-full px-4 py-3 text-left hover:bg-paper ' + (n.read_at ? '' : 'bg-soft/50')}
                   >
                     <span className="flex items-start gap-2">
-                      {!n.read_at && <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-accent" />}
+                      {!n.read_at && <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-700" />}
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold break-words text-ink">{n.title}</span>
                         {n.body && <span className="mt-0.5 block text-xs break-words text-muted">{n.body}</span>}
@@ -101,7 +101,7 @@ export default function NotificationsMenu({
 
           {permission === 'default' && (
             <div className="border-t border-line px-4 py-3">
-              <button onClick={() => void enableAlerts()} className="text-xs font-semibold text-accent hover:underline">
+              <button onClick={() => void enableAlerts()} className="text-xs font-semibold text-brand-700 hover:underline">
                 Also alert me on this device
               </button>
             </div>

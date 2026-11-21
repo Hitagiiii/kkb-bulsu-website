@@ -16,7 +16,7 @@ export default function Deactivated() {
   return (
     <AuthShell title="Your access is paused." subtitle="An admin has paused your KKB BULSU membership access. Your orders, attendance and records are kept.">
       <p className="text-sm text-muted">If this looks like a mistake, or you would like to rejoin, contact the membership officers.</p>
-      <a href={`mailto:${HELP_EMAIL}`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">
+      <a href={`mailto:${HELP_EMAIL}`} className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-brand-700 hover:underline">
         {HELP_EMAIL}
       </a>
       <div>

@@ -60,7 +60,7 @@ export default function Register() {
     return (
       <AuthShell title="Check your email." subtitle={`We sent a confirmation link to ${email}.`}>
         <p className="text-sm text-muted">Open the link, then sign in. An officer will approve your account after that.</p>
-        <Link to="/login" className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">
+        <Link to="/login" className="mt-6 inline-flex min-h-11 items-center text-sm font-semibold text-brand-700 hover:underline">
           Go to sign in
         </Link>
       </AuthShell>
@@ -109,7 +109,7 @@ export default function Register() {
           I agree to the membership guidelines and privacy notice.
         </label>
         {error && (
-          <p role="alert" className="border-l-4 border-accent bg-soft px-3 py-2.5 text-sm text-accent">{error}</p>
+          <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>
         )}
         <button type="submit" disabled={busy} className={buttonClass}>
           {busy ? 'Submitting…' : 'Submit membership application'}
@@ -117,7 +117,7 @@ export default function Register() {
       </form>
       <p className="mt-6 text-sm text-muted">
         Already a member?{' '}
-        <Link to="/login" className="font-semibold text-accent hover:underline">Sign in</Link>
+        <Link to="/login" className="font-semibold text-brand-700 hover:underline">Sign in</Link>
       </p>
     </AuthShell>
   )

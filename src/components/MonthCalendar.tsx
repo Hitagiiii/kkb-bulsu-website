@@ -4,7 +4,7 @@ import { dayKey, formatTime, type EventRow } from '../lib/events'
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const navButton =
-  'min-h-11 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink hover:bg-bg sm:min-h-10'
+  'min-h-11 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink hover:bg-paper sm:min-h-10'
 
 export default function MonthCalendar({
   events,
@@ -72,7 +72,7 @@ export default function MonthCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 border-b border-line bg-bg text-center text-xs font-semibold text-muted">
+      <div className="grid grid-cols-7 border-b border-line bg-paper text-center text-xs font-semibold text-muted">
         {WEEKDAYS.map((d) => (
           <div key={d} className="py-2">
             <span className="sm:hidden">{d[0]}</span>
@@ -95,7 +95,7 @@ export default function MonthCalendar({
               className={
                 'min-h-14 border-b border-r border-line sm:min-h-24 ' +
                 (isSelected ? 'bg-soft ' : '') +
-                (inMonth ? '' : 'bg-bg text-slate-400')
+                (inMonth ? '' : 'bg-paper text-umber')
               }
             >
               <button
@@ -108,12 +108,12 @@ export default function MonthCalendar({
                 }`}
                 className={
                   'flex min-h-11 w-full items-center gap-1 px-2 py-2 text-left text-sm font-semibold ' +
-                  (isToday ? 'text-accent' : 'text-ink')
+                  (isToday ? 'text-brand-700' : 'text-ink')
                 }
               >
-                <span className={isToday ? 'border-b-2 border-accent' : ''}>{date.getDate()}</span>
+                <span className={isToday ? 'border-b-2 border-brand-700' : ''}>{date.getDate()}</span>
                 {dayEvents.length > 0 && (
-                  <span className="text-xs font-medium text-slate-500">({dayEvents.length})</span>
+                  <span className="text-xs font-medium text-muted">({dayEvents.length})</span>
                 )}
               </button>
 
@@ -132,7 +132,7 @@ export default function MonthCalendar({
                   <button
                     type="button"
                     onClick={() => onSelectDay(key)}
-                    className="min-h-11 w-full px-2 text-left text-xs font-semibold text-accent hover:underline"
+                    className="min-h-11 w-full px-2 text-left text-xs font-semibold text-brand-700 hover:underline"
                   >
                     +{dayEvents.length - 2} more
                   </button>

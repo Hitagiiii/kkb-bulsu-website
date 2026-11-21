@@ -110,7 +110,7 @@ export default function Dashboard() {
           <section aria-label="Latest announcements">
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="text-xl font-medium text-ink">Latest announcements</h2>
-              <Link to="/announcements" className="py-1 text-sm font-semibold text-accent hover:underline">
+              <Link to="/announcements" className="py-1 text-sm font-semibold text-brand-700 hover:underline">
                 See all
               </Link>
             </div>
@@ -122,7 +122,7 @@ export default function Dashboard() {
                   const photo = (a.image_paths ?? []).map((p) => urls[p]).find(Boolean)
                   return (
                     <li key={a.id}>
-                      <Link to="/announcements" className={cardClass + ' block overflow-hidden transition-colors hover:bg-bg sm:flex'}>
+                      <Link to="/announcements" className={cardClass + ' block overflow-hidden transition-colors hover:bg-paper sm:flex'}>
                         {photo && i === 0 && (
                           <img src={photo} alt="" className="aspect-[16/9] w-full object-cover sm:aspect-auto sm:w-56 sm:shrink-0" />
                         )}
@@ -133,7 +133,7 @@ export default function Dashboard() {
                           </div>
                           <p className="mt-1 text-lg font-semibold break-words text-ink">{a.title}</p>
                           <p className="mt-1 line-clamp-2 text-sm break-words text-muted">{a.body}</p>
-                          <p className="mt-3 text-sm font-semibold text-accent">Read the story →</p>
+                          <p className="mt-3 text-sm font-semibold text-brand-700">Read the story →</p>
                         </div>
                       </Link>
                     </li>
@@ -147,7 +147,7 @@ export default function Dashboard() {
             <section aria-label="Coming up">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="text-xl font-medium text-ink">Coming up</h2>
-                <Link to="/events" className="py-1 text-sm font-semibold text-accent hover:underline">See all</Link>
+                <Link to="/events" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
               </div>
               {events === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
               {events && events.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No upcoming events yet.</p>}
@@ -157,9 +157,9 @@ export default function Dashboard() {
                     const d = new Date(e.starts_at)
                     return (
                       <li key={e.id}>
-                        <Link to="/events" className="flex items-stretch hover:bg-bg">
+                        <Link to="/events" className="flex items-stretch hover:bg-paper">
                           <span className="flex w-16 shrink-0 flex-col items-center justify-center bg-soft py-3">
-                            <span className="text-[11px] font-semibold tracking-[0.08em] text-accent uppercase">{d.toLocaleDateString('en-PH', { month: 'short' })}</span>
+                            <span className="text-[11px] font-semibold tracking-[0.08em] text-brand-700 uppercase">{d.toLocaleDateString('en-PH', { month: 'short' })}</span>
                             <span className="text-2xl leading-none font-medium text-ink">{d.getDate()}</span>
                           </span>
                           <span className="min-w-0 flex-1 px-4 py-3">
@@ -178,7 +178,7 @@ export default function Dashboard() {
             <section aria-label="Open polls">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="text-xl font-medium text-ink">Open polls</h2>
-                <Link to="/polls" className="py-1 text-sm font-semibold text-accent hover:underline">See all</Link>
+                <Link to="/polls" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
               </div>
               {openPolls === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
               {openPolls && openPolls.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No polls are open right now.</p>}
@@ -186,7 +186,7 @@ export default function Dashboard() {
                 <ul className={cardClass + ' mt-3 divide-y divide-line overflow-hidden'}>
                   {openPolls.map((p) => (
                     <li key={p.id}>
-                      <Link to="/polls" className="block px-4 py-3 hover:bg-bg">
+                      <Link to="/polls" className="block px-4 py-3 hover:bg-paper">
                         <span className={eyebrowClass + ' block'}>Member poll</span>
                         <span className="mt-1 block text-sm font-semibold break-words text-ink">{p.question}</span>
                         <span className="block text-xs text-muted">
@@ -203,7 +203,7 @@ export default function Dashboard() {
           <section aria-label="Recent documents">
             <div className="flex items-baseline justify-between gap-4">
               <h2 className="text-xl font-medium text-ink">Recent documents</h2>
-              <Link to="/documents" className="py-1 text-sm font-semibold text-accent hover:underline">See all</Link>
+              <Link to="/documents" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
             </div>
             {docs === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
             {docs && docs.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No documents have been shared yet.</p>}
@@ -211,7 +211,7 @@ export default function Dashboard() {
               <ul className="mt-3 grid gap-3 sm:grid-cols-2">
                 {docs.map((d) => (
                   <li key={d.id}>
-                    <Link to="/documents" className={cardClass + ' block p-4 hover:bg-bg'}>
+                    <Link to="/documents" className={cardClass + ' block p-4 hover:bg-paper'}>
                       <span className={eyebrowClass + ' block'}>{d.category}</span>
                       <span className="mt-1 block text-sm font-semibold break-words text-ink">{d.title}</span>
                       <span className="block text-xs text-muted">Added {formatDateTime(d.created_at).split(',')[0]}</span>
@@ -253,14 +253,14 @@ export default function Dashboard() {
                   {attendance.attended} of {attendance.past} events attended
                 </p>
                 <div
-                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary"
+                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-sand"
                   role="progressbar"
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-valuenow={Math.round((rate ?? 0) * 100)}
                   aria-label="Attendance"
                 >
-                  <div className="h-full bg-accent" style={{ width: `${Math.round((rate ?? 0) * 100)}%` }} />
+                  <div className="h-full bg-brand-700" style={{ width: `${Math.round((rate ?? 0) * 100)}%` }} />
                 </div>
                 <p className="mt-2 text-xs text-muted">
                   {rate !== null && rate >= PARTICIPATION_TARGET
@@ -269,7 +269,7 @@ export default function Dashboard() {
                 </p>
               </>
             )}
-            <Link to="/attendance" className="mt-3 inline-block py-1 text-sm font-semibold text-accent hover:underline">
+            <Link to="/attendance" className="mt-3 inline-block py-1 text-sm font-semibold text-brand-700 hover:underline">
               View my attendance →
             </Link>
           </section>
@@ -279,7 +279,7 @@ export default function Dashboard() {
             <ul className="mt-2 divide-y divide-line">
               {links.slice(0, 6).map((item) => (
                 <li key={item.to}>
-                  <Link to={item.to} className="flex items-center justify-between py-2 text-sm text-ink hover:text-accent">
+                  <Link to={item.to} className="flex items-center justify-between py-2 text-sm text-ink hover:text-brand-700">
                     {item.label}
                     <span aria-hidden="true" className="text-muted">↗</span>
                   </Link>

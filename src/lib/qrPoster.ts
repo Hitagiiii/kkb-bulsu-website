@@ -47,12 +47,12 @@ export async function downloadQrPoster(link: string, title: string, when: string
   ctx.font = '700 40px Inter, Arial, sans-serif'
   ctx.fillText('KKB BULSU', W / 2, 110)
 
-  ctx.fillStyle = '#1d1b22'
+  ctx.fillStyle = '#25191b'
   ctx.font = '700 64px Inter, Arial, sans-serif'
   const lines = wrapLines(ctx, title, W - 160, 3)
   lines.forEach((l, i) => ctx.fillText(l, W / 2, 210 + i * 78))
 
-  ctx.fillStyle = '#475569'
+  ctx.fillStyle = '#6b5e5a'
   ctx.font = '400 36px Inter, Arial, sans-serif'
   ctx.fillText(when, W / 2, 210 + lines.length * 78 + 20)
 
@@ -61,7 +61,7 @@ export async function downloadQrPoster(link: string, title: string, when: string
   ctx.fillStyle = '#8a1c2e'
   ctx.font = '700 52px Inter, Arial, sans-serif'
   ctx.fillText('Scan to check in', W / 2, 1610)
-  ctx.fillStyle = '#475569'
+  ctx.fillStyle = '#6b5e5a'
   ctx.font = '400 30px Inter, Arial, sans-serif'
   ctx.fillText('Use your phone camera. Sign in if asked.', W / 2, 1655)
 

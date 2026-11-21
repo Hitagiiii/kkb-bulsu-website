@@ -95,7 +95,7 @@ export default function LocationPicker({
               <button
                 type="button"
                 onClick={() => pickPlace(p)}
-                className="block w-full px-3 py-2.5 text-left break-words hover:bg-bg"
+                className="block w-full px-3 py-2.5 text-left break-words hover:bg-paper"
               >
                 {p.display_name}
               </button>
@@ -103,7 +103,7 @@ export default function LocationPicker({
           ))}
         </ul>
       )}
-      {note && <p className="mt-2 text-xs text-slate-600">{note}</p>}
+      {note && <p className="mt-2 text-xs text-umber">{note}</p>}
 
       <MapView
         lat={lat}
@@ -112,7 +112,7 @@ export default function LocationPicker({
         className="mt-3 h-64 w-full rounded-lg border border-line"
       />
 
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-muted">
         Tap the map to drop a pin, then drag the pin to adjust it.
         {lat != null && lng != null && ` Pin at ${lat.toFixed(5)}, ${lng.toFixed(5)}.`}
       </p>

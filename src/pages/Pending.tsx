@@ -56,8 +56,8 @@ export default function Pending() {
               <span className={s.state === 'todo' ? 'text-muted' : 'text-ink'}>
                 {i + 1} {s.label}
               </span>
-              {s.state === 'done' && <CheckIcon size={14} className="text-accent" />}
-              {s.state === 'current' && <span className="text-xs font-semibold text-accent">In progress</span>}
+              {s.state === 'done' && <CheckIcon size={14} className="text-brand-700" />}
+              {s.state === 'current' && <span className="text-xs font-semibold text-brand-700">In progress</span>}
             </li>
           ))}
         </ol>
@@ -71,7 +71,7 @@ export default function Pending() {
         {checking ? 'Checking…' : 'Check application status'}
       </button>
 
-      <p className="mt-6 text-xs text-accent">
+      <p className="mt-6 text-xs text-brand-700">
         Need to correct something?
         <br />
         <a href={`mailto:${HELP_EMAIL}`} className="hover:underline">Contact {HELP_EMAIL}</a>

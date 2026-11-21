@@ -61,7 +61,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
         </p>
       )}
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted">
         {going} going{capacity !== null && ` of ${capacity} spots`}
       </p>
 
@@ -74,7 +74,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
             onClick={() => void answer('going')}
             className={
               'min-h-11 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ' +
-              (mine === 'going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink hover:bg-bg')
+              (mine === 'going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink hover:bg-paper')
             }
           >
             {full ? 'Event is full' : "I'm going"}
@@ -86,7 +86,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
             onClick={() => void answer('not_going')}
             className={
               'min-h-11 rounded-md border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ' +
-              (mine === 'not_going' ? 'border-accent bg-accent text-white' : 'border-line bg-white text-ink hover:bg-bg')
+              (mine === 'not_going' ? 'border-brand-700 bg-brand-700 text-white' : 'border-line bg-white text-ink hover:bg-paper')
             }
           >
             Can't make it
@@ -94,7 +94,7 @@ export default function EventExtras({ event, canEdit, over }: { event: EventRow;
         </div>
       )}
       {error && (
-        <p role="alert" className="mt-2 text-sm text-accent">
+        <p role="alert" className="mt-2 text-sm text-brand-700">
           {error}
         </p>
       )}
@@ -249,18 +249,18 @@ function OfficerPanel({
 
       {open && (
         <div className="mt-4 space-y-6">
-          {note && <p className="text-sm text-slate-700">{note}</p>}
+          {note && <p className="text-sm text-ink">{note}</p>}
 
           <section aria-label="QR check-in">
             <h3 className="text-sm font-semibold">QR check-in</h3>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted">
               Show this at the entrance. Members scan it with their phone camera and sign in if asked. It works from 2
               hours before the event until 2 hours after it ends.
             </p>
             {qr ? (
               <img src={qr} alt="QR code for event check-in" className="mt-3 h-56 w-56 border border-line bg-white" />
             ) : (
-              <p className="mt-3 text-sm text-slate-500">Making the QR code…</p>
+              <p className="mt-3 text-sm text-muted">Making the QR code…</p>
             )}
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" onClick={() => void downloadQr()} disabled={!link} className={subtleButtonClass + ' min-h-11'}>
@@ -280,19 +280,19 @@ function OfficerPanel({
               Checked in ({attendance.length}), going ({going}){notYetIn > 0 && `, ${notYetIn} going but not in yet`}
             </h3>
             {attendance.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">No one has checked in yet.</p>
+              <p className="mt-2 text-sm text-muted">No one has checked in yet.</p>
             ) : (
               <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white bg-white text-sm">
                 {attendance.map((a) => (
                   <li key={a.id} className="flex min-h-11 items-center justify-between gap-3 px-3 py-2">
                     <span className="min-w-0 break-words">
                       {names[a.user_id] ?? 'Unknown'}
-                      <span className="ml-2 text-xs text-slate-500">
+                      <span className="ml-2 text-xs text-muted">
                         {formatDateTime(a.checked_in_at)}
                         {a.method === 'manual' && ' (added by an officer)'}
                       </span>
                     </span>
-                    <button type="button" onClick={() => void removeRow(a.id)} className="min-h-11 shrink-0 px-2 text-xs text-slate-600 hover:text-accent hover:underline">
+                    <button type="button" onClick={() => void removeRow(a.id)} className="min-h-11 shrink-0 px-2 text-xs text-umber hover:text-brand-700 hover:underline">
                       Remove
                     </button>
                   </li>
@@ -324,13 +324,13 @@ function OfficerPanel({
           <section aria-label="Who is going">
             <h3 className="text-sm font-semibold">RSVP list ({goingNames.length} going)</h3>
             {goingNames.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">No one has said they are going yet.</p>
+              <p className="mt-2 text-sm text-muted">No one has said they are going yet.</p>
             ) : (
-              <p className="mt-2 text-sm break-words text-slate-700">{goingNames.join(', ')}</p>
+              <p className="mt-2 text-sm break-words text-ink">{goingNames.join(', ')}</p>
             )}
             <div className="mt-3 flex flex-wrap items-end gap-2">
               <div>
-                <label htmlFor={`cap-${event.id}`} className="text-xs text-slate-500">Limit (leave empty for no limit)</label>
+                <label htmlFor={`cap-${event.id}`} className="text-xs text-muted">Limit (leave empty for no limit)</label>
                 <input
                   id={`cap-${event.id}`}
                   type="number"
@@ -351,7 +351,7 @@ function OfficerPanel({
           <section aria-label="Budget">
             <h3 className="text-sm font-semibold">Budget for this event</h3>
             {budgets.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-muted">
                 No budget is linked. The treasurer can link one from the budget page.
               </p>
             ) : (
@@ -361,7 +361,7 @@ function OfficerPanel({
                     <Link to={`/finance/${b.budget_id}`} className="font-medium text-brand-700 hover:underline">
                       {b.name}
                     </Link>
-                    <p className="text-slate-600">
+                    <p className="text-umber">
                       {peso(b.total_spent)} spent of {peso(b.total_budget)}
                       {going > 0 && `, about ${peso(b.total_budget / going)} per person going`}
                     </p>

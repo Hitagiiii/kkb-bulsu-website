@@ -68,7 +68,7 @@ export default function Login() {
         <div>
           <div className="flex items-baseline justify-between">
             <label htmlFor="password" className="block text-sm font-semibold text-ink">Password</label>
-            <Link to="/forgot-password" className="text-xs font-semibold text-accent hover:underline">Forgot password?</Link>
+            <Link to="/forgot-password" className="text-xs font-semibold text-brand-700 hover:underline">Forgot password?</Link>
           </div>
           <input
             id="password"
@@ -81,7 +81,7 @@ export default function Login() {
           />
         </div>
         {error && (
-          <p role="alert" className="border-l-4 border-accent bg-soft px-3 py-2.5 text-sm text-accent">
+          <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">
             {error}
           </p>
         )}
