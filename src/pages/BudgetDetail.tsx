@@ -203,7 +203,7 @@ export default function BudgetDetail() {
           </div>
 
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4 sm:p-5">
+            <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-5 sm:p-5">
               <dt className="text-xs font-medium text-muted">Total</dt>
               <dd className="mt-2 text-xl font-semibold tabular-nums text-ink sm:text-2xl">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
