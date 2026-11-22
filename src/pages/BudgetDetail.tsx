@@ -227,22 +227,28 @@ export default function BudgetDetail() {
                 <h2 className="text-sm font-semibold">Spending by category</h2>
                 <span className="text-xs text-muted">{categories.length} categories</span>
               </div>
-              <div className="mt-2 max-w-md space-y-0.5">
+              <div className="mt-2 space-y-1">
                 {categories.map(([cat, cents], i) => {
                   const share = (cents / spentCents) * 100
+                  const color = CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]
                   return (
-                    <div key={cat} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 py-1 text-xs">
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <span className={'h-2 w-2 shrink-0 rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} aria-hidden="true" />
-                          <span className="min-w-0 truncate font-medium text-ink">{cat}</span>
-                          <span className="shrink-0 font-num text-sm font-medium text-brand-900">{peso(cents / 100)}</span>
-                        </div>
-                        <div className="mt-1 h-1.5 w-full max-w-[8rem] overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
-                          <div className={'h-full rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} style={{ width: `${share}%` }} />
-                        </div>
+                    <div key={cat} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-sm py-1.5 sm:grid-cols-[minmax(7rem,1.15fr)_auto_minmax(9rem,2fr)_auto] sm:gap-x-3 sm:py-2">
+                      <div className="min-w-0 flex items-center gap-2">
+                        <span className={'h-2.5 w-2.5 shrink-0 rounded-full ' + color} aria-hidden="true" />
+                        <span className="min-w-0 truncate text-sm font-semibold text-ink sm:text-base">{cat}</span>
+                        <span className="text-sm font-semibold text-umber" aria-hidden="true">:</span>
                       </div>
-                      <span className="shrink-0 text-[11px] font-medium tabular-nums text-umber">{Math.round(share)}%</span>
+                      <span className="justify-self-end font-num text-base font-semibold tabular-nums text-brand-900 sm:text-lg">{peso(cents / 100)}</span>
+                      <div className="col-span-2 h-3 w-full min-w-0 overflow-hidden rounded-full bg-brand-50 sm:col-span-1" aria-hidden="true">
+                        <div
+                          className="h-full min-w-[0.35rem] rounded-full"
+                          style={{
+                            width: `${Math.max(share, 3)}%`,
+                            background: `linear-gradient(90deg, rgb(78 15 27), rgb(138 28 46) 55%, rgb(232 112 42))`,
+                          }}
+                        />
+                      </div>
+                      <span className="justify-self-end text-xs font-semibold tabular-nums text-umber sm:text-sm">{Math.round(share)}%</span>
                     </div>
                   )
                 })}
