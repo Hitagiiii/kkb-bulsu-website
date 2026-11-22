@@ -235,10 +235,12 @@ export default function BudgetDetail() {
                     <div key={cat} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 rounded-sm py-1.5 sm:grid-cols-[minmax(7rem,1.15fr)_auto_minmax(9rem,2fr)_auto] sm:gap-x-3 sm:py-2">
                       <div className="min-w-0 flex items-center gap-2">
                         <span className={'h-2.5 w-2.5 shrink-0 rounded-full ' + color} aria-hidden="true" />
-                        <span className="min-w-0 truncate text-sm font-medium text-ink sm:text-base">{cat}</span>
+                        <span className="min-w-0 truncate text-sm font-semibold text-ink sm:text-base">{cat}</span>
                         <span className="text-sm font-semibold text-umber" aria-hidden="true">:</span>
                       </div>
-                      <span className="justify-self-end font-num text-base font-semibold tabular-nums text-brand-900 sm:text-lg">{peso(cents / 100)}</span>
+                      <span className="justify-self-end font-num text-sm font-medium tabular-nums text-black sm:text-base">
+                      {peso(cents / 100)}
+                      </span> 
                       <div className="col-span-2 h-3 w-full min-w-0 overflow-hidden rounded-full bg-brand-50 sm:col-span-1" aria-hidden="true">
                         <div
                           className="h-full min-w-[0.35rem] rounded-full"
