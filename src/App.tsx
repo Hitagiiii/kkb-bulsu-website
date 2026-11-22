@@ -24,6 +24,8 @@ import Polls from './pages/Polls'
 import Register from './pages/Register'
 import ResetPassword from './pages/ResetPassword'
 import Tasks from './pages/Tasks'
+import MySpace from './pages/MySpace'
+import MyTasks from './pages/MyTasks'
 
 export default function App() {
   return (
@@ -44,6 +46,8 @@ export default function App() {
               <Route path="announcements" element={<Announcements />} />
               <Route path="events" element={<Events />} />
               <Route path="verse-of-the-day" element={<VerseOfTheDay />} />
+              <Route path="my-space" element={<MySpace />} />
+              <Route path="my-space/tasks" element={<MyTasks />} />
               <Route path="attend/:token" element={<CheckIn />} />
               <Route path="attendance" element={<Attendance />} />
               <Route path="polls" element={<Polls />} />

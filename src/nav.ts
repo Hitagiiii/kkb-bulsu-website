@@ -16,6 +16,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Home', description: 'Your overview', end: true, accent: 'maroon' },
   { to: '/announcements', label: 'Announcements', description: 'News and notices from the officers', accent: 'maroon' },
   { to: '/verse-of-the-day', label: 'Verse of the Day', description: 'Daily Scripture and KKB reflection', accent: 'maroon' },
+  { to: '/my-space', label: 'My Space', description: 'Your personal dashboard, goals and journal', accent: 'plum' },
   { to: '/events', label: 'Events', description: 'Calendar, RSVP, meeting places and call links', accent: 'orange' },
   { to: '/polls', label: 'Polls', description: 'Vote on organization decisions', accent: 'plum' },
   { to: '/attendance', label: 'Attendance', description: 'Events you attended, and reports for officers', accent: 'teal' },
