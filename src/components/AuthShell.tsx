@@ -26,29 +26,33 @@ export default function AuthShell({
         </span>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-8 sm:px-8 md:grid-cols-2 md:items-start md:gap-16 md:py-14">
+      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-6 sm:px-8 md:grid-cols-2 md:items-center md:gap-12 md:py-8">
         <section className="hidden md:block">
           <img
             src="/images/community.jpg"
             alt="KKB BULSU members chatting on campus"
             className="aspect-[4/3] w-full rounded-md object-cover"
           />
-          <h2 className="font-display mt-8 text-[40px] leading-[1.15] font-medium tracking-tight text-ink">
-            More than an org.
+          <h2 className="font-display mt-5 text-[36px] leading-[1.08] font-medium tracking-tight text-ink">
+            More than an organization,
             <br />
-            Your people on campus.
+            Your people on campus
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
-            Connect with the KKB BULSU community. Show up, lend a hand, and make your university years count.
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
+            Connect with the KKB BULSU community.
+            <br />
+            Show up, lend a hand,
+            <br />
+            and make your university years count.
           </p>
-          <p className={eyebrowClass + ' mt-6'}>Malolos, Bulacan / AY 2026–2027</p>
+          <p className={eyebrowClass + ' mt-4'}>Malolos, Bulacan / AY 2026–2027</p>
         </section>
 
-        <main className="w-full max-w-md md:justify-self-start">
+        <main className="w-full max-w-lg md:justify-self-start">
           <p className={eyebrowClass}>Members only / KKB BULSU</p>
           <h1 className="font-display mt-2 text-[28px] leading-tight font-medium tracking-tight sm:text-[32px]">{title}</h1>
           {subtitle && <p className="mt-2 text-sm leading-relaxed text-muted">{subtitle}</p>}
-          <div className="mt-6">{children}</div>
+          <div className="mt-4">{children}</div>
           {aside}
         </main>
       </div>

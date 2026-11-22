@@ -202,19 +202,19 @@ export default function BudgetDetail() {
             <p className="mt-3 text-xs text-muted">Available funds · {peso(Math.abs(left))}</p>
           </div>
 
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-5 sm:p-5">
-              <dt className="text-xs font-medium text-muted">Total</dt>
-              <dd className="mt-2 text-xl font-semibold tabular-nums text-ink sm:text-2xl">{peso(budget.total_budget)}</dd>
+          <dl className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
+            <div className="min-w-0 rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4">
+              <dt className="break-words text-xs font-medium text-muted">Total</dt>
+              <dd className="mt-2 break-words text-xl font-semibold tabular-nums text-ink">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
             </div>
-            <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4 sm:p-5">
-              <dt className="text-xs font-medium text-muted">Spent</dt>
-              <dd className="mt-2 text-xl font-semibold tabular-nums text-ink sm:text-2xl">{peso(spent)}</dd>
+            <div className="min-w-0 rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4">
+              <dt className="break-words text-xs font-medium text-muted">Spent</dt>
+              <dd className="mt-2 break-words text-xl font-semibold tabular-nums text-ink">{peso(spent)}</dd>
             </div>
-            <div className="rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4 sm:p-5">
-              <dt className="text-xs font-medium text-muted">Receipts missing</dt>
-              <dd className={'mt-1 text-lg font-semibold tabular-nums sm:text-xl ' + (missingCount > 0 ? 'text-brand-700' : 'text-brand-900')}>
+            <div className="min-w-0 rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4">
+              <dt className="break-words text-xs font-medium leading-tight text-muted">Receipts missing</dt>
+              <dd className={'mt-1 break-words text-xl font-semibold tabular-nums ' + (missingCount > 0 ? 'text-brand-700' : 'text-brand-900')}>
                 {missingCount}
               </dd>
             </div>
@@ -227,16 +227,22 @@ export default function BudgetDetail() {
                 <h2 className="text-sm font-semibold">Spending by category</h2>
                 <span className="text-xs text-muted">{categories.length} categories</span>
               </div>
-              <div className="mt-4 space-y-3">
+              <div className="mt-3 max-w-md space-y-1.5">
                 {categories.map(([cat, cents], i) => {
                   const share = (cents / spentCents) * 100
                   return (
-                    <div key={cat} className="grid grid-cols-[minmax(6rem,11rem)_1fr_auto] items-center gap-2 text-xs sm:grid-cols-[minmax(8rem,14rem)_1fr_auto]">
-                      <span className="min-w-0 truncate font-medium">{cat}</span>
-                      <div className="h-2 overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
-                        <div className={'h-full rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} style={{ width: `${share}%` }} />
+                    <div key={cat} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 py-1 text-xs">
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className={'h-2 w-2 shrink-0 rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} aria-hidden="true" />
+                          <span className="min-w-0 truncate font-medium text-ink">{cat}</span>
+                          <span className="shrink-0 font-semibold tabular-nums text-ink">{peso(cents / 100)}</span>
+                        </div>
+                        <div className="mt-1.5 h-1.5 w-full max-w-[12rem] overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
+                          <div className={'h-full rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} style={{ width: `${share}%` }} />
+                        </div>
                       </div>
-                      <span className="tabular-nums text-umber">{peso(cents / 100)}</span>
+                      <span className="shrink-0 text-[11px] font-medium tabular-nums text-umber">{Math.round(share)}%</span>
                     </div>
                   )
                 })}

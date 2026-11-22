@@ -39,6 +39,7 @@ export default function Register() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (email.trim().toLowerCase().endsWith('@bulsu.edu.ph')) return setError('Please use a personal email address, not a university email.')
     if (password.length < 8 || !/\d/.test(password)) return setError('Use a password with 8 or more characters, including a number.')
     if (!agree) return setError('Please agree to the membership guidelines and privacy notice.')
 
@@ -68,16 +69,16 @@ export default function Register() {
   }
 
   return (
-    <AuthShell title="Make yourself at home." subtitle="Apply for membership using your BulSU email.">
+    <AuthShell title="Make yourself at home." subtitle="Apply for membership using a personal email address.">
       <form onSubmit={onSubmit} className="space-y-4">
         <Field id="name" label="Full name">
           <input id="name" required autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
         </Field>
-        <Field id="email" label="University email">
-          <input id="email" type="email" required autoComplete="email" placeholder="name@bulsu.edu.ph" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+        <Field id="email" label="Personal email">
+          <input id="email" type="email" required autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
         </Field>
         <Field id="studentNo" label="Student number">
-          <input id="studentNo" required inputMode="numeric" placeholder="2024 010284" value={studentNo} onChange={(e) => setStudentNo(e.target.value)} className={inputClass} />
+          <input id="studentNo" required inputMode="numeric" placeholder="2024010284" value={studentNo} onChange={(e) => setStudentNo(e.target.value)} className={inputClass} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field id="college" label="College">
@@ -102,7 +103,7 @@ export default function Register() {
           </Field>
         </div>
         <Field id="password" label="Password" hint="Use 8 or more characters, including a number.">
-          <input id="password" type="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
+          <input id="password" type="password" required autoComplete="new-password" placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
         </Field>
         <label className="flex items-start gap-2.5 text-sm text-ink">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-accent" />
@@ -111,7 +112,7 @@ export default function Register() {
         {error && (
           <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>
         )}
-        <button type="submit" disabled={busy} className={buttonClass}>
+        <button type="submit" disabled={busy} className={buttonClass + ' sm:w-auto'}>
           {busy ? 'Submitting…' : 'Submit membership application'}
         </button>
       </form>

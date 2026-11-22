@@ -122,7 +122,7 @@ export default function Dashboard() {
                   const photo = (a.image_paths ?? []).map((p) => urls[p]).find(Boolean)
                   return (
                     <li key={a.id}>
-                      <Link to="/announcements" className={cardClass + ' block overflow-hidden transition-colors hover:bg-paper sm:flex'}>
+                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-[transform,background-color,border-color,box-shadow] duration-200 hover:scale-[1.02] hover:bg-brand-50 hover:shadow-[0_0_18px_rgba(138,28,46,0.16)] motion-reduce:transition-none sm:flex'}>
                         {photo && i === 0 && (
                           <img src={photo} alt="" className="aspect-[16/9] w-full object-cover sm:aspect-auto sm:w-56 sm:shrink-0" />
                         )}

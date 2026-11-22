@@ -66,11 +66,19 @@ export default function Layout() {
     return () => document.removeEventListener('keydown', onKey)
   }, [drawerOpen])
 
+  const accentClasses: Record<NonNullable<(typeof NAV_ITEMS)[number]['accent']>, string> = {
+    maroon: 'text-white',
+    orange: 'text-[#F6B26B]',
+    teal: 'text-[#6FC8C1]',
+    gold: 'text-[#F0CB79]',
+    plum: 'text-[#D2A6C7]',
+  }
+
   const navLinkClass = (isActive: boolean, rail: boolean) =>
-    'group relative flex items-center rounded-md text-sm transition-colors ' +
+    'group relative flex items-center rounded-md text-sm transition-[transform,background-color,box-shadow,color] duration-200 motion-reduce:transition-none ' +
     (rail ? 'md:justify-center md:px-0 md:py-2.5 ' : '') +
-    'gap-3 px-3 py-3 md:py-2 ' +
-    (isActive ? 'bg-white/15 font-semibold text-white ring-1 ring-inset ring-white/20' : 'text-white/80 hover:bg-white/10 hover:text-white')
+    'gap-3 px-3 py-3 md:py-2 hover:-translate-y-0.5 hover:scale-[1.01] hover:bg-white/10 hover:text-white hover:shadow-[0_0_18px_rgba(255,255,255,0.08)] focus-visible:ring-2 focus-visible:ring-white/70 ' +
+    (isActive ? 'bg-white/15 font-semibold text-white ring-1 ring-inset ring-white/20 before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:bg-white' : 'text-white/80')
 
   return (
     <div className="min-h-screen md:flex">
@@ -92,11 +100,12 @@ export default function Layout() {
         <div className={'px-5 pt-6 pb-4 ' + (collapsed ? 'md:px-0' : '')}>
           <div className={'flex items-start justify-between gap-2 ' + (collapsed ? 'md:flex-col md:items-center' : '')}>
             <div className={collapsed ? 'md:text-center' : ''}>
-              <p className="text-base font-bold tracking-tight text-white">
+              <p className="flex items-center gap-2 text-base font-bold tracking-tight text-white">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/70 bg-white text-sm font-black text-brand-900" aria-hidden="true">K</span>
                 <span className={collapsed ? 'md:hidden' : ''}>KKB BULSU</span>
                 {collapsed && <span className="hidden md:inline">KKB</span>}
               </p>
-              <p className={'mt-0.5 text-[10px] tracking-[0.06em] text-white/60 uppercase ' + (collapsed ? 'md:hidden' : '')}>
+              <p className={'mt-1 text-[10px] tracking-[0.06em] text-white/80 uppercase underline decoration-white decoration-2 underline-offset-4 ' + (collapsed ? 'md:hidden' : '')}>
                 Bulacan State University
               </p>
             </div>
@@ -134,12 +143,10 @@ export default function Layout() {
               onClick={() => setDrawerOpen(false)}
               className={({ isActive }) => navLinkClass(isActive, collapsed)}
             >
-              {collapsed && (
-                <span className="hidden md:block">
-                  <NavIcon to={item.to} />
-                </span>
-              )}
-              <span className={'flex-1 ' + (collapsed ? 'md:sr-only' : '')}>{item.label}</span>
+              <span className={'shrink-0 ' + (item.accent ? accentClasses[item.accent] : 'text-white/80')}>
+                <NavIcon to={item.to} />
+              </span>
+              <span className={'flex-1 ' + (collapsed ? 'md:sr-only' : '') + ' ' + (!collapsed ? 'group-hover:underline group-hover:underline-offset-4' : '')}>{item.label}</span>
               {badgeFor(item.to) > 0 && (
                 <span className="rounded-md bg-brand-100 px-1.5 py-0.5 text-[11px] font-bold text-brand-700">
                   {badgeFor(item.to)}
