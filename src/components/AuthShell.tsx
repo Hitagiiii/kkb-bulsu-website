@@ -1,10 +1,7 @@
 import type { ReactNode } from 'react'
 import { eyebrowClass } from './ui'
 
-/**
- * Members-only screens. Desktop: brand story and photo on the left, a quiet single-column form on the right.
- * Phone: the form only, under a slim top bar.
- */
+/** Members-only screens. The auth surface stays compact and centered on a brand background. */
 export default function AuthShell({
   title,
   subtitle,
@@ -14,45 +11,42 @@ export default function AuthShell({
   title: string
   subtitle?: string
   children: ReactNode
-  /** Extra content under the form, e.g. a "new here?" block */
   aside?: ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-paper">
-      <header className="flex items-center justify-between border-b border-line bg-white px-5 py-4 sm:px-8">
-        <span className="text-base font-bold tracking-tight text-brand-700">KKB BULSU</span>
-        <span className="text-xs text-muted">
-          <span className="hidden sm:inline">Bulacan State University · </span>Members portal
-        </span>
-      </header>
+    <div className="min-h-screen bg-brand-900 px-4 py-5 sm:px-6 sm:py-6">
+      <div className="flex min-h-[calc(100vh-2.5rem)] items-center justify-center sm:min-h-[calc(100vh-3rem)]">
+        <main className="w-full max-w-md rounded-md border border-white/15 bg-white p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <img src="/logo.jpg" alt="KKB BULSU" className="h-8 w-8 shrink-0 rounded-md object-cover" />
+            <div>
+              <p className="text-sm font-bold tracking-tight text-brand-900">KKB BULSU</p>
+              <p className="text-[10px] uppercase tracking-[0.06em] text-muted">Bulacan State University</p>
+            </div>
+          </div>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-6 sm:px-8 md:grid-cols-2 md:items-center md:gap-12 md:py-8">
-        <section className="hidden md:block">
-          <img
-            src="/images/community.jpg"
-            alt="KKB BULSU members chatting on campus"
-            className="aspect-[4/3] w-full rounded-md object-cover"
-          />
-          <h2 className="font-display mt-5 text-[36px] leading-[1.08] font-medium tracking-tight text-ink">
-            More than an organization,
-            <br />
-            Your people on campus
-          </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
-            Connect with the KKB BULSU community.
-            <br />
-            Show up, lend a hand,
-            <br />
-            and make your university years count.
-          </p>
-          <p className={eyebrowClass + ' mt-4'}>Malolos, Bulacan / AY 2026–2027</p>
-        </section>
+          <section>
+            <p className={eyebrowClass}>Members only / KKB BULSU</p>
+            <h2 className="font-display mt-2 text-[26px] leading-[1.08] font-semibold tracking-tight text-ink sm:text-[30px]">
+              More than an organization,
+              <br />
+              Your people on campus
+            </h2>
+            <p className="mt-2 text-sm leading-5 text-muted">
+              Connect with the KKB BULSU community.
+              <br />
+              Show up, lend a hand,
+              <br />
+              and make your university years count.
+            </p>
+          </section>
 
-        <main className="w-full max-w-lg md:justify-self-start">
-          <p className={eyebrowClass}>Members only / KKB BULSU</p>
-          <h1 className="font-display mt-2 text-[28px] leading-tight font-medium tracking-tight sm:text-[32px]">{title}</h1>
-          {subtitle && <p className="mt-2 text-sm leading-relaxed text-muted">{subtitle}</p>}
-          <div className="mt-4">{children}</div>
+          <section className="mt-5 border-t border-line pt-4">
+            <h1 className="font-display text-xl leading-tight font-semibold tracking-tight text-ink sm:text-2xl">{title}</h1>
+            {subtitle && <p className="mt-1.5 text-sm leading-5 text-muted">{subtitle}</p>}
+            <div className="mt-3">{children}</div>
+          </section>
+
           {aside}
         </main>
       </div>

@@ -189,14 +189,14 @@ export default function BudgetDetail() {
           </p>
         )}
 
-        <section aria-label="Budget summary" className="mt-6 grid gap-4 lg:grid-cols-[1.15fr_.85fr]">
-          <div className="rounded-md border border-brand-100 border-t-4 border-t-brand-700 bg-white p-5 sm:p-6">
+        <section aria-label="Budget summary" className="mt-5 grid gap-3 lg:grid-cols-[1.15fr_.85fr]">
+          <div className="rounded-md border border-brand-100 border-t-4 border-t-brand-700 bg-white p-4 sm:p-5">
             <p className="text-xs font-semibold tracking-[0.12em] text-brand-700 uppercase">Money left</p>
             <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums text-brand-900 sm:text-5xl">
               {peso(Math.abs(left))}
             </p>
             <p className="mt-2 text-sm text-muted">{over ? 'Over the approved budget' : `${Math.round(pct)}% of the budget used`}</p>
-            <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
+            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
               <div className={'h-full rounded-full ' + 'bg-brand-700'} style={{ width: `${pct}%` }} />
             </div>
             <p className="mt-3 text-xs text-muted">Available funds · {peso(Math.abs(left))}</p>
@@ -227,7 +227,7 @@ export default function BudgetDetail() {
                 <h2 className="text-sm font-semibold">Spending by category</h2>
                 <span className="text-xs text-muted">{categories.length} categories</span>
               </div>
-              <div className="mt-3 max-w-md space-y-1.5">
+              <div className="mt-2 max-w-md space-y-0.5">
                 {categories.map(([cat, cents], i) => {
                   const share = (cents / spentCents) * 100
                   return (
@@ -236,9 +236,9 @@ export default function BudgetDetail() {
                         <div className="flex min-w-0 items-center gap-2">
                           <span className={'h-2 w-2 shrink-0 rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} aria-hidden="true" />
                           <span className="min-w-0 truncate font-medium text-ink">{cat}</span>
-                          <span className="shrink-0 font-semibold tabular-nums text-ink">{peso(cents / 100)}</span>
+                          <span className="shrink-0 font-num text-sm font-medium text-brand-900">{peso(cents / 100)}</span>
                         </div>
-                        <div className="mt-1.5 h-1.5 w-full max-w-[12rem] overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
+                        <div className="mt-1 h-1.5 w-full max-w-[8rem] overflow-hidden rounded-full bg-brand-50" aria-hidden="true">
                           <div className={'h-full rounded-full ' + CAT_COLORS[Math.min(i, CAT_COLORS.length - 1)]} style={{ width: `${share}%` }} />
                         </div>
                       </div>
@@ -250,13 +250,13 @@ export default function BudgetDetail() {
             </section>
           )}
 
-        <div className="mt-7 grid gap-5 xl:grid-cols-2">
+        <div className="mt-6 grid gap-4 xl:grid-cols-2">
           <BudgetFolderPicker budgetId={budget.id} />
           <BudgetEventLink budget={budget} spent={spent} canEdit={canEdit} onChanged={load} />
         </div>
         {canEdit && <AddExpenseForm budgetId={budget.id} onAdded={load} />}
 
-        <section className="mt-9" aria-label="Expenses">
+        <section className="mt-6" aria-label="Expenses">
           <div className="flex flex-wrap items-baseline justify-between gap-3 border-b-2 border-brand-700 pb-3">
             <div>
               <h2 className="text-xl font-medium">Expenses</h2>
@@ -693,7 +693,7 @@ function ActivityLog({ budgetId, names }: { budgetId: string; names: Record<stri
   }
 
   return (
-    <section className="mt-10 mb-10" aria-label="Activity log">
+    <section className="mt-6 mb-6" aria-label="Activity log">
       <button type="button" onClick={() => void toggle()} aria-expanded={open} className="min-h-11 py-2 text-xl font-medium">Activity log {open ? '(hide)' : '(show)'}</button>
       {open && (
         <div className="mt-3">

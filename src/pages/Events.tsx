@@ -230,7 +230,7 @@ export default function Events() {
                   onOpen={() => selectEvent(next.id)}
                 />
               ) : (
-                <div className="mt-6 rounded-md border border-dashed border-line bg-white px-6 py-10 text-center">
+                <div className="mt-5 rounded-md border border-dashed border-line bg-white px-4 py-6 text-center">
                   <CalendarIcon size={36} className="mx-auto text-brand-700" />
                   <p className="mt-3 text-xl font-medium">Nothing coming up</p>
                   <p className="mt-1 text-sm text-muted">
@@ -274,7 +274,7 @@ export default function Events() {
               {(() => {
                 const mine = upcoming.filter((e) => rsvps[e.id] === 'going')
                 return mine.length === 0 ? (
-                  <div className="rounded-md border border-dashed border-line bg-white px-6 py-10 text-center">
+                  <div className="rounded-md border border-dashed border-line bg-white px-4 py-6 text-center">
                     <p className="text-xl font-medium">No RSVPs yet</p>
                     <p className="mt-1 text-sm text-muted">Open an event and press “I’m going” to save your seat.</p>
                   </div>

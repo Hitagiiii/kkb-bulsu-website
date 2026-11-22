@@ -101,9 +101,8 @@ export default function Layout() {
           <div className={'flex items-start justify-between gap-2 ' + (collapsed ? 'md:flex-col md:items-center' : '')}>
             <div className={collapsed ? 'md:text-center' : ''}>
               <p className="flex items-center gap-2 text-base font-bold tracking-tight text-white">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-white/70 bg-white text-sm font-black text-brand-900" aria-hidden="true">K</span>
+                <img src="/logo.jpg" alt="KKB BULSU" className="h-7 w-7 shrink-0 rounded-md object-cover" />
                 <span className={collapsed ? 'md:hidden' : ''}>KKB BULSU</span>
-                {collapsed && <span className="hidden md:inline">KKB</span>}
               </p>
               <p className={'mt-1 text-[10px] tracking-[0.06em] text-white/80 uppercase underline decoration-white decoration-2 underline-offset-4 ' + (collapsed ? 'md:hidden' : '')}>
                 Bulacan State University
@@ -126,7 +125,7 @@ export default function Layout() {
               type="button"
               onClick={() => setDrawerOpen(false)}
               aria-label="Close menu"
-              className="-mt-1 rounded-md px-2 py-1 text-sm text-white/80 hover:bg-white/10 hover:text-white md:hidden"
+              className="-mt-1 rounded-md px-2 py-1 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white md:hidden" title="Close menu"
             >
               Close ×
             </button>
@@ -167,9 +166,9 @@ export default function Layout() {
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-2 py-1 text-sm text-white/70 underline-offset-2 hover:text-white hover:underline"
+            className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-md px-2 py-2 text-sm text-white/75 transition-[transform,background-color,color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white hover:shadow-[0_0_18px_rgba(255,255,255,0.08)] focus-visible:ring-2 focus-visible:ring-white/70 motion-reduce:transition-none"
           >
-            {collapsed ? <span className="hidden md:inline">↩</span> : null}
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H3" /><path d="M21 19V5a2 2 0 0 0-2-2h-6" /></svg>
             <span className={collapsed ? 'md:sr-only' : ''}>Sign out</span>
           </button>
         </div>
@@ -187,7 +186,7 @@ export default function Layout() {
           >
             Menu
           </button>
-          <span className="text-base font-bold tracking-tight text-brand-900">KKB BULSU</span>
+          <span className="flex items-center gap-2 text-base font-bold tracking-tight text-brand-900"><img src="/logo.jpg" alt="" className="h-6 w-6 rounded-md object-cover" />KKB BULSU</span>
           <NotificationsMenu data={notifications} permission={permission} enableAlerts={enableAlerts} />
         </header>
 
@@ -229,7 +228,7 @@ export default function Layout() {
           </div>
         )}
 
-        <main className="px-4 py-7 sm:px-6 md:px-8 md:py-9 lg:px-10 print:p-0"><div className="mx-auto w-full max-w-[1440px]">
+        <main className="px-4 py-4 sm:px-6 md:px-8 md:py-6 lg:px-10 print:p-0"><div className="mx-auto w-full max-w-[1440px]">
           <Outlet />
         </div></main>
       </div>

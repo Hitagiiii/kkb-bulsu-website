@@ -144,7 +144,7 @@ export default function Tasks() {
       {loading && <p className="mt-6 text-sm text-muted">Loading tasks…</p>}
 
       {!loading && (
-        <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <section aria-label="Open tasks">
             <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-2">
               <div>

@@ -199,7 +199,7 @@ export default function Attendance() {
             <p className="text-sm">Printed on {new Date().toLocaleDateString('en-PH', { dateStyle: 'long' })}</p>
           </header>
 
-          <section className="mt-12 print:mt-6" aria-label="Attendance per member">
+          <section className="mt-6 print:mt-6" aria-label="Attendance per member">
             <h2 className="text-xl font-medium">Per member ({rows.total} past events)</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
@@ -226,7 +226,7 @@ export default function Attendance() {
             </div>
           </section>
 
-          <section className="mt-10" aria-label="Attendance per event">
+          <section className="mt-6" aria-label="Attendance per event">
             <h2 className="text-xl font-medium">Per event</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">

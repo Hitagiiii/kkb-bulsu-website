@@ -229,12 +229,12 @@ export default function Announcements() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
+      <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
         <div>
           {loading && <p className="text-sm text-muted">Loading announcements…</p>}
 
           {!loading && shown.length === 0 && (
-            <div className={cardClass + ' px-4 py-10 text-center'}>
+            <div className={cardClass + ' px-4 py-6 text-center'}>
               <p className="text-base font-semibold text-ink">
                 {items.length === 0 ? 'Nothing has been posted yet.' : 'No posts in this tab.'}
               </p>
@@ -489,7 +489,7 @@ function AnnouncementForm({
   }
 
   return (
-    <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+    <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
     <form onSubmit={submit} className="space-y-4">
       <div>
         <label htmlFor={`${uid}-title`} className="text-sm font-medium">Title</label>

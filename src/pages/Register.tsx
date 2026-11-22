@@ -70,7 +70,7 @@ export default function Register() {
 
   return (
     <AuthShell title="Make yourself at home." subtitle="Apply for membership using a personal email address.">
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-3">
         <Field id="name" label="Full name">
           <input id="name" required autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
         </Field>
@@ -80,7 +80,7 @@ export default function Register() {
         <Field id="studentNo" label="Student number">
           <input id="studentNo" required inputMode="numeric" placeholder="2024010284" value={studentNo} onChange={(e) => setStudentNo(e.target.value)} className={inputClass} />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           <Field id="college" label="College">
             <select id="college" required value={college} onChange={(e) => setCollege(e.target.value)} className={inputClass}>
               <option value="">Choose…</option>
@@ -91,7 +91,7 @@ export default function Register() {
             <input id="program" required placeholder="BS Information Technology" value={program} onChange={(e) => setProgram(e.target.value)} className={inputClass} />
           </Field>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           <Field id="year" label="Year">
             <select id="year" required value={year} onChange={(e) => setYear(e.target.value)} className={inputClass}>
               <option value="">Choose…</option>
@@ -112,11 +112,11 @@ export default function Register() {
         {error && (
           <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>
         )}
-        <button type="submit" disabled={busy} className={buttonClass + ' sm:w-auto'}>
+        <button type="submit" disabled={busy} className={buttonClass + ' sm:w-auto px-4'}>
           {busy ? 'Submitting…' : 'Submit membership application'}
         </button>
       </form>
-      <p className="mt-6 text-sm text-muted">
+      <p className="mt-4 text-sm text-muted">
         Already a member?{' '}
         <Link to="/login" className="font-semibold text-brand-700 hover:underline">Sign in</Link>
       </p>

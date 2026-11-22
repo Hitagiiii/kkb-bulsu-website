@@ -188,7 +188,7 @@ export default function Merch() {
 
               <section className="mt-8" aria-label="Open for orders">
                 {available.length === 0 ? (
-                  <div className={cardClass + ' px-4 py-10 text-center'}>
+                  <div className={cardClass + ' px-4 py-6 text-center'}>
                     <p className="text-base font-semibold">Nothing is open for orders right now.</p>
                     <p className="mt-1 text-sm text-muted">New drops show up here as soon as officers open them.</p>
                   </div>
@@ -218,7 +218,7 @@ export default function Merch() {
           {section === 'orders' && (
             <section className="mt-6" aria-label="My orders">
               {orders.length === 0 ? (
-                <div className={cardClass + ' px-4 py-12 text-center'}>
+                <div className={cardClass + ' px-4 py-6 text-center'}>
                   <p className="text-xl font-medium">Your first KKB find is waiting.</p>
                   <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
                     You haven’t placed an order yet. Browse the collection and find your everyday essential.

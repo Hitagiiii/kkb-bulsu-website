@@ -40,26 +40,26 @@ export default function Login() {
       subtitle="Sign in to your campus community."
       aside={
         <>
-          <div className={cardClass + ' mt-8 p-5'}>
+          <div className={cardClass + ' mt-4 p-4'}>
             <p className="text-sm font-semibold text-ink">New around here?</p>
             <p className="mt-1 text-sm text-muted">Join the community to see events, announcements and members-only merch.</p>
             <Link to="/register" className={subtleButtonClass + ' mt-4 w-full'}>
               Create an account
             </Link>
           </div>
-          <p className="mt-4 text-xs text-muted">Access is limited to approved KKB BULSU members.</p>
+          <p className="mt-3 text-xs text-muted">Access is limited to approved KKB BULSU members.</p>
         </>
       }
     >
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-3">
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-ink">University email</label>
+          <label htmlFor="email" className="block text-sm font-semibold text-ink">Email</label>
           <input
             id="email"
             type="email"
             required
             autoComplete="email"
-            placeholder="name@bulsu.edu.ph"
+            placeholder="you@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={inputClass}
@@ -85,7 +85,7 @@ export default function Login() {
             {error}
           </p>
         )}
-        <button type="submit" disabled={busy} className={buttonClass}>
+        <button type="submit" disabled={busy} className={buttonClass + " sm:w-auto"}>
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>

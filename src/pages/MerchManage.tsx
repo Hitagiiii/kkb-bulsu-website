@@ -161,7 +161,7 @@ export default function MerchManage() {
         />
       )}
 
-      {loading && <p className="mt-10 text-sm text-muted">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-muted">Loading…</p>}
 
       {!loading && visibleItems.length === 0 && (
         <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-muted">
@@ -169,7 +169,7 @@ export default function MerchManage() {
         </p>
       )}
 
-      <div className="mt-8 space-y-10">
+      <div className="mt-6 space-y-6">
         {visibleItems.map((item) => (
           <ItemSection
             key={item.id}

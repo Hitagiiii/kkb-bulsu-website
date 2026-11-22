@@ -95,16 +95,16 @@ export default function Dashboard() {
       <header>
         <p className={eyebrowClass}>{today}</p>
         <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">
-          Magandang araw, {firstName}.
+          Good day, {firstName}
         </h1>
         <p className="mt-2 text-sm text-muted">
           Here’s what’s moving in your KKB community. Signed in as {profile ? ROLE_LABEL[profile.role].toLowerCase() : 'a member'}.
         </p>
       </header>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         {/* Main column */}
-        <div className="space-y-10">
+        <div className="space-y-6">
           <DashboardExtras pollsWaiting={pollsWaiting} />
 
           <section aria-label="Latest announcements">
@@ -122,7 +122,7 @@ export default function Dashboard() {
                   const photo = (a.image_paths ?? []).map((p) => urls[p]).find(Boolean)
                   return (
                     <li key={a.id}>
-                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-[transform,background-color,border-color,box-shadow] duration-200 hover:scale-[1.02] hover:bg-brand-50 hover:shadow-[0_0_18px_rgba(138,28,46,0.16)] motion-reduce:transition-none sm:flex'}>
+                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-[transform,background-color,border-color,box-shadow] duration-200 hover:scale-[1.02] hover:bg-brand-50 hover:border-l-brand-800 hover:shadow-[0_0_18px_rgba(138,28,46,0.16)] motion-reduce:transition-none sm:flex'}>
                         {photo && i === 0 && (
                           <img src={photo} alt="" className="aspect-[16/9] w-full object-cover sm:aspect-auto sm:w-56 sm:shrink-0" />
                         )}
