@@ -51,7 +51,6 @@ export default function MerchManage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
-  const [realtimeConnected, setRealtimeConnected] = useState(false)
   const urlCache = useRef<Record<string, string>>({})
 
   const load = useCallback(async () => {
@@ -89,24 +88,6 @@ export default function MerchManage() {
   useEffect(() => {
     void load()
   }, [load])
-
-  // Keep the consolidated order sheet in sync when another treasurer or a member
-  // places/updates an order, records a payment, or changes an item's stage.
-  useEffect(() => {
-    if (!canEdit) return
-    const channel = supabase
-      .channel('merch-orders-spreadsheet-live')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'merch_orders' }, () => void load())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'merch_payments' }, () => void load())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'merch_items' }, () => void load())
-      .subscribe((status) => {
-        setRealtimeConnected(status === 'SUBSCRIBED')
-      })
-    return () => {
-      setRealtimeConnected(false)
-      void supabase.removeChannel(channel)
-    }
-  }, [canEdit, load])
 
   const names = useMemo(() => Object.fromEntries(people.map((p) => [p.id, p.full_name || 'Unnamed'])), [people])
   const visibleItems = items.filter((i) =>
@@ -168,10 +149,6 @@ export default function MerchManage() {
         </p>
       )}
 
-      {canEdit && !loading && (
-        <ConsolidatedOrdersSheet orders={orders} items={items} names={names} realtimeConnected={realtimeConnected} onChanged={load} />
-      )}
-
       {canEdit && creating && (
         <NewItemForm
           folders={folders}
@@ -184,7 +161,7 @@ export default function MerchManage() {
         />
       )}
 
-      {loading && <p className="mt-10 text-sm text-muted">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-muted">Loading…</p>}
 
       {!loading && visibleItems.length === 0 && (
         <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-muted">
@@ -192,7 +169,7 @@ export default function MerchManage() {
         </p>
       )}
 
-      <div className="mt-8 space-y-10">
+      <div className="mt-6 space-y-6">
         {visibleItems.map((item) => (
           <ItemSection
             key={item.id}
@@ -224,283 +201,6 @@ function Metric({ label, value, tone = 'default', hint }: { label: string; value
       {hint && <p className="mt-0.5 text-xs text-muted">{hint}</p>}
     </div>
   )
-}
-
-/* ---------- treasurer: combined, editable, live merch order spreadsheet ---------- */
-type SheetSortKey = 'created_at' | 'buyer' | 'item' | 'variant' | 'quantity' | 'unit_price' | 'total' | 'paid' | 'balance' | 'payment_status' | 'fulfillment_status'
-type SheetEdit = { buyer_name: string; variant: string; quantity: string; note: string }
-
-function ConsolidatedOrdersSheet({
-  orders,
-  items,
-  names,
-  realtimeConnected,
-  onChanged,
-}: {
-  orders: MerchOrder[]
-  items: MerchItem[]
-  names: Record<string, string>
-  realtimeConnected: boolean
-  onChanged: () => Promise<void>
-}) {
-  const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [sortKey, setSortKey] = useState<SheetSortKey>('created_at')
-  const [ascending, setAscending] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [draft, setDraft] = useState<SheetEdit>({ buyer_name: '', variant: '', quantity: '1', note: '' })
-  const [savingId, setSavingId] = useState<string | null>(null)
-  const [sheetError, setSheetError] = useState<string | null>(null)
-
-  const itemById = useMemo(() => Object.fromEntries(items.map((item) => [item.id, item])), [items])
-  const rows = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-    const prepared = orders.map((order) => {
-      const item = itemById[order.item_id]
-      const balance = orderBalance(order)
-      const paymentStatus = sheetPaymentStatus(order)
-      const fulfillmentStatus = sheetFulfillmentStatus(order, item)
-      const buyer = order.buyer_name || (order.user_id ? names[order.user_id] : '') || 'Unnamed'
-      return { order, item, buyer, balance, paymentStatus, fulfillmentStatus, total: orderTotal(order) }
-    }).filter(({ order, item, buyer, paymentStatus, fulfillmentStatus }) => {
-      if (statusFilter.startsWith('payment:') && paymentStatus !== statusFilter.slice(8)) return false
-      if (statusFilter.startsWith('fulfillment:') && fulfillmentStatus !== statusFilter.slice(12)) return false
-      if (!normalizedQuery) return true
-      return [buyer, item?.name ?? 'Unknown item', order.variant ?? '', order.note ?? '', paymentStatus, fulfillmentStatus]
-        .some((value) => value.toLowerCase().includes(normalizedQuery))
-    })
-    prepared.sort((a, b) => {
-      let comparison = 0
-      switch (sortKey) {
-        case 'created_at': comparison = new Date(a.order.created_at).getTime() - new Date(b.order.created_at).getTime(); break
-        case 'buyer': comparison = a.buyer.localeCompare(b.buyer); break
-        case 'item': comparison = (a.item?.name ?? '').localeCompare(b.item?.name ?? ''); break
-        case 'variant': comparison = (a.order.variant ?? '').localeCompare(b.order.variant ?? ''); break
-        case 'quantity': comparison = a.order.quantity - b.order.quantity; break
-        case 'unit_price': comparison = a.order.unit_price - b.order.unit_price; break
-        case 'total': comparison = a.total - b.total; break
-        case 'paid': comparison = a.order.amount_paid - b.order.amount_paid; break
-        case 'balance': comparison = a.balance - b.balance; break
-        case 'payment_status': comparison = a.paymentStatus.localeCompare(b.paymentStatus); break
-        case 'fulfillment_status': comparison = a.fulfillmentStatus.localeCompare(b.fulfillmentStatus); break
-      }
-      return comparison * (ascending ? 1 : -1)
-    })
-    return prepared
-  }, [orders, itemById, names, query, statusFilter, sortKey, ascending])
-
-  function startEdit(order: MerchOrder) {
-    setSheetError(null)
-    setEditingId(order.id)
-    setDraft({
-      buyer_name: order.buyer_name || (order.user_id ? names[order.user_id] : '') || '',
-      variant: order.variant ?? '',
-      quantity: String(order.quantity),
-      note: order.note ?? '',
-    })
-  }
-
-  async function saveEdit(order: MerchOrder, item: MerchItem | undefined) {
-    const buyerName = draft.buyer_name.trim()
-    const quantity = Number(draft.quantity)
-    if (!buyerName) return setSheetError('Buyer name is required.')
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 50) {
-      return setSheetError('Quantity must be a whole number from 1 to 50.')
-    }
-    if (Math.round(quantity * order.unit_price * 100) < Math.round(order.amount_paid * 100)) {
-      return setSheetError('Quantity cannot be reduced below the amount already paid. Review the payment record first.')
-    }
-    const variant = draft.variant.trim() || null
-    if (item?.variants.length && (!variant || !item.variants.includes(variant))) {
-      return setSheetError('Choose a valid size or variant for this item.')
-    }
-    setSavingId(order.id)
-    setSheetError(null)
-    const { error } = await supabase.from('merch_orders').update({
-      buyer_name: buyerName,
-      variant: item?.variants.length ? variant : null,
-      quantity,
-      note: draft.note.trim() || null,
-    }).eq('id', order.id)
-    setSavingId(null)
-    if (error) return setSheetError(errorMessage(error, 'Could not update this order.'))
-    setEditingId(null)
-    await onChanged()
-  }
-
-  function exportCsv() {
-    const header = ['Order date', 'Buyer', 'Item', 'Variant / size', 'Quantity', 'Unit price', 'Total', 'Amount paid', 'Balance', 'Payment status', 'Fulfillment status', 'Notes']
-    const records = rows.map(({ order, item, buyer, balance, paymentStatus, fulfillmentStatus, total }) => [
-      new Date(order.created_at).toLocaleString(), buyer, item?.name ?? 'Unknown item', order.variant ?? '',
-      order.quantity, order.unit_price.toFixed(2), total.toFixed(2), order.amount_paid.toFixed(2), balance.toFixed(2), paymentStatus, fulfillmentStatus, order.note ?? '',
-    ])
-    const escapeCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`
-    const csv = '\uFEFF' + [header, ...records].map((record) => record.map(escapeCell).join(',')).join('\r\n')
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `kkb-merch-orders-${new Date().toISOString().slice(0, 10)}.csv`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
-  }
-
-  function sortButton(label: string, key: SheetSortKey, align = 'text-left') {
-    const active = sortKey === key
-    return (
-      <th scope="col" className={`whitespace-nowrap px-3 py-3 ${align}`}>
-        <button type="button" onClick={() => {
-          if (sortKey === key) setAscending((value) => !value)
-          else { setSortKey(key); setAscending(key !== 'created_at') }
-        }} className="inline-flex min-h-11 items-center gap-1 font-semibold text-ink hover:text-brand-700">
-          {label}<span aria-hidden="true" className="text-muted">{active ? (ascending ? '↑' : '↓') : '↕'}</span>
-        </button>
-      </th>
-    )
-  }
-
-  return (
-    <section aria-labelledby="consolidated-orders-title" className="mt-6 overflow-hidden rounded-md border border-line bg-white">
-      <div className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-brand-700">Treasurer tools</p>
-          <h2 id="consolidated-orders-title" className="mt-1 text-lg font-semibold text-ink">Consolidated orders spreadsheet</h2>
-          <p className="mt-1 text-sm text-muted">All products in one editable, sortable order list.</p>
-        </div>
-        <button type="button" onClick={exportCsv} disabled={rows.length === 0} className={subtleButtonClass + ' min-h-11'}>
-          Export Excel-compatible CSV
-        </button>
-      </div>
-
-      <div className="grid gap-3 border-b border-line bg-paper/60 p-4 sm:grid-cols-[minmax(0,1fr)_13rem_auto] sm:items-end">
-        <label className="block text-xs font-semibold text-muted">
-          Search orders
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buyer, product, size, notes…" className="mt-1 min-h-11 w-full rounded-md border border-line bg-white px-3 text-base text-ink placeholder:text-ash sm:text-sm" />
-        </label>
-        <label className="block text-xs font-semibold text-muted">
-          Order status
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-1 min-h-11 w-full rounded-md border border-line bg-white px-3 text-base text-ink sm:text-sm">
-            <option value="all">All statuses</option>
-            <optgroup label="Payment status">
-              <option value="payment:Unpaid">Unpaid</option>
-              <option value="payment:Partly paid">Partly paid</option>
-              <option value="payment:Paid">Paid</option>
-              <option value="payment:Cancelled">Cancelled</option>
-            </optgroup>
-            <optgroup label="Fulfillment status">
-              <option value="fulfillment:Open for orders">Open for orders</option>
-              <option value="fulfillment:Ordered from supplier">Ordered from supplier</option>
-              <option value="fulfillment:Ready to claim">Ready to claim</option>
-              <option value="fulfillment:Balance due">Arrived · balance due</option>
-              <option value="fulfillment:Claimed">Claimed</option>
-              <option value="fulfillment:Cancelled">Cancelled</option>
-            </optgroup>
-          </select>
-        </label>
-        <p className="text-sm tabular-nums text-muted sm:pb-3">Showing <strong className="text-ink">{rows.length}</strong> of {orders.length} orders</p>
-      </div>
-
-      {sheetError && <p role="alert" className="border-b border-line bg-soft px-4 py-2 text-sm text-brand-700">{sheetError}</p>}
-
-      {rows.length === 0 ? (
-        <p className="px-4 py-8 text-center text-sm text-muted">No orders match your search or filter.</p>
-      ) : (
-        <div className="max-w-full overflow-x-auto">
-          <table className="w-full min-w-[1280px] border-collapse text-left text-sm">
-            <thead className="sticky top-0 z-[1] border-b border-line bg-paper">
-              <tr>
-                {sortButton('Date', 'created_at')}
-                {sortButton('Buyer', 'buyer')}
-                {sortButton('Product', 'item')}
-                {sortButton('Size / type', 'variant')}
-                {sortButton('Qty', 'quantity', 'text-right')}
-                {sortButton('Unit price', 'unit_price', 'text-right')}
-                {sortButton('Total', 'total', 'text-right')}
-                {sortButton('Paid', 'paid', 'text-right')}
-                {sortButton('Balance', 'balance', 'text-right')}
-                {sortButton('Payment', 'payment_status')}
-                {sortButton('Fulfillment', 'fulfillment_status')}
-                <th scope="col" className="px-3 py-3">Notes</th>
-                <th scope="col" className="px-3 py-3 text-right">Edit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {rows.map(({ order, item, buyer, balance, paymentStatus, fulfillmentStatus, total }) => {
-                const editing = editingId === order.id
-                const locked = !!order.cancelled_at || !!order.claimed_at
-                return (
-                  <tr key={order.id} className="align-middle hover:bg-paper/60">
-                    <td className="whitespace-nowrap px-3 py-3 text-xs text-muted">{new Date(order.created_at).toLocaleDateString()}</td>
-                    <td className="max-w-48 px-3 py-3">
-                      {editing ? <input aria-label="Buyer name" value={draft.buyer_name} onChange={(event) => setDraft((value) => ({ ...value, buyer_name: event.target.value }))} className="min-h-11 w-40 rounded-md border border-line px-2 text-sm" /> : <span className="font-medium text-ink">{buyer}</span>}
-                      {!order.user_id && <span className="ml-1 text-xs text-muted">Guest</span>}
-                    </td>
-                    <td className="max-w-48 px-3 py-3">{item?.name ?? 'Unknown item'}</td>
-                    <td className="px-3 py-3">
-                      {editing ? (
-                        item?.variants.length ? (
-                          <select aria-label="Size or variant" value={draft.variant} onChange={(event) => setDraft((value) => ({ ...value, variant: event.target.value }))} className="min-h-11 w-32 rounded-md border border-line bg-white px-2 text-sm">
-                            <option value="">Choose…</option>
-                            {item.variants.map((variant) => <option key={variant} value={variant}>{variant}</option>)}
-                          </select>
-                        ) : <span className="text-muted">—</span>
-                      ) : order.variant || '—'}
-                    </td>
-                    <td className="px-3 py-3 text-right tabular-nums">
-                      {editing ? <input aria-label="Quantity" type="number" min="1" max="50" step="1" value={draft.quantity} onChange={(event) => setDraft((value) => ({ ...value, quantity: event.target.value }))} className="min-h-11 w-16 rounded-md border border-line px-2 text-right text-sm" /> : order.quantity}
-                    </td>
-                    <td className="px-3 py-3 text-right tabular-nums">{peso(order.unit_price)}</td>
-                    <td className="px-3 py-3 text-right font-medium tabular-nums">{peso(total)}</td>
-                    <td className="px-3 py-3 text-right tabular-nums">{peso(order.amount_paid)}</td>
-                    <td className="px-3 py-3 text-right font-medium tabular-nums">{peso(balance)}</td>
-                    <td className="whitespace-nowrap px-3 py-3">
-                      <span className={'inline-flex rounded-md px-2 py-1 text-xs font-semibold ' + (paymentStatus === 'Cancelled' ? 'bg-soft text-brand-700' : 'bg-paper text-muted')}>{paymentStatus}</span>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-3">
-                      <span className={'inline-flex rounded-md px-2 py-1 text-xs font-semibold ' + (fulfillmentStatus === 'Cancelled' ? 'bg-soft text-brand-700' : 'bg-paper text-muted')}>{fulfillmentStatus}</span>
-                    </td>
-                    <td className="max-w-48 px-3 py-3 text-xs text-muted">
-                      {editing ? <input aria-label="Order notes" value={draft.note} onChange={(event) => setDraft((value) => ({ ...value, note: event.target.value }))} placeholder="Optional note" className="min-h-11 w-44 rounded-md border border-line bg-white px-2 text-xs" /> : <span className="block max-w-48 truncate" title={order.note ?? ''}>{order.note || '—'}</span>}
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      {editing ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button type="button" disabled={savingId === order.id} onClick={() => void saveEdit(order, item)} className="min-h-11 rounded-md bg-brand-700 px-3 text-xs font-semibold text-white disabled:opacity-50">{savingId === order.id ? 'Saving…' : 'Save'}</button>
-                          <button type="button" disabled={savingId === order.id} onClick={() => setEditingId(null)} className="min-h-11 px-2 text-xs font-medium text-muted hover:text-ink">Cancel</button>
-                        </div>
-                      ) : (
-                        <button type="button" disabled={locked} onClick={() => startEdit(order)} title={locked ? 'Claimed or cancelled orders are read-only' : 'Edit order details'} className="min-h-11 rounded-md border border-line px-3 text-xs font-semibold text-brand-700 hover:border-brand-700 hover:bg-soft disabled:cursor-not-allowed disabled:opacity-40">Edit</button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-3 text-xs text-muted">
-        <span>Changes are saved to the order records and shared with the rest of the system.</span>
-        <span>{realtimeConnected ? 'Live sync connected' : 'Connecting to live updates…'}</span>
-      </div>
-    </section>
-  )
-}
-
-function sheetPaymentStatus(order: MerchOrder): string {
-  if (order.cancelled_at) return 'Cancelled'
-  if (orderBalance(order) <= 0) return 'Paid'
-  return order.amount_paid > 0 ? 'Partly paid' : 'Unpaid'
-}
-
-function sheetFulfillmentStatus(order: MerchOrder, item: MerchItem | undefined): string {
-  if (order.cancelled_at) return 'Cancelled'
-  if (order.claimed_at) return 'Claimed'
-  if (item?.stage === 'arrived' || item?.stage === 'closed') {
-    return orderBalance(order) <= 0 ? 'Ready to claim' : 'Balance due'
-  }
-  return item?.stage === 'ordered' ? 'Ordered from supplier' : 'Open for orders'
 }
 
 /* ---------- folder picker + create/rename/delete ---------- */

@@ -6,13 +6,13 @@ export const inputClass =
 /** Primary action: maroon. One per view where possible. */
 export const buttonClass =
   'inline-flex w-full items-center justify-center rounded-md bg-brand-700 px-4 py-3 text-sm font-semibold sm:py-2.5 ' +
-  'text-white transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:bg-brand-800 hover:shadow-[0_0_18px_rgba(138,28,46,0.25)] active:scale-[0.98] motion-reduce:transition-none ' +
+  'text-white transition-colors hover:bg-brand-800 active:bg-brand-800 ' +
   'disabled:cursor-not-allowed disabled:bg-sand disabled:text-muted'
 
 /** Secondary action: white with a hairline border. */
 export const subtleButtonClass =
   'inline-flex items-center justify-center rounded-md border border-line bg-white px-4 py-2.5 text-sm sm:py-2 ' +
-  'font-semibold text-ink transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:bg-paper hover:shadow-[0_0_18px_rgba(138,28,46,0.12)] active:scale-[0.98] motion-reduce:transition-none ' +
+  'font-semibold text-ink transition-colors hover:bg-paper active:bg-paper ' +
   'disabled:cursor-not-allowed disabled:bg-sand disabled:text-muted'
 
 /** Destructive or quiet-danger action: soft maroon. */

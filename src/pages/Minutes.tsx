@@ -111,7 +111,7 @@ export default function Minutes() {
                     <span className="block text-base font-semibold break-words text-ink">{r.title}</span>
                     <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
                       {formatDateTime(r.held_at)}
-                      {canWrite && <Chip tone={r.visible_to_members ? 'green' : 'slate'}>{r.visible_to_members ? 'Shared with members' : 'Officers only'}</Chip>}
+                      {canWrite && <Chip tone="slate">Officers only</Chip>}
                     </span>
                   </button>
                 )
@@ -125,7 +125,7 @@ export default function Minutes() {
               const related = tasks.filter((t) => t.minutes_id === r.id)
               return (
                 <>
-                  <p className={eyebrowClass}>{r.visible_to_members ? 'Approved / shared' : 'Officer notes'} · {formatDate(r.held_at)}</p>
+                  <p className={eyebrowClass}>Officer record · {formatDate(r.held_at)}</p>
                   <h2 className="mt-1 text-xl font-medium break-words">{r.title}</h2>
                   <p className="mt-1 text-sm text-muted">{formatDateTime(r.held_at)}</p>
                   {r.attendees && (

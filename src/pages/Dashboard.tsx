@@ -63,13 +63,17 @@ export default function Dashboard() {
         const rows = (data ?? []) as { id: string; question: string; closes_at: string | null }[]
         setOpenPolls(rows.filter((r) => !r.closes_at || new Date(r.closes_at).getTime() > Date.now()).slice(0, 4))
       })
+  }, [])
+
+  useEffect(() => {
+    if (!profile || !['officer', 'treasurer', 'admin'].includes(profile.role)) return
     supabase
       .from('documents')
       .select('id, title, category, created_at')
       .order('created_at', { ascending: false })
       .limit(4)
       .then(({ data }) => setDocs((data ?? []) as { id: string; title: string; category: string; created_at: string }[]))
-  }, [])
+  }, [profile])
 
   useEffect(() => {
     if (!profile) return
@@ -200,27 +204,29 @@ export default function Dashboard() {
             </section>
           </div>
 
-          <section aria-label="Recent documents">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-xl font-medium text-ink">Recent documents</h2>
-              <Link to="/documents" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
-            </div>
-            {docs === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
-            {docs && docs.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No documents have been shared yet.</p>}
-            {docs && docs.length > 0 && (
-              <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-                {docs.map((d) => (
-                  <li key={d.id}>
-                    <Link to="/documents" className={cardClass + ' block p-4 hover:bg-paper'}>
-                      <span className={eyebrowClass + ' block'}>{d.category}</span>
-                      <span className="mt-1 block text-sm font-semibold break-words text-ink">{d.title}</span>
-                      <span className="block text-xs text-muted">Added {formatDateTime(d.created_at).split(',')[0]}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          {profile && ['officer', 'treasurer', 'admin'].includes(profile.role) && (
+            <section aria-label="Recent documents">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="text-xl font-medium text-ink">Recent documents</h2>
+                <Link to="/documents" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
+              </div>
+              {docs === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
+              {docs && docs.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No documents have been shared yet.</p>}
+              {docs && docs.length > 0 && (
+                <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {docs.map((d) => (
+                    <li key={d.id}>
+                      <Link to="/documents" className={cardClass + ' block p-4 hover:bg-paper'}>
+                        <span className={eyebrowClass + ' block'}>{d.category}</span>
+                        <span className="mt-1 block text-sm font-semibold break-words text-ink">{d.title}</span>
+                        <span className="block text-xs text-muted">Added {formatDateTime(d.created_at).split(',')[0]}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
         </div>
 
         {/* Right rail */}

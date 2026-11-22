@@ -12,8 +12,7 @@ const BUCKET = 'documents'
 const MAX_BYTES = 10 * 1024 * 1024
 const CATEGORIES = ['Constitution', 'Minutes', 'Forms', 'Financial', 'Templates', 'Other']
 const ACCESS: { value: Role; label: string }[] = [
-  { value: 'member', label: 'All approved members' },
-  { value: 'officer', label: 'Officers and above' },
+  { value: 'officer', label: 'Officers, treasurer and admin' },
   { value: 'treasurer', label: 'Treasurer and admin' },
   { value: 'admin', label: 'Admin only' },
 ]

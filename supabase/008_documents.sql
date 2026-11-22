@@ -39,7 +39,7 @@ create trigger document_meta_trg before insert on public.documents
 alter table public.documents enable row level security;
 drop policy if exists "documents: read allowed" on public.documents;
 create policy "documents: read allowed" on public.documents
-  for select using (public.has_min_role(min_role));
+  for select using (public.is_officer());
 drop policy if exists "documents: officer write" on public.documents;
 create policy "documents: officer write" on public.documents for all
   using (public.is_officer()) with check (public.is_officer());
@@ -53,9 +53,10 @@ drop policy if exists "documents files: read allowed" on storage.objects;
 create policy "documents files: read allowed" on storage.objects
   for select using (
     bucket_id = 'documents'
+    and public.is_officer()
     and exists (
       select 1 from public.documents d
-      where d.storage_path = objects.name and public.has_min_role(d.min_role)
+      where d.storage_path = objects.name
     )
   );
 drop policy if exists "documents files: officer upload" on storage.objects;

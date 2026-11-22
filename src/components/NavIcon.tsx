@@ -2,6 +2,7 @@
 const PATHS: Record<string, string> = {
   '/': 'M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10',
   '/announcements': 'M4 11v3a1 1 0 0 0 1 1h2l5 4V6L7 10H5a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6',
+  '/verse-of-the-day': 'M12 4v16M5 7h7M12 7h7M5 12h7M12 12h7M5 17h7M12 17h7',
   '/events': 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
   '/polls': 'M5 20V10M12 20V4M19 20v-7',
   '/attendance': 'M5 12l4 4 10-10',

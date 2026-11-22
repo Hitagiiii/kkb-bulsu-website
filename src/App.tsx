@@ -10,6 +10,7 @@ import CheckIn from './pages/CheckIn'
 import Dashboard from './pages/Dashboard'
 import Documents from './pages/Documents'
 import Events from './pages/Events'
+import VerseOfTheDay from './pages/VerseOfTheDay'
 import Finance from './pages/Finance'
 import Deactivated from './pages/Deactivated'
 import ForgotPassword from './pages/ForgotPassword'
@@ -42,12 +43,16 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="announcements" element={<Announcements />} />
               <Route path="events" element={<Events />} />
+              <Route path="verse-of-the-day" element={<VerseOfTheDay />} />
               <Route path="attend/:token" element={<CheckIn />} />
               <Route path="attendance" element={<Attendance />} />
               <Route path="polls" element={<Polls />} />
               <Route path="merch" element={<Merch />} />
-              <Route path="documents" element={<Documents />} />
-              <Route path="minutes" element={<Minutes />} />
+              {/* Officers, treasurer and admin only. */}
+              <Route element={<RequireAuth minRole="officer" />} >
+                <Route path="documents" element={<Documents />} />
+                <Route path="minutes" element={<Minutes />} />
+              </Route>
               <Route path="account" element={<Account />} />
 
               {/* Officers, treasurer and admin */}

@@ -78,7 +78,7 @@ alter table public.tasks   enable row level security;
 -- Minutes: officers see everything. Members only see minutes marked as shared.
 drop policy if exists "minutes: read" on public.minutes;
 create policy "minutes: read" on public.minutes
-  for select using (public.is_officer() or (visible_to_members and public.is_approved()));
+  for select using (public.is_officer());
 drop policy if exists "minutes: officer write" on public.minutes;
 create policy "minutes: officer write" on public.minutes for all
   using (public.is_officer()) with check (public.is_officer());
