@@ -47,11 +47,10 @@ export default function Modal({
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="max-h-[90dvh] w-full overflow-y-auto rounded-t-md border border-line bg-white p-6 pb-8 outline-none sm:max-w-xl sm:rounded-md sm:pb-6"
+        className="max-h-[90dvh] w-full overflow-y-auto rounded-t-md border border-border bg-surface p-6 pb-8 text-ink outline-none sm:max-w-xl sm:rounded-md sm:pb-6"
       >
         {children}
       </div>
     </div>
   )
 }
-

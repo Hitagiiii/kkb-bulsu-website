@@ -21,15 +21,15 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
   const withReceipts = active.map((e, i) => ({ e, n: i + 1 })).filter(({ e }) => e.receipt_path && urls[e.receipt_path])
 
   return (
-    <div id="print-bill" className="hidden bg-white text-black print:block print:bg-white print:text-black">
-      <header className="border-b-2 border-black bg-white pb-3 text-black">
+    <div id="print-bill" className="hidden bg-surface text-black print:block print:bg-surface print:text-black">
+      <header className="border-b-2 border-black bg-surface pb-3 text-black">
         <p className="text-sm">KKB BULSU</p>
         <h1 className="text-2xl font-bold">Statement of Expenses</h1>
         <p className="text-lg">{budget.name}</p>
         <p className="mt-1 text-sm">Printed on {new Date().toLocaleDateString('en-PH', { dateStyle: 'long' })}</p>
       </header>
 
-      <table className="mt-5 w-full border-collapse bg-white text-sm text-black">
+      <table className="mt-5 w-full border-collapse bg-surface text-sm text-black">
         <tbody>
           <tr><th className={th}>Total budget</th><td className={td + ' text-right'}>{peso(budget.total_budget)}</td></tr>
           <tr><th className={th}>Total expenses</th><td className={td + ' text-right'}>{peso(spent)}</td></tr>
@@ -38,7 +38,7 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
       </table>
 
       <h2 className="mt-6 mb-2 text-base font-bold">Itemized expenses</h2>
-      <table className="w-full border-collapse bg-white text-sm text-black">
+      <table className="w-full border-collapse bg-surface text-sm text-black">
         <thead className="table-header-group">
           <tr>
             <th className={th}>No.</th>
@@ -68,7 +68,7 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
       {voided.length > 0 && (
         <>
           <h2 className="mt-6 mb-2 text-base font-bold">Voided entries (not counted in the total)</h2>
-          <table className="w-full border-collapse bg-white text-sm text-black">
+          <table className="w-full border-collapse bg-surface text-sm text-black">
             <thead className="table-header-group">
               <tr><th className={th}>Description</th><th className={th}>Amount</th><th className={th}>Reason</th><th className={th}>Voided by</th></tr>
             </thead>
@@ -97,7 +97,7 @@ export default function PrintBill({ budget, expenses, urls, names, spent, left }
           <h2 className="mb-3 text-base font-bold">Receipts</h2>
           <div className="grid grid-cols-2 gap-4">
             {withReceipts.map(({ e, n }) => (
-              <figure key={e.id} className="break-inside-avoid border border-black bg-white p-2">
+              <figure key={e.id} className="break-inside-avoid border border-black bg-surface p-2">
                 <img src={urls[e.receipt_path!]} alt={`Receipt for item ${n}`} className="max-h-96 w-full object-contain" />
                 <figcaption className="mt-1 text-xs">Item {n}: {e.description} ({peso(e.amount)})</figcaption>
               </figure>

@@ -141,7 +141,7 @@ export default function Merch() {
         }
       />
 
-      <div role="group" aria-label="Merch sections" className="mt-6 flex gap-5 border-b border-line text-sm">
+      <div role="group" aria-label="Merch sections" className="mt-6 flex gap-5 border-b border-border text-sm">
         {([
           ['shop', 'Shop'],
           ['orders', `My orders (${activeCount})`],
@@ -166,7 +166,7 @@ export default function Merch() {
       {loading && (
         <div className="mt-8 grid gap-4 sm:grid-cols-2" aria-label="Loading">
           {[0, 1].map((n) => (
-            <div key={n} className="h-72 animate-pulse rounded-md bg-sand" />
+            <div key={n} className="h-72 animate-pulse rounded-md bg-surface-sunken" />
           ))}
         </div>
       )}
@@ -207,7 +207,7 @@ export default function Merch() {
                     ))}
                   </ul>
                 )}
-                <div className="mt-8 border-t border-line pt-5">
+                <div className="mt-8 border-t border-border pt-5">
                   <p className="text-base font-medium">Made together, not mass produced.</p>
                   <p className="mt-1 text-sm text-muted">Payment confirms your order. Bring your student ID when claiming.</p>
                 </div>
@@ -238,7 +238,7 @@ export default function Merch() {
                         onClick={() => setTab(t.id)}
                         className={
                           'shrink-0 rounded-md border px-3 py-2 text-sm font-medium transition-colors sm:py-1.5 ' +
-                          (tab === t.id ? 'border-brand-700 bg-soft text-brand-700' : 'border-line bg-white text-muted hover:bg-paper')
+                          (tab === t.id ? 'border-brand-700 bg-soft text-brand-700' : 'border-border bg-surface text-muted hover:bg-surface-sunken')
                         }
                       >
                         {t.label} <span className="opacity-70">({counts[t.id]})</span>
@@ -266,7 +266,7 @@ export default function Merch() {
                         </li>
                       ))}
                     </ul>
-                    <aside className="border-t border-line bg-sand/60 p-4 xl:sticky xl:top-6 xl:border-t-0 xl:border-l xl:bg-transparent xl:pl-5" aria-label="Order help">
+                    <aside className="border-t border-border bg-surface-sunken/60 p-4 xl:sticky xl:top-6 xl:border-t-0 xl:border-l xl:bg-transparent xl:pl-5" aria-label="Order help">
                       <p className="text-[11px] font-bold tracking-[0.12em] text-brand-700 uppercase">Need a hand?</p>
                       <h3 className="mt-2 text-lg font-semibold">From order to pickup.</h3>
                       <p className="mt-1 text-sm text-muted">Your order moves through four steps. Keep your reference handy when claiming.</p>
@@ -363,20 +363,20 @@ function ProductCard({
   }
 
   return (
-    <form onSubmit={submit} className="h-full overflow-hidden rounded-md border border-line bg-white">
+    <form onSubmit={submit} className="h-full overflow-hidden rounded-md border border-border bg-surface">
       <div className="relative">
         <MerchPhoto paths={item.image_paths ?? []} category={item.category} name={item.name} className="aspect-[4/3] w-full" gallery />
-        <span className="absolute top-3 right-3 rounded-md bg-white px-2.5 py-1 text-sm font-semibold text-ink tabular-nums">
+        <span className="absolute top-3 right-3 rounded-md bg-surface px-2.5 py-1 text-sm font-semibold text-ink tabular-nums">
           {peso(item.price)}
         </span>
         {item.order_deadline && (
-          <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-semibold text-brand-700">
+          <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-md bg-surface px-2.5 py-1 text-xs font-semibold text-brand-700">
             <ClockIcon size={13} />
             Closes {timeUntil(item.order_deadline)}
           </span>
         )}
         {left !== undefined && (
-          <span className={'absolute right-3 bottom-3 rounded-md px-2.5 py-1 text-xs font-semibold ' + (left === 0 ? 'bg-ink text-white' : left <= 5 ? 'bg-accent-100 text-accent-700' : 'bg-white text-ink')}>
+          <span className={'absolute right-3 bottom-3 rounded-md px-2.5 py-1 text-xs font-semibold ' + (left === 0 ? 'bg-ink text-white dark:bg-surface-raised dark:text-ink' : left <= 5 ? 'bg-accent-100 text-accent-700' : 'bg-surface text-ink')}>
             {left === 0 ? 'Sold out' : `${left} left`}
           </span>
         )}
@@ -403,7 +403,7 @@ function ProductCard({
                     onChange={() => setVariant(v)}
                     className="peer sr-only"
                   />
-                  <span className="inline-flex min-w-11 items-center justify-center rounded-md border border-line bg-white px-3 py-2 text-sm font-medium text-ink transition-colors peer-checked:border-brand-700 peer-checked:bg-brand-700 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-700 hover:bg-paper peer-checked:hover:bg-brand-800">
+                  <span className="inline-flex min-w-11 items-center justify-center rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-ink transition-colors peer-checked:border-brand-700 peer-checked:bg-brand-700 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-700 hover:bg-surface-sunken peer-checked:hover:bg-brand-800">
                     {v}
                   </span>
                 </label>
@@ -413,13 +413,13 @@ function ProductCard({
         )}
 
         <div className="mt-4 flex items-center justify-between gap-3">
-          <div className="flex items-center rounded-md border border-line" role="group" aria-label="Quantity">
+          <div className="flex items-center rounded-md border border-border" role="group" aria-label="Quantity">
             <button
               type="button"
               aria-label="One less"
               disabled={qty <= 1}
               onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="rounded-md p-3 text-ink hover:bg-paper disabled:opacity-40 sm:p-2.5"
+              className="rounded-md p-3 text-ink hover:bg-surface-sunken disabled:opacity-40 sm:p-2.5"
             >
               <MinusIcon />
             </button>
@@ -429,7 +429,7 @@ function ProductCard({
               aria-label="One more"
               disabled={qty >= maxQty && left !== 0}
               onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
-              className="rounded-md p-3 text-ink hover:bg-paper disabled:opacity-40 sm:p-2.5"
+              className="rounded-md p-3 text-ink hover:bg-surface-sunken disabled:opacity-40 sm:p-2.5"
             >
               <PlusIcon />
             </button>
@@ -446,7 +446,7 @@ function ProductCard({
         )}
 
         {waiting ? (
-          <div className="mt-4 rounded-md bg-paper p-3 text-sm">
+          <div className="mt-4 rounded-md bg-bg p-3 text-sm">
             <p className="font-semibold text-ink">You’re on the waitlist</p>
             <p className="mt-0.5 text-muted">
               {waiting.quantity} × {item.name}
@@ -516,14 +516,14 @@ function OrderCard({
   }
 
   return (
-    <article className={'overflow-hidden rounded-md border border-line bg-white ' + (cancelled ? 'opacity-70' : '')}>
+    <article className={'overflow-hidden rounded-md border border-border bg-surface ' + (cancelled ? 'opacity-70' : '')}>
       <div className="flex gap-4 p-4 sm:p-5">
         <MerchPhoto paths={item?.image_paths ?? []} category={item?.category ?? ''} name={item?.name ?? 'Item'} className="h-16 w-16 shrink-0 rounded-md" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
             <h3 className="text-lg leading-snug font-medium break-words">
               {item?.name ?? 'Item'}
-              {o.variant && <span className="font-sans text-base font-normal text-umber"> ({o.variant})</span>}
+              {o.variant && <span className="font-sans text-base font-normal text-muted"> ({o.variant})</span>}
             </h3>
             <Chip tone={st.tone}>{st.label}</Chip>
           </div>
@@ -534,7 +534,7 @@ function OrderCard({
         </div>
       </div>
 
-      <div className="border-t border-line px-4 pb-4 sm:px-5 sm:pb-5">
+      <div className="border-t border-border px-4 pb-4 sm:px-5 sm:pb-5">
         {cancelled ? (
           <p className="mt-4 rounded-md bg-soft px-3 py-2 text-sm text-brand-700">
             This order was cancelled{o.cancel_reason ? `: ${o.cancel_reason}` : '.'}
@@ -552,13 +552,13 @@ function OrderCard({
 
         <div className="mt-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-            <span className="text-umber">
+            <span className="text-muted">
               Paid <span className="font-semibold text-ink tabular-nums">{peso(o.amount_paid)}</span> of{' '}
               <span className="tabular-nums">{peso(total)}</span>
             </span>
             {!cancelled && <Chip tone={PAY_TONE[p]}>{PAY_LABEL[p]}</Chip>}
           </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sand" aria-hidden="true">
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-sunken" aria-hidden="true">
             <div className="h-full rounded-full bg-brand-700 transition-[width] duration-500 motion-reduce:transition-none" style={{ width: `${pct}%` }} />
           </div>
           {!cancelled && balance > 0 && (
@@ -583,7 +583,7 @@ function OrderCard({
                 <li key={x.id} className="flex flex-wrap items-center gap-2 text-ink">
                   {proofUrls[x.image_path] && (
                     <a href={proofUrls[x.image_path]} target="_blank" rel="noreferrer">
-                      <img src={proofUrls[x.image_path]} alt="Your payment screenshot" className="h-10 w-10 rounded border border-line object-cover" />
+                      <img src={proofUrls[x.image_path]} alt="Your payment screenshot" className="h-10 w-10 rounded border border-border object-cover" />
                     </a>
                   )}
                   <span>
@@ -606,12 +606,12 @@ function OrderCard({
                 <button onClick={() => void cancel()} className="py-1 font-semibold text-brand-700 hover:underline">
                   Yes, cancel it
                 </button>
-                <button onClick={() => setCancelling(false)} className="py-1 text-umber hover:underline">
+                <button onClick={() => setCancelling(false)} className="py-1 text-muted hover:underline">
                   Keep it
                 </button>
               </span>
             ) : (
-              <button onClick={() => setCancelling(true)} className="py-1 text-umber hover:text-brand-700 hover:underline">
+              <button onClick={() => setCancelling(true)} className="py-1 text-muted hover:text-brand-700 hover:underline">
                 Cancel order
               </button>
             )}
@@ -687,7 +687,7 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 rounded-md border border-line bg-paper p-4">
+    <form onSubmit={submit} className="mt-4 rounded-md border border-border bg-bg p-4">
       <p className={eyebrowClass}>GCash / Send money</p>
       <p className="mt-1 text-sm text-muted">Amount to send</p>
       <p className="text-3xl font-medium tabular-nums text-ink">{peso(orderBalance(order))}</p>
@@ -706,7 +706,7 @@ function ProofForm({ order, onSent }: { order: MerchOrder; onSent: () => Promise
             type="file"
             accept="image/jpeg,image/png,image/webp"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border file:border-line file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-semibold hover:file:bg-paper"
+            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:py-2.5 file:text-sm file:font-semibold hover:file:bg-bg"
           />
           <p className="mt-1 text-xs text-muted">PNG or JPG. Keep amount, date and reference visible.</p>
         </div>

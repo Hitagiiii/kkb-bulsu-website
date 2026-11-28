@@ -160,7 +160,7 @@ export default function EventForm({
             {busy ? 'Saving…' : submitLabel}
           </button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-muted hover:underline">
           Cancel
         </button>
       </div>

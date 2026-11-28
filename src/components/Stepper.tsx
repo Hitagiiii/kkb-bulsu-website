@@ -26,7 +26,7 @@ export default function Stepper({
               {i > 0 && (
                 <span
                   aria-hidden="true"
-                  className={'absolute top-3 right-1/2 h-px w-full ' + (i <= done ? 'bg-brand-700' : 'bg-line')}
+                  className={'absolute top-3 right-1/2 h-px w-full ' + (i <= done ? 'bg-brand-700' : 'bg-border')}
                 />
               )}
               <span
@@ -35,8 +35,8 @@ export default function Stepper({
                   (complete
                     ? 'border-brand-700 bg-brand-700 text-white'
                     : current
-                      ? 'border-brand-700 bg-white text-brand-700'
-                      : 'border-line bg-white text-muted')
+                      ? 'border-brand-700 bg-surface text-brand-700'
+                      : 'border-border bg-surface text-muted')
                 }
               >
                 {complete ? <CheckIcon size={13} /> : i + 1}

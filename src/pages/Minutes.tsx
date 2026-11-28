@@ -84,20 +84,20 @@ export default function Minutes() {
       )}
 
       <div className="mt-4">
-        <input aria-label="Search meeting minutes" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search minutes" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+        <input aria-label="Search meeting minutes" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search minutes" className="min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
       </div>
       {loading && <p className="mt-6 text-sm text-muted">Loading…</p>}
       {!loading && rows.length === 0 && (
-        <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-muted">
+        <p className="mt-8 rounded-md border border-dashed border-border px-4 py-6 text-sm text-muted">
           {canWrite ? 'No minutes yet. Write the first one above.' : 'No minutes have been shared with members yet.'}
         </p>
       )}
 
-      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 border border-line bg-white px-4 py-6 text-sm text-muted">No minutes match.</p>}
+      {!loading && shown.length === 0 && rows.length > 0 && <p className="mt-5 border border-border bg-surface px-4 py-6 text-sm text-muted">No minutes match.</p>}
       {!loading && shown.length > 0 && (
         <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,34rem)]">
           <section aria-label="Meeting list">
-            <div className="border-y border-line bg-white">
+            <div className="border-y border-border bg-surface">
               {shown.map((r) => {
                 const open = openId === r.id
                 return (
@@ -106,7 +106,7 @@ export default function Minutes() {
                     type="button"
                     onClick={() => setOpenId(r.id)}
                     aria-expanded={open}
-                    className={'block min-h-11 w-full border-b border-line px-4 py-4 text-left last:border-b-0 hover:bg-paper ' + (open ? 'bg-paper' : '')}
+                    className={'block min-h-11 w-full border-b border-border px-4 py-4 text-left last:border-b-0 hover:bg-surface-sunken ' + (open ? 'bg-bg' : '')}
                   >
                     <span className="block text-base font-semibold break-words text-ink">{r.title}</span>
                     <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
@@ -119,7 +119,7 @@ export default function Minutes() {
             </div>
           </section>
 
-          <aside className="border border-line bg-white p-4 sm:p-5 lg:sticky lg:top-6" aria-label="Selected meeting details">
+          <aside className="border border-border bg-surface p-4 sm:p-5 lg:sticky lg:top-6" aria-label="Selected meeting details">
             {(() => {
               const r = shown.find((item) => item.id === openId) ?? shown[0]
               const related = tasks.filter((t) => t.minutes_id === r.id)
@@ -129,17 +129,17 @@ export default function Minutes() {
                   <h2 className="mt-1 text-xl font-medium break-words">{r.title}</h2>
                   <p className="mt-1 text-sm text-muted">{formatDateTime(r.held_at)}</p>
                   {r.attendees && (
-                    <p className="mt-4 text-sm text-umber"><span className="font-medium text-ink">Present:</span> {r.attendees}</p>
+                    <p className="mt-4 text-sm text-muted"><span className="font-medium text-ink">Present:</span> {r.attendees}</p>
                   )}
-                  <div className="mt-4 border-t border-line pt-4">
+                  <div className="mt-4 border-t border-border pt-4">
                     <p className="break-words whitespace-pre-wrap leading-6"><Linkify text={r.body} /></p>
                     <p className="mt-4 text-xs text-muted">Recorded by {r.author_name || 'an officer'}</p>
                   </div>
 
                   {related.length > 0 && (
-                    <div className="mt-5 border-t border-line pt-4">
+                    <div className="mt-5 border-t border-border pt-4">
                       <h3 className="text-sm font-semibold">Decisions &amp; action items</h3>
-                      <ul className="mt-2 divide-y divide-line border-y border-line text-sm">
+                      <ul className="mt-2 divide-y divide-border border-y border-border text-sm">
                         {related.map((t) => (
                           <li key={t.id} className="py-3">
                             <p className="font-medium break-words text-ink">{t.title}</p>
@@ -160,10 +160,10 @@ export default function Minutes() {
                         <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                           <span className="text-ink">Delete these minutes for good?</span>
                           <button onClick={() => void remove(r)} className="min-h-11 font-semibold text-brand-700 hover:underline">Yes, delete</button>
-                          <button onClick={() => setDeleting(null)} className="min-h-11 text-umber hover:underline">Cancel</button>
+                          <button onClick={() => setDeleting(null)} className="min-h-11 text-muted hover:underline">Cancel</button>
                         </span>
                       ) : (
-                        <button onClick={() => setDeleting(r.id)} className="min-h-11 text-sm text-umber hover:text-brand-700 hover:underline">Delete</button>
+                        <button onClick={() => setDeleting(r.id)} className="min-h-11 text-sm text-muted hover:text-brand-700 hover:underline">Delete</button>
                       )}
                     </div>
                   )}
@@ -245,7 +245,7 @@ function MinutesForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
+    <form onSubmit={submit} className="mt-5 rounded-md border border-border bg-surface p-4 sm:p-6">
       <h2 className="text-xl font-medium">New minutes</h2>
       <div className="mt-4 space-y-4">
         <div>
@@ -275,13 +275,13 @@ function MinutesForm({
                   value={i.title}
                   onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, title: e.target.value } : x)))}
                   placeholder="What needs to be done"
-                  className="min-w-0 rounded-md border border-line px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+                  className="min-w-0 rounded-md border border-border px-3 py-2.5 text-base sm:py-2 sm:text-sm"
                 />
                 <select
                   aria-label="Assigned to"
                   value={i.who}
                   onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, who: e.target.value } : x)))}
-                  className="rounded-md border border-line bg-white px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                  className="rounded-md border border-border bg-surface px-2 py-2.5 text-base sm:py-2 sm:text-sm"
                 >
                   <option value="">Unassigned</option>
                   {officers.map((o) => (
@@ -293,14 +293,14 @@ function MinutesForm({
                   type="date"
                   value={i.due}
                   onChange={(e) => setItems((prev) => prev.map((x) => (x.id === i.id ? { ...x, due: e.target.value } : x)))}
-                  className="rounded-md border border-line px-2 py-2.5 text-base sm:py-2 sm:text-sm"
+                  className="rounded-md border border-border px-2 py-2.5 text-base sm:py-2 sm:text-sm"
                 />
                 {items.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setItems((prev) => prev.filter((x) => x.id !== i.id))}
                     aria-label={`Remove action item ${n + 1}`}
-                    className="rounded-md px-2 py-2 text-left text-sm text-umber hover:bg-paper hover:text-brand-700"
+                    className="rounded-md px-2 py-2 text-left text-sm text-muted hover:bg-surface-sunken hover:text-brand-700"
                   >
                     Remove
                   </button>
@@ -328,7 +328,7 @@ function MinutesForm({
         <div className="w-full sm:w-auto sm:min-w-44">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save minutes'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-muted hover:underline">Cancel</button>
       </div>
     </form>
   )

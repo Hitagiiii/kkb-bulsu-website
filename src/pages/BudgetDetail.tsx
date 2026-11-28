@@ -20,7 +20,7 @@ import Modal from '../components/Modal'
 import PrintBill from '../components/PrintBill'
 import { buttonClass, inputClass, noticeClass, subtleButtonClass } from '../components/ui'
 
-const CAT_COLORS = ['bg-brand-900', 'bg-brand-800', 'bg-brand-700', 'bg-brand-600', 'bg-brand-100', 'bg-line', 'bg-ash']
+const CAT_COLORS = ['bg-brand-900', 'bg-brand-800', 'bg-brand-700', 'bg-brand-600', 'bg-brand-100', 'bg-border', 'bg-border-subtle']
 
 export default function BudgetDetail() {
   const { budgetId } = useParams<{ budgetId: string }>()
@@ -153,7 +153,7 @@ export default function BudgetDetail() {
   if (!budget) {
     return (
       <div>
-        <p className="text-umber">{error ?? 'This budget does not exist, or you do not have access to it.'}</p>
+        <p className="text-muted">{error ?? 'This budget does not exist, or you do not have access to it.'}</p>
         <Link to="/finance" className="mt-4 inline-block min-h-11 py-2 text-sm font-semibold text-brand-700 hover:underline">
           Back to Finance
         </Link>
@@ -168,11 +168,11 @@ export default function BudgetDetail() {
           <Link to="/finance" className="inline-flex min-h-11 items-center font-medium text-brand-700 hover:underline">
             Finance
           </Link>
-          <span className="px-2 text-umber" aria-hidden="true">/</span>
-          <span className="text-umber">Budget</span>
+          <span className="px-2 text-muted" aria-hidden="true">/</span>
+          <span className="text-muted">Budget</span>
         </nav>
 
-        <header className="mt-3 flex flex-wrap items-start justify-between gap-4 border-b border-line pb-5">
+        <header className="mt-3 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-5">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold tracking-[0.08em] text-brand-700 uppercase">Finance / Budget</p>
             <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">{budget.name}</h1>
@@ -190,7 +190,7 @@ export default function BudgetDetail() {
         )}
 
         <section aria-label="Budget summary" className="mt-5 grid gap-3 lg:grid-cols-[1.15fr_.85fr]">
-          <div className="rounded-md border border-brand-100 border-t-4 border-t-brand-700 bg-white p-4 sm:p-5">
+          <div className="rounded-md border border-brand-100 border-t-4 border-t-brand-700 bg-surface p-4 sm:p-5">
             <p className="text-xs font-semibold tracking-[0.12em] text-brand-700 uppercase">Money left</p>
             <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums text-brand-900 sm:text-5xl">
               {peso(Math.abs(left))}
@@ -203,16 +203,16 @@ export default function BudgetDetail() {
           </div>
 
           <dl className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3">
-            <div className="min-w-0 rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4">
+            <div className="min-w-0 rounded-md border border-border border-t-4 border-t-brand-100 bg-surface p-4">
               <dt className="break-words text-xs font-medium text-muted">Total</dt>
               <dd className="mt-2 break-words text-xl font-semibold tabular-nums text-ink">{peso(budget.total_budget)}</dd>
               {canEdit && <ChangeTotal budget={budget} onChanged={load} />}
             </div>
-            <div className="min-w-0 rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4">
+            <div className="min-w-0 rounded-md border border-border border-t-4 border-t-brand-100 bg-surface p-4">
               <dt className="break-words text-xs font-medium text-muted">Spent</dt>
               <dd className="mt-2 break-words text-xl font-semibold tabular-nums text-ink">{peso(spent)}</dd>
             </div>
-            <div className="min-w-0 rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-4">
+            <div className="min-w-0 rounded-md border border-border border-t-4 border-t-brand-100 bg-surface p-4">
               <dt className="break-words text-xs font-medium leading-tight text-muted">Receipts missing</dt>
               <dd className={'mt-1 break-words text-xl font-semibold tabular-nums ' + (missingCount > 0 ? 'text-brand-700' : 'text-brand-900')}>
                 {missingCount}
@@ -222,7 +222,7 @@ export default function BudgetDetail() {
         </section>
 
         {categories.length > 0 && spentCents > 0 && (
-            <section aria-label="Spending by category" className="mt-5 rounded-md border border-line bg-white p-4 sm:p-5">
+            <section aria-label="Spending by category" className="mt-5 rounded-md border border-border bg-surface p-4 sm:p-5">
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="text-sm font-semibold">Spending by category</h2>
                 <span className="text-xs text-muted">{categories.length} categories</span>
@@ -236,7 +236,7 @@ export default function BudgetDetail() {
                       <div className="min-w-0 flex items-center gap-2">
                         <span className={'h-2.5 w-2.5 shrink-0 rounded-full ' + color} aria-hidden="true" />
                         <span className="min-w-0 truncate text-sm font-semibold text-ink sm:text-base">{cat}</span>
-                        <span className="text-sm font-semibold text-umber" aria-hidden="true">:</span>
+                        <span className="text-sm font-semibold text-muted" aria-hidden="true">:</span>
                       </div>
                       <span className="justify-self-end font-num text-base font-semibold tabular-nums text-brand-900 sm:text-lg">{peso(cents / 100)}</span>
                       <div className="col-span-2 h-3 w-full min-w-0 overflow-hidden rounded-full bg-brand-50 sm:col-span-1" aria-hidden="true">
@@ -248,7 +248,7 @@ export default function BudgetDetail() {
                           }}
                         />
                       </div>
-                      <span className="justify-self-end text-xs font-semibold tabular-nums text-umber sm:text-sm">{Math.round(share)}%</span>
+                      <span className="justify-self-end text-xs font-semibold tabular-nums text-muted sm:text-sm">{Math.round(share)}%</span>
                     </div>
                   )
                 })}
@@ -269,7 +269,7 @@ export default function BudgetDetail() {
               <p className="mt-0.5 text-xs text-muted">{active.length} active {active.length === 1 ? 'entry' : 'entries'}</p>
             </div>
             {hasVoided && (
-              <label className="flex min-h-11 items-center gap-2 py-2 text-sm text-umber">
+              <label className="flex min-h-11 items-center gap-2 py-2 text-sm text-muted">
                 <input type="checkbox" checked={showVoided} onChange={(e) => setShowVoided(e.target.checked)} />
                 Show voided
               </label>
@@ -287,7 +287,7 @@ export default function BudgetDetail() {
           )}
 
           {visible.length === 0 && (
-            <p className="mt-4 border border-dashed border-ash bg-card px-4 py-6 text-sm text-muted">
+            <p className="mt-4 border border-dashed border-border-subtle bg-surface px-4 py-6 text-sm text-muted">
               {canEdit ? 'No expenses yet. Add the first one above.' : 'No expenses recorded yet.'}
             </p>
           )}
@@ -295,16 +295,16 @@ export default function BudgetDetail() {
           {visible.length > 0 && (
             <>
               <div className="mt-4 md:hidden">
-                <ul className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+                <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
                   {visible.map((x) => <MobileExpenseRow key={x.id} expense={x} url={x.receipt_path ? urls[x.receipt_path] : undefined} onOpen={() => selectExpense(x.id)} />)}
                 </ul>
               </div>
 
               <div className="mt-4 hidden md:block">
-                <div className="overflow-x-auto rounded-md border border-line bg-white">
+                <div className="overflow-x-auto rounded-md border border-border bg-surface">
                   <table className="w-full min-w-[760px] border-collapse text-sm">
                     <thead>
-                      <tr className="border-b border-line bg-sand/70 text-left text-xs font-semibold uppercase tracking-wide text-umber">
+                      <tr className="border-b border-border bg-surface-sunken/70 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                         <th className="w-14 px-2 py-2">Receipt</th>
                         <th className="px-3 py-2">Expense</th>
                         <th className="w-32 px-3 py-2">Category</th>
@@ -319,15 +319,15 @@ export default function BudgetDetail() {
                         const voided = !!x.voided_at
                         const thumb = x.receipt_path ? urls[x.receipt_path] : undefined
                         return (
-                          <tr key={x.id} className={'border-b border-line last:border-b-0 ' + (voided ? 'opacity-60' : '')}>
+                          <tr key={x.id} className={'border-b border-border last:border-b-0 ' + (voided ? 'opacity-60' : '')}>
                             <td className="px-2 py-2 align-middle">
                               <button type="button" onClick={() => selectExpense(x.id)} className="flex min-h-11 min-w-11 items-center justify-center" aria-label={`Open ${x.description}`}>
                                 {thumb ? (
-                                  <img src={thumb} alt="Receipt thumbnail" className="h-10 w-10 border border-line object-cover" />
+                                  <img src={thumb} alt="Receipt thumbnail" className="h-10 w-10 border border-border object-cover" />
                                 ) : x.receipt_path ? (
-                                  <span className="flex h-10 w-10 items-center justify-center border border-line bg-card text-[10px] text-muted">Loading</span>
+                                  <span className="flex h-10 w-10 items-center justify-center border border-border bg-surface text-[10px] text-muted">Loading</span>
                                 ) : (
-                                  <span className="flex h-10 w-10 items-center justify-center border border-dashed border-ash bg-card text-[10px] font-semibold text-umber">No receipt</span>
+                                  <span className="flex h-10 w-10 items-center justify-center border border-dashed border-border-subtle bg-surface text-[10px] font-semibold text-muted">No receipt</span>
                                 )}
                               </button>
                             </td>
@@ -337,11 +337,11 @@ export default function BudgetDetail() {
                                 <span className="mt-0.5 block text-xs text-muted">Added by {names[x.added_by] ?? 'Unknown'}</span>
                               </button>
                             </td>
-                            <td className="px-3 py-2 align-middle text-umber">{x.category}</td>
-                            <td className="px-3 py-2 align-middle whitespace-nowrap text-umber">{formatDate(x.spent_on)}</td>
+                            <td className="px-3 py-2 align-middle text-muted">{x.category}</td>
+                            <td className="px-3 py-2 align-middle whitespace-nowrap text-muted">{formatDate(x.spent_on)}</td>
                             <td className={'px-3 py-2 text-right align-middle font-semibold tabular-nums ' + (voided ? 'line-through' : '')}>{peso(x.amount)}</td>
                             <td className="px-3 py-2 align-middle">
-                              {voided ? <span className="text-xs font-semibold text-brand-700">Voided</span> : x.receipt_path ? <span className="text-xs text-umber">Receipt attached</span> : <span className="text-xs font-semibold text-brand-700">No receipt</span>}
+                              {voided ? <span className="text-xs font-semibold text-brand-700">Voided</span> : x.receipt_path ? <span className="text-xs text-muted">Receipt attached</span> : <span className="text-xs font-semibold text-brand-700">No receipt</span>}
                             </td>
                             <td className="px-3 py-2 text-right align-middle">
                               <button type="button" onClick={() => selectExpense(x.id)} className="min-h-11 px-2 text-xs font-semibold text-brand-700 hover:underline">Open</button>
@@ -361,7 +361,7 @@ export default function BudgetDetail() {
       </div>
 
       {isDesktop && selected && (
-        <aside className="fixed inset-y-0 right-0 z-30 w-[min(28rem,40vw)] overflow-y-auto border-l border-line bg-white p-6 print:hidden" aria-label="Expense inspector">
+        <aside className="fixed inset-y-0 right-0 z-30 w-[min(28rem,40vw)] overflow-y-auto border-l border-border bg-surface p-6 print:hidden" aria-label="Expense inspector">
           <ExpenseDetail
             expense={selected}
             url={selected.receipt_path ? urls[selected.receipt_path] : undefined}
@@ -397,11 +397,11 @@ function MobileExpenseRow({ expense, url, onOpen }: { expense: Expense; url?: st
     <li>
       <button type="button" onClick={onOpen} className={'flex min-h-16 w-full items-center gap-3 py-3 text-left ' + (voided ? 'opacity-60' : '')}>
         {url ? (
-          <img src={url} alt="Receipt thumbnail" className="h-11 w-11 shrink-0 border border-line object-cover" />
+          <img src={url} alt="Receipt thumbnail" className="h-11 w-11 shrink-0 border border-border object-cover" />
         ) : expense.receipt_path ? (
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-line bg-card text-[10px] text-muted">Loading</span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-border bg-surface text-[10px] text-muted">Loading</span>
         ) : (
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-dashed border-ash bg-card text-center text-[9px] leading-tight font-semibold text-umber">No receipt</span>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-dashed border-border-subtle bg-surface text-center text-[9px] leading-tight font-semibold text-muted">No receipt</span>
         )}
         <span className="min-w-0 flex-1">
           <span className={'block break-words text-sm font-medium ' + (voided ? 'line-through' : '')}>{expense.description}</span>
@@ -461,7 +461,7 @@ function ChangeTotal({ budget, onChanged }: { budget: Budget; onChanged: () => P
         step="0.01"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="w-32 min-h-11 border border-line px-2 py-2 text-base sm:text-sm"
+        className="w-32 min-h-11 border border-border px-2 py-2 text-base sm:text-sm"
       />
       <button type="submit" disabled={busy} className={subtleButtonClass + ' min-h-11'}>Save</button>
       <button type="button" onClick={() => setOpen(false)} className="min-h-11 py-2 text-sm text-muted hover:underline">Cancel</button>
@@ -521,8 +521,8 @@ function AddExpenseForm({ budgetId, onAdded }: { budgetId: string; onAdded: () =
   }
 
   return (
-    <form onSubmit={submit} className="mt-7 rounded-md border border-line bg-white p-5 sm:p-6">
-      <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">Record keeping</p><h2 className="mt-1 text-xl font-semibold">Add an expense</h2></div><p className="text-xs text-muted">Attach a receipt to keep the ledger complete.</p></div>
+    <form onSubmit={submit} className="mt-7 rounded-md border border-border bg-surface p-5 sm:p-6">
+      <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-4"><div><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">Record keeping</p><h2 className="mt-1 text-xl font-semibold">Add an expense</h2></div><p className="text-xs text-muted">Attach a receipt to keep the ledger complete.</p></div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <label htmlFor="x-desc" className="text-sm font-medium">What was it for?</label>
@@ -545,7 +545,7 @@ function AddExpenseForm({ budgetId, onAdded }: { budgetId: string; onAdded: () =
         </div>
         <div>
           <label htmlFor="x-file" className="text-sm font-medium">Receipt photo (optional)</label>
-          <input id="x-file" ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-1 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-paper" />
+          <input id="x-file" ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-1 block w-full text-sm file:mr-3 file:border-0 file:bg-surface file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-bg" />
           <p className="mt-1 text-xs text-muted">You can also add the receipt later from the saved expense.</p>
         </div>
       </div>
@@ -586,9 +586,9 @@ function AttachReceipt({ expense, onChanged }: { expense: Expense; onChanged: ()
   }
 
   return (
-    <form onSubmit={submit} className="border border-dashed border-ash bg-card p-4">
+    <form onSubmit={submit} className="border border-dashed border-border-subtle bg-surface p-4">
       <label htmlFor="attach-file" className="text-sm font-medium text-ink">This expense has no receipt yet</label>
-      <input id="attach-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm file:mr-3 file:border-0 file:bg-white file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-paper" />
+      <input id="attach-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-2 block w-full text-sm file:mr-3 file:border-0 file:bg-surface file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-bg" />
       {error && <p role="alert" className="mt-2 text-sm text-brand-700">{error}</p>}
       <div className="mt-3 sm:max-w-48"><button type="submit" disabled={busy || !file} className={buttonClass + ' min-h-11'}>{busy ? 'Attaching…' : 'Attach receipt'}</button></div>
       <p className="mt-2 text-xs text-ink">Once attached, a receipt can't be replaced. If it's the wrong photo, void the expense and add it again.</p>
@@ -618,12 +618,12 @@ function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { e
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
+      <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
         <div className="min-w-0">
           <p className="text-2xl font-medium tabular-nums">{peso(expense.amount)}</p>
           <p className="mt-1 break-words">{expense.description}</p>
         </div>
-        <button type="button" onClick={onClose} className="min-h-11 shrink-0 px-2 text-sm font-medium text-umber hover:text-ink">Close</button>
+        <button type="button" onClick={onClose} className="min-h-11 shrink-0 px-2 text-sm font-medium text-muted hover:text-ink">Close</button>
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
@@ -636,12 +636,12 @@ function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { e
       <div className="mt-5">
         {url ? (
           <a href={url} target="_blank" rel="noreferrer" title="Open full size">
-            <img src={url} alt="Receipt" className="max-h-[70vh] w-full border border-line object-contain" />
+            <img src={url} alt="Receipt" className="max-h-[70vh] w-full border border-border object-contain" />
           </a>
         ) : expense.receipt_path ? (
           <p className="text-sm text-muted">Loading receipt…</p>
         ) : voided || !canEdit ? (
-          <p className="border border-dashed border-ash bg-card px-3 py-2 text-sm text-ink">No receipt attached.</p>
+          <p className="border border-dashed border-border-subtle bg-surface px-3 py-2 text-sm text-ink">No receipt attached.</p>
         ) : (
           <AttachReceipt expense={expense} onChanged={onChanged} />
         )}
@@ -652,11 +652,11 @@ function ExpenseDetail({ expense, url, names, canEdit, onChanged, onClose }: { e
           Voided on {formatDate(expense.voided_at!)}{expense.voided_by && names[expense.voided_by] ? ` by ${names[expense.voided_by]}` : ''}. Reason: {expense.void_reason}
         </p>
       ) : canEdit && (
-        <form onSubmit={voidExpense} className="mt-5 border-t border-line pt-4">
+        <form onSubmit={voidExpense} className="mt-5 border-t border-border pt-4">
           <label htmlFor="void-reason" className="text-sm font-medium">Void this expense</label>
           <p className="text-xs text-muted">It stays in the records, marked as voided, and no longer counts toward the total.</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="min-h-11 min-w-0 flex-1 border border-line px-3 py-2.5 text-base sm:text-sm" />
+            <input id="void-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" className="min-h-11 min-w-0 flex-1 border border-border px-3 py-2.5 text-base sm:text-sm" />
             <button type="submit" disabled={busy} className={subtleButtonClass + ' min-h-11'}>{busy ? 'Voiding…' : 'Void expense'}</button>
           </div>
           {error && <p role="alert" className="mt-2 text-sm text-brand-700">{error}</p>}
@@ -707,7 +707,7 @@ function ActivityLog({ budgetId, names }: { budgetId: string; names: Record<stri
           {!rows && !error && <p className="text-sm text-muted">Loading…</p>}
           {rows && rows.length === 0 && <p className="text-sm text-muted">Nothing recorded yet.</p>}
           {rows && rows.length > 0 && (
-            <ul className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+            <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
               {rows.map((r) => (
                 <li key={r.id} className="px-4 py-3 text-sm">
                   <p className="break-words">{describe(r)}</p>

@@ -124,19 +124,19 @@ export default function MerchManage() {
       {error && <p role="alert" className="mt-6 rounded-md bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
 
       {!loading && (
-        <dl aria-label="Totals" className="mt-6 grid grid-cols-1 gap-px overflow-hidden border border-line bg-line sm:grid-cols-3">
+        <dl aria-label="Totals" className="mt-6 grid grid-cols-1 gap-px overflow-hidden border border-border bg-border sm:grid-cols-3">
           <Metric label="Collected" value={peso(collected)} tone="good" hint={`${live.filter((o) => orderBalance(o) <= 0).length} fully paid orders`} />
           <Metric label="For verification" value={peso(forVerification)} tone={pendingProofs > 0 ? 'warn' : 'default'} hint={`${pendingProofs} ${pendingProofs === 1 ? 'proof needs' : 'proofs need'} review`} />
           <Metric label="Unpaid" value={peso(expected - collected)} tone={expected - collected > 0 ? 'warn' : 'default'} hint={`${live.filter((o) => orderBalance(o) > 0).length} orders awaiting payment`} />
         </dl>
       )}
 
-      <details className="mt-4 border-y border-line bg-white">
+      <details className="mt-4 border-y border-border bg-surface">
         <summary className="flex min-h-12 cursor-pointer items-center justify-between px-4 text-sm font-semibold text-ink">
           Product organization and payment details
           <span className="text-xs font-normal text-muted">Folders · GCash instructions</span>
         </summary>
-        <div className="border-t border-line px-4 pb-4">
+        <div className="border-t border-border px-4 pb-4">
           <FolderBar folders={folders} value={folderFilter} onChange={setFolderFilter} canEdit={canEdit} onChanged={load} setError={setError} />
           <div className="mt-4"><PaymentInfoCard editable={canEdit} /></div>
         </div>
@@ -164,7 +164,7 @@ export default function MerchManage() {
       {loading && <p className="mt-6 text-sm text-muted">Loading…</p>}
 
       {!loading && visibleItems.length === 0 && (
-        <p className="mt-8 rounded-md border border-dashed border-line px-4 py-6 text-sm text-muted">
+        <p className="mt-8 rounded-md border border-dashed border-border px-4 py-6 text-sm text-muted">
           {items.length === 0 ? 'No items yet. Add the first one above.' : 'No items in this folder yet.'}
         </p>
       )}
@@ -195,7 +195,7 @@ export default function MerchManage() {
 function Metric({ label, value, tone = 'default', hint }: { label: string; value: string; tone?: 'default' | 'good' | 'warn' | 'bad'; hint?: string }) {
   const valueClass = tone === 'good' ? 'text-success-deep' : tone === 'warn' ? 'text-brand-700' : tone === 'bad' ? 'text-error' : 'text-ink'
   return (
-    <div className="min-w-0 bg-white p-4">
+    <div className="min-w-0 bg-surface p-4">
       <dt className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{label}</dt>
       <dd className={'mt-1 text-xl font-semibold tabular-nums ' + valueClass}>{value}</dd>
       {hint && <p className="mt-0.5 text-xs text-muted">{hint}</p>}
@@ -259,7 +259,7 @@ function FolderBar({
           id="mf"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="mt-1 block min-h-11 rounded-md border border-line bg-white px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+          className="mt-1 block min-h-11 rounded-md border border-border bg-surface px-3 py-2.5 text-base sm:py-2 sm:text-sm"
         >
           <option value="all">All items</option>
           {folders.map((f) => (
@@ -291,7 +291,7 @@ function FolderBar({
               >
                 Rename
               </button>
-              <button onClick={() => setMode('delete')} className="py-1 text-umber hover:text-brand-700 hover:underline">
+              <button onClick={() => setMode('delete')} className="py-1 text-muted hover:text-brand-700 hover:underline">
                 Delete folder
               </button>
             </>
@@ -307,10 +307,10 @@ function FolderBar({
             maxLength={80}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. November 2026 batch"
-            className="min-w-0 rounded-md border border-line px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+            className="min-w-0 rounded-md border border-border px-3 py-2.5 text-base sm:py-2 sm:text-sm"
           />
           <button type="submit" className={subtleButtonClass}>{mode === 'new' ? 'Create' : 'Save'}</button>
-          <button type="button" onClick={() => setMode(null)} className="py-2 text-sm text-umber hover:underline">Cancel</button>
+          <button type="button" onClick={() => setMode(null)} className="py-2 text-sm text-muted hover:underline">Cancel</button>
         </form>
       )}
 
@@ -318,7 +318,7 @@ function FolderBar({
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm">
           <span className="text-ink">Delete "{current.name}"? Its items and orders are kept and move to "No folder".</span>
           <button onClick={() => void remove()} className="py-1 font-semibold text-brand-700 hover:underline">Yes, delete</button>
-          <button onClick={() => setMode(null)} className="py-1 text-umber hover:underline">Cancel</button>
+          <button onClick={() => setMode(null)} className="py-1 text-muted hover:underline">Cancel</button>
         </div>
       )}
     </div>
@@ -329,15 +329,15 @@ function FolderBar({
 function StageSteps({ stage }: { stage: Stage }) {
   const idx = STAGES.indexOf(stage)
   return (
-    <ol className="mt-4 grid grid-cols-4 border-y border-line py-2" aria-label="Sale stage">
+    <ol className="mt-4 grid grid-cols-4 border-y border-border py-2" aria-label="Sale stage">
       {STAGES.map((s, i) => (
         <li key={s} className="relative min-w-0 px-1 text-center" aria-current={i === idx ? 'step' : undefined}>
-          {i > 0 && <span aria-hidden="true" className={'absolute left-0 top-3 h-px w-1/2 ' + (i <= idx ? 'bg-brand-700' : 'bg-line')} />}
-          {i < STAGES.length - 1 && <span aria-hidden="true" className={'absolute right-0 top-3 h-px w-1/2 ' + (i < idx ? 'bg-brand-700' : 'bg-line')} />}
+          {i > 0 && <span aria-hidden="true" className={'absolute left-0 top-3 h-px w-1/2 ' + (i <= idx ? 'bg-brand-700' : 'bg-border')} />}
+          {i < STAGES.length - 1 && <span aria-hidden="true" className={'absolute right-0 top-3 h-px w-1/2 ' + (i < idx ? 'bg-brand-700' : 'bg-border')} />}
           <span
             className={
               'relative z-10 mx-auto flex h-6 w-6 items-center justify-center rounded-md border text-[11px] font-bold ' +
-              (i < idx ? 'border-brand-700 bg-brand-700 text-white' : i === idx ? 'border-brand-700 bg-white text-brand-700' : 'border-line bg-paper text-muted')
+              (i < idx ? 'border-brand-700 bg-brand-700 text-white' : i === idx ? 'border-brand-700 bg-surface text-brand-700' : 'border-border bg-bg text-muted')
             }
           >
             {i + 1}
@@ -422,7 +422,7 @@ function NewItemForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-8 rounded-md border border-line bg-white p-4 sm:p-5">
+    <form onSubmit={submit} className="mt-8 rounded-md border border-border bg-surface p-4 sm:p-5">
       <h2 className="text-xl font-medium">New item</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -478,7 +478,7 @@ function NewItemForm({
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? (photos.length ? 'Uploading photos…' : 'Saving…') : 'Add item'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-muted hover:underline">Cancel</button>
       </div>
     </form>
   )
@@ -571,7 +571,7 @@ function ItemSection({
   }
 
   return (
-    <section aria-label={item.name} className="overflow-hidden border border-line bg-white">
+    <section aria-label={item.name} className="overflow-hidden border border-border bg-surface">
       <div className="grid sm:grid-cols-[13rem_minmax(0,1fr)]">
         <MerchPhoto paths={item.image_paths ?? []} category={item.category} name={item.name} className="aspect-[4/3] w-full sm:aspect-auto sm:min-h-44" />
         <div className="min-w-0 p-4 sm:p-5">
@@ -592,7 +592,7 @@ function ItemSection({
       <div className="border-t-4 border-brand-700 px-4 py-3 sm:px-5">
       <StageSteps stage={item.stage} />
 
-      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-line py-3 text-sm sm:grid-cols-4">
+      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-y border-border py-3 text-sm sm:grid-cols-4">
         <div>
           <dt className="text-muted">Pieces ordered</dt>
           <dd className="text-lg font-medium">{qty}</dd>
@@ -613,7 +613,7 @@ function ItemSection({
 
       {canEdit && (
         <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_15rem]">
-          <div className="rounded-lg border border-line bg-white p-4">
+          <div className="rounded-lg border border-border bg-surface p-4">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted">Next step</p>
             {next ? (
               <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -634,7 +634,7 @@ function ItemSection({
               </button>
             )}
           </div>
-          <label className="flex flex-col justify-center rounded-lg border border-line bg-paper p-4 text-sm">
+          <label className="flex flex-col justify-center rounded-lg border border-border bg-bg p-4 text-sm">
             <span className="font-semibold text-ink">Organize item</span>
             <span className="mt-1 text-xs text-muted">Choose a folder for this merch item.</span>
             <select
@@ -642,7 +642,7 @@ function ItemSection({
               value={item.folder_id ?? ''}
               disabled={busy}
               onChange={(e) => void update({ folder_id: e.target.value || null }, 'Could not move the item.')}
-              className="mt-3 min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:text-sm"
+              className="mt-3 min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-base sm:text-sm"
             >
               <option value="">No folder</option>
               {folders.map((f) => (
@@ -658,21 +658,21 @@ function ItemSection({
       {canEdit && <ItemTools item={item} hasOrders={orders.length > 0} onChanged={onChanged} />}
       {canEdit && waitlist.length > 0 && <WaitlistPanel item={item} waitlist={waitlist} names={names} orders={orders} onChanged={onChanged} />}
 
-      <details className="mt-4 border-t border-line bg-paper/60 px-4 py-3">
+      <details className="mt-4 border-t border-border bg-bg/60 px-4 py-3">
         <summary className="cursor-pointer py-1 text-sm font-semibold">Order sheet for the supplier</summary>
         {qty === 0 ? (
           <p className="mt-2 text-sm text-muted">No orders yet.</p>
         ) : (
           <table className="mt-2 w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-line">
+              <tr className="border-b border-border">
                 <th className="py-1 pr-4 font-semibold">{item.variants.length ? 'Size or type' : 'Item'}</th>
                 <th className="py-1 font-semibold">Pieces</th>
               </tr>
             </thead>
             <tbody>
               {sheet.map(([v, n]) => (
-                <tr key={v} className="border-b border-line">
+                <tr key={v} className="border-b border-border">
                   <td className="py-1 pr-4">{v === 'All' ? item.name : v}</td>
                   <td className="py-1 tabular-nums">{n}</td>
                 </tr>
@@ -685,7 +685,7 @@ function ItemSection({
           </table>
         )}
         {cost > 0 && qty > 0 && (
-          <p className="mt-2 text-sm text-umber">
+          <p className="mt-2 text-sm text-muted">
             Cost to pay the supplier: {peso(qty * cost)}. Expected profit: {peso(expected - qty * cost)}.
           </p>
         )}
@@ -701,7 +701,7 @@ function ItemSection({
                 step="0.01"
                 value={costText}
                 onChange={(e) => setCostText(e.target.value)}
-                className="mt-1 block w-32 rounded-md border border-line px-2 py-2 text-base sm:py-1.5 sm:text-sm"
+                className="mt-1 block w-32 rounded-md border border-border px-2 py-2 text-base sm:py-1.5 sm:text-sm"
               />
             </div>
             <button type="button" onClick={() => void saveCost()} className={subtleButtonClass}>Save cost</button>
@@ -715,7 +715,7 @@ function ItemSection({
           aria-label="Filter orders"
           value={filter}
           onChange={(e) => setFilter(e.target.value as Filter)}
-          className="rounded-md border border-line bg-white px-2 py-2 text-base sm:py-1.5 sm:text-sm"
+          className="rounded-md border border-border bg-surface px-2 py-2 text-base sm:py-1.5 sm:text-sm"
         >
           <option value="all">All orders</option>
           <option value="verify">Needs verification</option>
@@ -729,7 +729,7 @@ function ItemSection({
       {shown.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No orders match.</p>
       ) : (
-        <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+        <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
           {shown.map((o) => (
             <OrderRow
               key={o.id}
@@ -804,7 +804,7 @@ function WaitlistPanel({
   }
 
   return (
-    <section aria-label="Waitlist" className="mt-4 rounded-md border border-line bg-paper p-4">
+    <section aria-label="Waitlist" className="mt-4 rounded-md border border-border bg-bg p-4">
       <h3 className="text-base font-semibold">Waitlist ({waitlist.length})</h3>
       <p className="mt-0.5 text-xs text-muted">
         In the order they asked.{' '}
@@ -812,7 +812,7 @@ function WaitlistPanel({
           ? `${left} ${left === 1 ? 'piece is' : 'pieces are'} free right now.`
           : 'No pieces are free, so nobody can be moved yet.'}
       </p>
-      <ul className="mt-3 divide-y divide-line rounded-md border border-line bg-white">
+      <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-surface">
         {waitlist.map((w, i) => (
           <li key={w.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 text-sm">
             <span className="min-w-0 break-words">
@@ -945,7 +945,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
   ]
 
   return (
-    <div className="mt-5 border-t border-line pt-4">
+    <div className="mt-5 border-t border-border pt-4">
       <div className="mb-3">
         <h3 className="text-sm font-bold text-ink">Manage listing</h3>
         <p className="mt-0.5 text-xs text-muted">Choose what you want to update.</p>
@@ -957,7 +957,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
             type="button"
             onClick={() => open(tool.id)}
             aria-expanded={panel === tool.id}
-            className={'flex min-h-[104px] flex-col items-start justify-between rounded-lg border p-3.5 text-left transition-colors ' + (panel === tool.id ? 'border-brand-700 bg-soft' : tool.id === 'remove' ? 'border-line bg-white hover:border-brand-300 hover:bg-paper' : 'border-line bg-white hover:border-brand-300 hover:bg-paper')}
+            className={'flex min-h-[104px] flex-col items-start justify-between rounded-lg border p-3.5 text-left transition-colors ' + (panel === tool.id ? 'border-brand-700 bg-soft' : tool.id === 'remove' ? 'border-border bg-surface hover:border-brand-300 hover:bg-surface-sunken' : 'border-border bg-surface hover:border-brand-300 hover:bg-surface-sunken')}
           >
             <span>
               <span className={'block text-sm font-semibold ' + (tool.id === 'remove' ? 'text-ink' : panel === tool.id ? 'text-brand-800' : 'text-ink')}>{tool.title}</span>
@@ -971,7 +971,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
       </div>
 
       {panel === 'photos' && (
-        <div className="mt-3 rounded-md border border-line bg-paper p-4">
+        <div className="mt-3 rounded-md border border-border bg-bg p-4">
           <PhotoPicker id={`ph-${item.id}`} saved={saved} files={files} onSavedChange={setSaved} onFilesChange={setFiles} />
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <div className="w-full sm:w-auto sm:min-w-40">
@@ -985,7 +985,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
       )}
 
       {panel === 'edit' && (
-        <form onSubmit={saveDetails} className="mt-3 grid gap-3 rounded-md border border-line bg-paper p-4 sm:grid-cols-2">
+        <form onSubmit={saveDetails} className="mt-3 grid gap-3 rounded-md border border-border bg-bg p-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label htmlFor={`en-${item.id}`} className="text-sm font-medium">Name</label>
             <input id={`en-${item.id}`} value={name} maxLength={120} onChange={(e) => setName(e.target.value)} className={inputClass} />
@@ -1024,7 +1024,7 @@ function ItemTools({ item, hasOrders, onChanged }: { item: MerchItem; hasOrders:
       )}
 
       {panel === 'remove' && (
-        <div className="mt-3 rounded-md border border-line bg-paper p-4 text-sm">
+        <div className="mt-3 rounded-md border border-border bg-bg p-4 text-sm">
           {hasOrders ? (
             <p className="text-ink">
               This item has orders, so it cannot be removed. Remove or cancel its orders first, or move the sale to “Closed” to stop new orders.
@@ -1078,7 +1078,7 @@ function AddOrder({ item, people, onAdded }: { item: MerchItem; people: Person[]
   }
 
   return (
-    <details className="mt-4 rounded-lg border border-line bg-paper px-4 py-3">
+    <details className="mt-4 rounded-lg border border-border bg-bg px-4 py-3">
       <summary className="cursor-pointer py-1 text-sm font-semibold">Add an order for someone</summary>
       <form onSubmit={submit} className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>

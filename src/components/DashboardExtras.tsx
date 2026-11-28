@@ -133,7 +133,7 @@ export default function DashboardExtras({
           <ul className="mt-3 space-y-3">
             {alerts.map((a) => (
               <li key={a.key}>
-                <Link to={a.to} className="block rounded-md border border-line bg-white p-4 transition-colors hover:bg-soft">
+                <Link to={a.to} className="block rounded-md border border-border bg-surface p-4 transition-colors hover:bg-surface-sunken">
                   <p className={eyebrowClass}>{a.eyebrow}</p>
                   <p className="mt-1 text-base font-semibold break-words text-ink">{a.text}</p>
                   <p className="mt-1 flex items-center gap-1 text-xs text-muted">
@@ -149,7 +149,7 @@ export default function DashboardExtras({
 
       {showTasks && (
         <div className={alerts.length > 0 ? 'mt-8' : ''}>
-          <div className="flex items-baseline justify-between gap-4 border-b border-line pb-2.5">
+          <div className="flex items-baseline justify-between gap-4 border-b border-border pb-2.5">
             <h2 className="flex items-center gap-2.5 text-[20px] font-medium leading-tight text-ink">
               <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
               My tasks
@@ -158,10 +158,10 @@ export default function DashboardExtras({
               See all
             </Link>
           </div>
-          <ul className="mt-3 divide-y divide-line rounded-md border border-line bg-white">
+          <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-surface">
             {tasks.map((t) => (
               <li key={t.id}>
-                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-soft">
+                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-surface-sunken">
                   <p className="text-sm font-semibold break-words text-ink">{t.title}</p>
                   {t.due_on && (
                     <p className={'text-xs ' + (t.due_on < today ? 'font-semibold text-error' : 'text-muted')}>

@@ -57,11 +57,11 @@ export default function NotificationsMenu({
           role="dialog"
           aria-label="Notifications"
           className={
-            'absolute z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-md border border-line bg-white text-left shadow-none ring-1 ring-line ' +
+            'absolute z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-md border border-border bg-surface text-left shadow-none ring-1 ring-line ' +
             (align === 'right' ? 'right-0' : 'left-0')
           }
         >
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <p className="text-sm font-semibold text-ink">Notifications</p>
             {unread > 0 && (
               <button onClick={() => void markRead(items.filter((n) => !n.read_at).map((n) => n.id))} className="text-xs font-semibold text-brand-700 hover:underline">
@@ -73,7 +73,7 @@ export default function NotificationsMenu({
           {items.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-muted">Nothing yet. Payment updates and arrivals will show up here.</p>
           ) : (
-            <ul className="max-h-96 divide-y divide-line overflow-y-auto">
+            <ul className="max-h-96 divide-y divide-border overflow-y-auto">
               {items.map((n) => (
                 <li key={n.id}>
                   <button
@@ -83,7 +83,7 @@ export default function NotificationsMenu({
                       setOpen(false)
                       if (n.link) navigate(n.link)
                     }}
-                    className={'block w-full px-4 py-3 text-left hover:bg-paper ' + (n.read_at ? '' : 'bg-soft/50')}
+                    className={'block w-full px-4 py-3 text-left hover:bg-surface-sunken ' + (n.read_at ? '' : 'bg-soft/50')}
                   >
                     <span className="flex items-start gap-2">
                       {!n.read_at && <span aria-hidden="true" className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-700" />}
@@ -100,7 +100,7 @@ export default function NotificationsMenu({
           )}
 
           {permission === 'default' && (
-            <div className="border-t border-line px-4 py-3">
+            <div className="border-t border-border px-4 py-3">
               <button onClick={() => void enableAlerts()} className="text-xs font-semibold text-brand-700 hover:underline">
                 Also alert me on this device
               </button>

@@ -137,13 +137,13 @@ export default function VerseOfTheDay() {
         subtitle="A Scripture reading and KKB BULSU reflection for today."
       />
 
-      {error && <p role="alert" className="mt-6 border-l-2 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
+      {error && <p role="alert" className="mt-6 border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">{error}</p>}
       {loading && <p className="mt-6 text-sm text-muted">Preparing today’s verse…</p>}
 
       {!loading && today && (
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
           <div className="space-y-8">
-            <article className="border-b border-line pb-8" aria-labelledby="verse-heading">
+            <article className="border-b border-border pb-8" aria-labelledby="verse-heading">
               <header>
                 <p className="text-xs font-medium text-muted">{displayDate(today.date)} · {today.translation}</p>
                 <h2 id="verse-heading" className="sr-only">Today’s Scripture</h2>
@@ -155,27 +155,27 @@ export default function VerseOfTheDay() {
               <p className="mt-2 text-xs text-muted">Scripture source: Free Use Bible API · Berean Standard Bible</p>
             </article>
 
-            <section className="border-b border-line pb-8" aria-labelledby="reflection-heading">
+            <section className="border-b border-border pb-8" aria-labelledby="reflection-heading">
               <div className="flex items-center gap-2.5">
                 <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
                 <p className="text-xs font-medium text-muted">KKB Reflection</p>
               </div>
               <h2 id="reflection-heading" className="mt-3 text-[20px] font-medium leading-tight text-ink">Faith in the middle of university life</h2>
               {today.reflection ? (
-                <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-umber sm:text-base">{today.reflection}</p>
+                <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-ink-secondary sm:text-base">{today.reflection}</p>
               ) : (
                 <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">The KKB reflection is being prepared. The Scripture above is available to read and reflect on today.</p>
               )}
             </section>
 
             {today.prayer && (
-              <section className="border-b border-line pb-8" aria-labelledby="prayer-heading">
+              <section className="border-b border-border pb-8" aria-labelledby="prayer-heading">
                 <div className="flex items-center gap-2.5">
                   <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
                   <p className="text-xs font-medium text-muted">Prayer</p>
                 </div>
                 <h2 id="prayer-heading" className="mt-3 text-[20px] font-medium leading-tight text-ink">A moment to pray</h2>
-                <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-umber sm:text-base">{today.prayer}</p>
+                <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-ink-secondary sm:text-base">{today.prayer}</p>
               </section>
             )}
 
@@ -204,14 +204,14 @@ export default function VerseOfTheDay() {
             )}
 
             <section aria-label="Previous verses">
-              <div className="flex items-center gap-2.5 border-b border-line pb-2.5">
+              <div className="flex items-center gap-2.5 border-b border-border pb-2.5">
                 <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
                 <h2 className="text-[20px] font-medium leading-tight text-ink">Previous verses</h2>
               </div>
               {archiveRows.length === 0 ? (
                 <p className="mt-4 text-sm text-muted">Previous devotionals will appear here as they are published.</p>
               ) : (
-                <ul className="mt-4 divide-y divide-line">
+                <ul className="mt-4 divide-y divide-border">
                   {archiveRows.map((row) => (
                     <li key={row.date} className="py-3 first:pt-0">
                       <p className="text-xs text-muted">{displayDate(row.date)}</p>

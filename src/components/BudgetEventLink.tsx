@@ -44,7 +44,7 @@ export default function BudgetEventLink({ budget, spent, canEdit, onChanged }: {
   if (!canEdit && !linked) return null
 
   return (
-    <section aria-label="Linked event" className="rounded-md border border-line bg-white p-4 sm:p-5">
+    <section aria-label="Linked event" className="rounded-md border border-border bg-surface p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">Event context</p><h2 className="mt-1 text-base font-semibold">Linked event</h2><p className="mt-1 text-xs text-muted">Connect this budget to an event to compare planned and actual attendance costs.</p></div>
         {linked && <Link to="/events" className="min-h-11 py-2 text-sm font-semibold text-brand-700 hover:underline">Open event</Link>}
@@ -53,19 +53,19 @@ export default function BudgetEventLink({ budget, spent, canEdit, onChanged }: {
       {linked ? (
         <div className="mt-2 text-sm">
           <p><Link to="/events" className="font-medium text-brand-700 hover:underline">{linked.title}</Link> <span className="text-muted">({formatEventTime(linked.starts_at)})</span></p>
-          <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-4">
-            <div className="bg-paper p-3 sm:p-4"><dt className="text-xs text-muted">Going</dt><dd className="text-xl font-medium tabular-nums">{going ?? '…'}</dd></div>
-            <div className="bg-paper p-3 sm:p-4"><dt className="text-xs text-muted">Checked in</dt><dd className="text-xl font-medium tabular-nums">{attended ?? '…'}</dd></div>
-            <div className="bg-paper p-3 sm:p-4"><dt className="text-xs text-muted">Budget per going</dt><dd className="text-xl font-medium tabular-nums">{going ? peso(budget.total_budget / going) : '-'}</dd></div>
-            <div className="bg-paper p-3 sm:p-4"><dt className="text-xs text-muted">Spent per attendee</dt><dd className="text-xl font-medium tabular-nums">{attended ? peso(spent / attended) : '-'}</dd></div>
+          <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-4">
+            <div className="bg-bg p-3 sm:p-4"><dt className="text-xs text-muted">Going</dt><dd className="text-xl font-medium tabular-nums">{going ?? '…'}</dd></div>
+            <div className="bg-bg p-3 sm:p-4"><dt className="text-xs text-muted">Checked in</dt><dd className="text-xl font-medium tabular-nums">{attended ?? '…'}</dd></div>
+            <div className="bg-bg p-3 sm:p-4"><dt className="text-xs text-muted">Budget per going</dt><dd className="text-xl font-medium tabular-nums">{going ? peso(budget.total_budget / going) : '-'}</dd></div>
+            <div className="bg-bg p-3 sm:p-4"><dt className="text-xs text-muted">Spent per attendee</dt><dd className="text-xl font-medium tabular-nums">{attended ? peso(spent / attended) : '-'}</dd></div>
           </dl>
         </div>
       ) : <p className="mt-2 text-sm text-muted">This budget is not tied to an event yet.</p>}
 
       {canEdit && (
-        <div className="mt-4 border-t border-line pt-4">
+        <div className="mt-4 border-t border-border pt-4">
           <label htmlFor="link-event" className="text-sm font-medium">Event</label>
-          <select id="link-event" value={eventId ?? ''} onChange={(e) => void link(e.target.value)} className="mt-2 block min-h-11 w-full rounded-md border border-line bg-paper px-3 py-2.5 text-base sm:text-sm">
+          <select id="link-event" value={eventId ?? ''} onChange={(e) => void link(e.target.value)} className="mt-2 block min-h-11 w-full rounded-md border border-border bg-bg px-3 py-2.5 text-base sm:text-sm">
             <option value="">No linked event</option>
             {events.map((e) => <option key={e.id} value={e.id}>{e.title} ({new Date(e.starts_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })})</option>)}
           </select>

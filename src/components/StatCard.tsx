@@ -21,7 +21,7 @@ export default function StatCard({
   className?: string
 }) {
   return (
-    <div className={'rounded-md border border-line border-t-4 border-t-brand-100 bg-white p-5 sm:p-6 ' + className}>
+    <div className={'rounded-md border border-border border-t-4 border-t-brand-100 bg-surface p-5 sm:p-6 ' + className}>
       <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">{label}</p>
       <p className={'mt-1 text-2xl font-semibold tracking-tight tabular-nums break-words sm:text-3xl ' + TONES[tone]}>{value}</p>
       {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}

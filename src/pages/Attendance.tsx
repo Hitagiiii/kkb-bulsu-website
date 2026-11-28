@@ -130,12 +130,12 @@ export default function Attendance() {
       {!loading && (
         <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start print:hidden" aria-label="My attendance">
           <div>
-            <div className="rounded-md border border-line bg-white p-5">
+            <div className="rounded-md border border-border bg-surface p-5">
               <p className="text-5xl font-medium tabular-nums text-ink">{Math.round(rate * 100)}%</p>
               <p className="mt-1 text-sm font-semibold text-ink">
                 {attendedPast} of {pastCount} events attended
               </p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-sand" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(rate * 100)} aria-label="Attendance rate">
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(rate * 100)} aria-label="Attendance rate">
                 <div className="h-full bg-brand-700" style={{ width: `${Math.round(rate * 100)}%` }} />
               </div>
               <p className="mt-3 text-sm text-muted">
@@ -150,13 +150,13 @@ export default function Attendance() {
             <h2 className="mt-8 text-xl font-medium">Event history</h2>
             {history.length > 0 && (
               <div className="mt-3">
-                <input aria-label="Search my attendance" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by event" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+                <input aria-label="Search my attendance" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter by event" className="min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
               </div>
             )}
             {history.length === 0 ? (
-              <p className="mt-3 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">No events have happened yet.</p>
+              <p className="mt-3 rounded-md border border-border bg-surface px-4 py-6 text-sm text-muted">No events have happened yet.</p>
             ) : (
-              <ul className="mt-3 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+              <ul className="mt-3 divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
                 {shownHistory.map((h) => (
                   <li key={h.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                     <div className="min-w-0">
@@ -176,14 +176,14 @@ export default function Attendance() {
 
           <aside className="space-y-4">
             {nextEvent && (
-              <div className="rounded-md border border-line bg-white p-4">
+              <div className="rounded-md border border-border bg-surface p-4">
                 <p className={eyebrowClass}>Your next chance to show up</p>
                 <p className="mt-2 text-lg font-medium break-words">{nextEvent.title}</p>
                 <p className="mt-1 text-xs text-muted">{formatDay(nextEvent.starts_at)}</p>
                 <Link to="/events" className="mt-3 inline-block text-sm font-semibold text-brand-700 hover:underline">View event &amp; RSVP →</Link>
               </div>
             )}
-            <div className="rounded-md border border-line bg-white p-4">
+            <div className="rounded-md border border-border bg-surface p-4">
               <p className="text-sm font-semibold">Think a record is missing?</p>
               <p className="mt-1 text-xs text-muted">Contact the attendance officer within 7 school days.</p>
             </div>
@@ -204,7 +204,7 @@ export default function Attendance() {
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-line">
+                  <tr className="border-b border-border">
                     <th className="py-2 pr-4 font-semibold">Member</th>
                     <th className="py-2 pr-4 font-semibold">Attended</th>
                     <th className="py-2 font-semibold">Rate</th>
@@ -214,7 +214,7 @@ export default function Attendance() {
                   {report.people.map((p) => {
                     const n = rows.perPerson.get(p.id) ?? 0
                     return (
-                      <tr key={p.id} className="border-b border-line break-inside-avoid">
+                      <tr key={p.id} className="border-b border-border break-inside-avoid">
                         <td className="py-2 pr-4 break-words">{p.full_name || 'Unnamed'}</td>
                         <td className="py-2 pr-4 tabular-nums">{n} / {rows.total}</td>
                         <td className="py-2 tabular-nums">{rows.total ? Math.round((n / rows.total) * 100) : 0}%</td>
@@ -231,7 +231,7 @@ export default function Attendance() {
             <div className="mt-3 overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-line">
+                  <tr className="border-b border-border">
                     <th className="py-2 pr-4 font-semibold">Event</th>
                     <th className="py-2 pr-4 font-semibold">Date</th>
                     <th className="py-2 font-semibold">Present</th>
@@ -239,7 +239,7 @@ export default function Attendance() {
                 </thead>
                 <tbody>
                   {report.events.map((e) => (
-                    <tr key={e.id} className="border-b border-line break-inside-avoid">
+                    <tr key={e.id} className="border-b border-border break-inside-avoid">
                       <td className="py-2 pr-4 break-words">{e.title}</td>
                       <td className="py-2 pr-4 whitespace-nowrap">{formatDay(e.starts_at)}</td>
                       <td className="py-2 tabular-nums">{rows.perEvent.get(e.id) ?? 0}</td>

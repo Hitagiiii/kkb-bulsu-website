@@ -5,7 +5,7 @@ export default function ProgressRing({ pct, over, size = 56 }: { pct: number; ov
   const shown = Math.max(0, Math.min(100, pct))
   return (
     <svg width={size} height={size} viewBox="0 0 56 56" role="img" aria-label={`${Math.round(shown)}% used`} className="shrink-0">
-      <circle cx="28" cy="28" r={r} fill="none" stroke="currentColor" strokeWidth="6" className="text-umber" />
+      <circle cx="28" cy="28" r={r} fill="none" stroke="currentColor" strokeWidth="6" className="text-muted" />
       <circle
         cx="28"
         cy="28"

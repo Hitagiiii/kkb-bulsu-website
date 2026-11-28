@@ -16,6 +16,7 @@ import {
 import Linkify from '../components/Linkify'
 import { buttonClass, cardClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
 import PageHeader from '../components/PageHeader'
+import Chip from '../components/Chip'
 
 const BUCKET = 'announcement-images'
 const MAX_IMAGES = 3
@@ -191,7 +192,7 @@ export default function Announcements() {
       />
 
       {error && (
-        <p role="alert" className="mt-4 border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
+        <p role="alert" className="mt-4 rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">
           {error}
         </p>
       )}
@@ -199,7 +200,7 @@ export default function Announcements() {
       {canPost && composing && (
         <div className={cardClass + ' mt-6 p-4 sm:p-6'}>
           <p className={eyebrowClass}>Officer workspace</p>
-          <h2 className="mt-1 text-xl font-medium">Write to your community.</h2>
+          <h2 className="mt-1 text-[20px] font-semibold tracking-tight text-ink">Write to your community.</h2>
           <p className="mt-1 text-sm text-muted">Announcements are visible to approved members only.</p>
           <AnnouncementForm
             initial={{ title: '', body: '', pinned: false, eventAt: null, imagePaths: [] }}
@@ -212,7 +213,7 @@ export default function Announcements() {
         </div>
       )}
 
-      <div role="group" aria-label="Filter posts" className="mt-6 flex gap-5 border-b border-line text-sm">
+      <div role="group" aria-label="Filter posts" className="mt-6 flex gap-6 border-b border-border text-sm">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -220,16 +221,16 @@ export default function Announcements() {
             aria-pressed={filter === t.id}
             onClick={() => setFilter(t.id)}
             className={
-              '-mb-px border-b-2 py-2.5 transition-colors ' +
+              '-mb-px min-h-11 border-b-2 py-2.5 transition-colors ' +
               (filter === t.id ? 'border-brand-700 font-semibold text-brand-700' : 'border-transparent text-muted hover:text-ink')
             }
           >
-            {t.label} <span className="text-xs">({counts[t.id]})</span>
+            {t.label} <span className="font-num text-xs">({counts[t.id]})</span>
           </button>
         ))}
       </div>
 
-      <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-start">
         <div>
           {loading && <p className="text-sm text-muted">Loading announcements…</p>}
 
@@ -244,37 +245,40 @@ export default function Announcements() {
             </div>
           )}
 
-          <ul className="space-y-4">
-            {shown.map((a) => (
-              <li key={a.id}>
-                {editingId === a.id ? (
-                  <div className={cardClass + ' p-4 sm:p-6'}>
-                    <AnnouncementForm
-                      initial={{
-                        title: a.title,
-                        body: a.body,
-                        pinned: a.pinned,
-                        eventAt: a.event_at,
-                        imagePaths: a.image_paths ?? [],
-                      }}
-                      urls={urls}
-                      submitLabel="Save changes"
-                      onSubmit={(v) => save(a, v)}
-                      onCancel={() => setEditingId(null)}
-                      authorName={a.author_name}
-                    />
-                  </div>
-                ) : (
-                  <article className={cardClass + ' overflow-hidden'}>
-                    <Photos paths={a.image_paths ?? []} urls={urls} />
-                    <div className="p-4 sm:p-6">
-                      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+          {shown.length > 0 && (
+            <ul className="divide-y divide-border border-b border-border">
+              {shown.map((a) => (
+                <li key={a.id} className="py-6 first:pt-2">
+                  {editingId === a.id ? (
+                    <div className={cardClass + ' p-4 sm:p-6'}>
+                      <AnnouncementForm
+                        initial={{
+                          title: a.title,
+                          body: a.body,
+                          pinned: a.pinned,
+                          eventAt: a.event_at,
+                          imagePaths: a.image_paths ?? [],
+                        }}
+                        urls={urls}
+                        submitLabel="Save changes"
+                        onSubmit={(v) => save(a, v)}
+                        onCancel={() => setEditingId(null)}
+                        authorName={a.author_name}
+                      />
+                    </div>
+                  ) : (
+                    <article>
+                      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
                         <div className="min-w-0 flex-1">
-                          <p className={eyebrowClass}>
-                            {a.pinned ? 'Pinned / Official update' : a.event_at ? 'Event / Announcement' : 'Community'}
-                            <span className="text-muted"> · {formatDateTime(a.created_at).split(',')[0]}</span>
-                          </p>
-                          <h2 className="mt-1 text-xl font-semibold break-words sm:text-2xl">{a.title}</h2>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {a.pinned && <Chip tone="brand">Pinned</Chip>}
+                            {a.event_at && !a.pinned && <Chip tone="amber">Event</Chip>}
+                            <p className={eyebrowClass}>
+                              {a.pinned ? 'Official update' : a.event_at ? 'Announcement' : 'Community'}
+                              <span className="text-muted"> · {formatDateTime(a.created_at).split(',')[0]}</span>
+                            </p>
+                          </div>
+                          <h2 className="mt-1.5 text-[20px] font-semibold tracking-tight text-ink break-words sm:text-2xl">{a.title}</h2>
                           <p className="mt-1 text-xs text-muted">
                             {a.author_name || 'An officer'} · {formatDateTime(a.created_at)}
                             {a.updated_at && ' · Edited'}
@@ -286,7 +290,7 @@ export default function Announcements() {
                               <>
                                 <span className="text-ink">Delete permanently?</span>
                                 <button onClick={() => void remove(a)} className="min-h-11 font-semibold text-brand-700 underline underline-offset-2">Yes, delete</button>
-                                <button onClick={() => setDeletingId(null)} className="min-h-11 text-muted underline underline-offset-2">Cancel</button>
+                                <button onClick={() => setDeletingId(null)} className="min-h-11 text-muted underline underline-offset-2 hover:text-ink">Cancel</button>
                               </>
                             ) : (
                               <>
@@ -307,6 +311,12 @@ export default function Announcements() {
 
                       {a.event_at && <EventLine iso={a.event_at} now={now} />}
 
+                      {(a.image_paths ?? []).length > 0 && (
+                        <div className="mt-4 overflow-hidden rounded-md border border-border">
+                          <Photos paths={a.image_paths ?? []} urls={urls} />
+                        </div>
+                      )}
+
                       <p className="mt-3 text-sm leading-6 break-words whitespace-pre-wrap text-ink">
                         <Linkify text={a.body} />
                       </p>
@@ -315,22 +325,23 @@ export default function Announcements() {
                           Open event
                         </Link>
                       )}
-                    </div>
-                  </article>
-                )}
-              </li>
-            ))}
-          </ul>
+                    </article>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <aside className="space-y-6">
+        <aside className="space-y-6 border-t border-border pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
           {dontMiss.length > 0 && (
-            <section className={cardClass + ' p-4'} aria-label="Don't miss">
-              <p className="text-sm font-semibold text-ink">Don’t miss</p>
-              <ol className="mt-3 space-y-3">
+            <section aria-label="Don't miss">
+              <p className={eyebrowClass}>Highlights</p>
+              <h2 className="mt-1 text-sm font-semibold text-ink">Don’t miss</h2>
+              <ol className="mt-3 divide-y divide-border-subtle">
                 {dontMiss.map((a, i) => (
-                  <li key={a.id} className="flex gap-3 text-sm">
-                    <span className="text-xs font-semibold text-brand-700">{String(i + 1).padStart(2, '0')}</span>
+                  <li key={a.id} className="flex gap-3 py-2.5 first:pt-0 text-sm">
+                    <span className="font-num text-xs font-semibold text-brand-700">{String(i + 1).padStart(2, '0')}</span>
                     <span className="min-w-0 break-words text-ink">{a.title}</span>
                   </li>
                 ))}
@@ -338,13 +349,14 @@ export default function Announcements() {
             </section>
           )}
           {byMonth.size > 0 && (
-            <section className={cardClass + ' p-4'} aria-label="Browse by month">
-              <p className="text-sm font-semibold text-ink">Browse by month</p>
+            <section className={dontMiss.length > 0 ? 'border-t border-border-subtle pt-6' : ''} aria-label="Browse by month">
+              <p className={eyebrowClass}>Archive</p>
+              <h2 className="mt-1 text-sm font-semibold text-ink">Browse by month</h2>
               <ul className="mt-3 space-y-2 text-sm">
                 {[...byMonth.entries()].map(([month, n]) => (
                   <li key={month} className="flex justify-between gap-2 text-muted">
                     <span>{month}</span>
-                    <span>{n} {n === 1 ? 'post' : 'posts'}</span>
+                    <span className="font-num">{n} {n === 1 ? 'post' : 'posts'}</span>
                   </li>
                 ))}
               </ul>
@@ -361,10 +373,10 @@ function EventLine({ iso, now }: { iso: string; now: number }) {
   const state = eventState(iso, now)
   return (
     <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm">
-      <span className="rounded-md bg-soft px-2 py-1 font-semibold text-brand-700">Event</span>
+      <Chip tone="brand">Event</Chip>
       <span className="text-muted">{formatEventTime(iso)}</span>
       {state === 'soon' && (
-        <span className="rounded-md bg-accent-100 px-2 py-1 text-xs font-semibold text-accent-700">Starts {timeUntil(iso, now)}</span>
+        <Chip tone="amber">Starts {timeUntil(iso, now)}</Chip>
       )}
       {state === 'later' && <span className="text-muted">{timeUntil(iso, now)}</span>}
       {state === 'past' && <span className="text-muted">Already happened</span>}
@@ -377,7 +389,7 @@ function Photos({ paths, urls }: { paths: string[]; urls: Record<string, string>
   if (paths.length === 0) return null
   const single = paths.length === 1
   return (
-    <div className={'grid gap-px bg-line ' + (single ? 'grid-cols-1' : paths.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
+    <div className={'grid gap-px bg-border ' + (single ? 'grid-cols-1' : paths.length === 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
       {paths.map((p) =>
         urls[p] ? (
           <a key={p} href={urls[p]} target="_blank" rel="noreferrer" title="Open full size">
@@ -385,11 +397,11 @@ function Photos({ paths, urls }: { paths: string[]; urls: Record<string, string>
               src={urls[p]}
               alt="Photo attached to the announcement"
               loading="lazy"
-              className={'w-full bg-sand object-cover ' + (single ? 'aspect-[16/9] max-h-[28rem]' : 'aspect-square')}
+              className={'w-full bg-surface-sunken object-cover ' + (single ? 'aspect-[16/9] max-h-[28rem]' : 'aspect-square')}
             />
           </a>
         ) : (
-          <div key={p} className={'bg-sand ' + (single ? 'aspect-[16/9]' : 'aspect-square')} />
+          <div key={p} className={'bg-surface-sunken ' + (single ? 'aspect-[16/9]' : 'aspect-square')} />
         ),
       )}
     </div>
@@ -415,11 +427,11 @@ function NewPreview({ file, onRemove }: { file: File; onRemove: () => void }) {
   return (
     <li className="w-24">
       {src ? (
-        <img src={src} alt="New photo preview" className="h-24 w-24 border border-line object-cover" />
+        <img src={src} alt="New photo preview" className="h-24 w-24 rounded-md border border-border object-cover" />
       ) : (
-        <div className="h-24 w-24 bg-sand" />
+        <div className="h-24 w-24 rounded-md bg-surface-sunken" />
       )}
-      <button type="button" onClick={onRemove} className="mt-1 min-h-11 py-2 text-xs text-umber underline underline-offset-2 hover:text-error">
+      <button type="button" onClick={onRemove} className="mt-1 min-h-11 py-2 text-xs text-muted underline underline-offset-2 hover:text-error">
         Remove
       </button>
     </li>
@@ -489,10 +501,10 @@ function AnnouncementForm({
   }
 
   return (
-    <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+    <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
     <form onSubmit={submit} className="space-y-4">
       <div>
-        <label htmlFor={`${uid}-title`} className="text-sm font-medium">Title</label>
+        <label htmlFor={`${uid}-title`} className="block text-sm font-medium text-ink">Title</label>
         <input
           id={`${uid}-title`}
           value={title}
@@ -503,7 +515,7 @@ function AnnouncementForm({
       </div>
 
       <div>
-        <label htmlFor={`${uid}-body`} className="text-sm font-medium">Message</label>
+        <label htmlFor={`${uid}-body`} className="block text-sm font-medium text-ink">Message</label>
         <textarea
           id={`${uid}-body`}
           value={body}
@@ -516,7 +528,7 @@ function AnnouncementForm({
       </div>
 
       <div>
-        <label htmlFor={`${uid}-event`} className="text-sm font-medium">Event date and time (optional)</label>
+        <label htmlFor={`${uid}-event`} className="block text-sm font-medium text-ink">Event date and time (optional)</label>
         <div className="flex items-center gap-3">
           <input
             id={`${uid}-event`}
@@ -526,7 +538,7 @@ function AnnouncementForm({
             className={inputClass + ' sm:max-w-xs'}
           />
           {eventLocal && (
-            <button type="button" onClick={() => setEventLocal('')} className="mt-1 min-h-11 py-2 text-sm text-umber underline underline-offset-2">
+            <button type="button" onClick={() => setEventLocal('')} className="mt-1 min-h-11 px-2 py-2 text-sm text-muted underline underline-offset-2 hover:text-ink">
               Clear
             </button>
           )}
@@ -537,7 +549,7 @@ function AnnouncementForm({
       </div>
 
       <div>
-        <label htmlFor={`${uid}-photos`} className="text-sm font-medium">
+        <label htmlFor={`${uid}-photos`} className="block text-sm font-medium text-ink">
           Photos ({total} of {MAX_IMAGES})
         </label>
         <input
@@ -550,7 +562,7 @@ function AnnouncementForm({
             pickFiles(e.target.files)
             e.target.value = ''
           }}
-          className="mt-1 block min-h-11 w-full text-sm file:mr-3 file:min-h-11 file:border-0 file:bg-sand file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-sand disabled:opacity-60"
+          className="mt-1 block min-h-11 w-full text-sm text-ink file:mr-3 file:min-h-11 file:rounded-md file:border-0 file:bg-surface-sunken file:px-3 file:py-2.5 file:text-sm file:font-medium file:text-ink hover:file:bg-border disabled:opacity-60"
         />
         {note && <p className="mt-1 text-xs text-accent-700">{note}</p>}
 
@@ -559,14 +571,14 @@ function AnnouncementForm({
             {keepPaths.map((p) => (
               <li key={p} className="w-24">
                 {urls[p] ? (
-                  <img src={urls[p]} alt="Saved photo" className="h-24 w-24 border border-line object-cover" />
+                  <img src={urls[p]} alt="Saved photo" className="h-24 w-24 rounded-md border border-border object-cover" />
                 ) : (
-                  <div className="h-24 w-24 bg-sand" />
+                  <div className="h-24 w-24 rounded-md bg-surface-sunken" />
                 )}
                 <button
                   type="button"
                   onClick={() => setKeepPaths((prev) => prev.filter((x) => x !== p))}
-                  className="mt-1 min-h-11 py-2 text-xs text-umber underline underline-offset-2 hover:text-error"
+                  className="mt-1 min-h-11 py-2 text-xs text-muted underline underline-offset-2 hover:text-error"
                 >
                   Remove
                 </button>
@@ -583,34 +595,37 @@ function AnnouncementForm({
         )}
       </div>
 
-      <label className="flex min-h-11 items-center gap-2 py-1 text-sm">
-        <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} className="h-4 w-4 accent-accent" />
+      <label className="flex min-h-11 items-center gap-2.5 py-1 text-sm text-ink">
+        <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} className="h-4 w-4 accent-brand-700" />
         Pin to the top
       </label>
 
       {error && (
-        <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
+        <p role="alert" className="rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
           {error}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         <div className="w-full sm:w-auto sm:min-w-48">
           <button type="submit" disabled={busy} className={buttonClass}>
             {busy ? (newFiles.length ? 'Uploading photos…' : 'Saving…') : submitLabel}
           </button>
         </div>
-        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-muted underline underline-offset-2">
+        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-muted underline underline-offset-2 hover:text-ink">
           Cancel
         </button>
       </div>
     </form>
 
-    <aside aria-label="Member preview" className="rounded-md border border-line bg-paper p-4 lg:sticky lg:top-6">
-      <p className="text-[11px] font-semibold tracking-[0.08em] text-muted uppercase">Member preview</p>
-      <div className="mt-3 rounded-md border border-line bg-white p-4">
-        <p className={eyebrowClass}>{pinned ? 'Pinned / Official update' : 'Community'}</p>
-        <p className="mt-1 text-lg font-semibold break-words text-ink">{title.trim() || 'Your title appears here'}</p>
+    <aside aria-label="Member preview" className="border-t border-border-subtle pt-4 lg:sticky lg:top-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+      <p className={eyebrowClass}>Member preview</p>
+      <div className="mt-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {pinned && <Chip tone="brand">Pinned</Chip>}
+          <p className={eyebrowClass}>{pinned ? 'Official update' : 'Community'}</p>
+        </div>
+        <p className="mt-1.5 text-lg font-semibold break-words text-ink">{title.trim() || 'Your title appears here'}</p>
         <p className="mt-1 text-xs text-muted">{authorName || 'An officer'} · Visible after publishing</p>
         <p className="mt-3 line-clamp-4 text-sm break-words whitespace-pre-wrap text-ink">
           {body.trim() || 'Your message appears here.'}

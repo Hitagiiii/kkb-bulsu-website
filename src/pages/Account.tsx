@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import PageHeader from '../components/PageHeader'
-import { buttonClass, cardClass, inputClass } from '../components/ui'
+import Chip from '../components/Chip'
+import { buttonClass, eyebrowClass, inputClass } from '../components/ui'
 import { supabase } from '../lib/supabase'
 import { ROLE_LABEL } from '../lib/types'
 
@@ -64,63 +65,79 @@ export default function Account() {
 
   return (
     <div className="w-full">
-      <PageHeader eyebrow="Account settings" title="Your details." subtitle={`${ROLE_LABEL[profile.role]} · ${session?.user.email ?? ''}`} />
+      <PageHeader
+        eyebrow="Account settings"
+        title="Your details."
+        subtitle={`${ROLE_LABEL[profile.role]} · ${session?.user.email ?? ''}`}
+        action={<Chip tone="brand">{ROLE_LABEL[profile.role]}</Chip>}
+      />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2 lg:items-start">
-        <form onSubmit={saveProfile} className={cardClass + ' space-y-4 p-4 sm:p-6'}>
-          <h2 className="text-xl font-medium">Membership details</h2>
-          <p className="text-sm text-muted">Officers use these to verify you. Your role and approval can only be changed by an admin.</p>
+      <div className="mt-8 grid gap-8 lg:grid-cols-2 lg:items-start lg:divide-x lg:divide-border">
+        <form onSubmit={saveProfile} className="space-y-5">
+          <div className="border-b border-border-subtle pb-4">
+            <p className={eyebrowClass}>Profile</p>
+            <h2 className="mt-1 text-[20px] font-semibold tracking-tight text-ink">Membership details</h2>
+            <p className="mt-1 text-sm text-muted">Officers use these to verify you. Your role and approval can only be changed by an admin.</p>
+          </div>
           <div>
-            <label htmlFor="acc-name" className="block text-sm font-semibold">Full name</label>
+            <label htmlFor="acc-name" className="block text-sm font-medium text-ink">Full name</label>
             <input id="acc-name" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" className={inputClass} />
           </div>
           <div>
-            <label htmlFor="acc-email" className="block text-sm font-semibold">University email</label>
-            <input id="acc-email" value={session?.user.email ?? ''} disabled className={inputClass + ' bg-paper text-muted'} />
+            <label htmlFor="acc-email" className="block text-sm font-medium text-ink">University email</label>
+            <input id="acc-email" value={session?.user.email ?? ''} disabled className={inputClass + ' bg-surface-sunken text-muted'} />
           </div>
           <div>
-            <label htmlFor="acc-sn" className="block text-sm font-semibold">Student number</label>
+            <label htmlFor="acc-sn" className="block text-sm font-medium text-ink">Student number</label>
             <input id="acc-sn" value={studentNo} onChange={(e) => setStudentNo(e.target.value)} inputMode="numeric" className={inputClass} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="acc-col" className="block text-sm font-semibold">College</label>
+              <label htmlFor="acc-col" className="block text-sm font-medium text-ink">College</label>
               <select id="acc-col" value={college} onChange={(e) => setCollege(e.target.value)} className={inputClass}>
                 <option value="">Choose…</option>
                 {COLLEGES.map((c) => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label htmlFor="acc-prog" className="block text-sm font-semibold">Program</label>
+              <label htmlFor="acc-prog" className="block text-sm font-medium text-ink">Program</label>
               <input id="acc-prog" value={program} onChange={(e) => setProgram(e.target.value)} className={inputClass} />
             </div>
           </div>
           <div>
-            <label htmlFor="acc-ys" className="block text-sm font-semibold">Year & section</label>
+            <label htmlFor="acc-ys" className="block text-sm font-medium text-ink">Year & section</label>
             <input id="acc-ys" value={yearSection} onChange={(e) => setYearSection(e.target.value)} placeholder="3rd year · BSIT 3A" className={inputClass} />
           </div>
-          {error && <p role="alert" className="border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>}
+          {error && <p role="alert" className="rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">{error}</p>}
           {saved && <p role="status" className="rounded-md bg-success-pale px-3 py-2.5 text-sm text-success-deep">Saved.</p>}
-          <button type="submit" disabled={saving} className={buttonClass + ' sm:w-auto'}>{saving ? 'Saving…' : 'Save changes'}</button>
+          <div className="pt-2">
+            <button type="submit" disabled={saving} className={buttonClass + ' sm:w-auto'}>{saving ? 'Saving…' : 'Save changes'}</button>
+          </div>
         </form>
 
-        <form onSubmit={changePassword} className={cardClass + ' space-y-4 p-4 sm:p-6'}>
-          <h2 className="text-xl font-medium">Password</h2>
+        <form onSubmit={changePassword} className="space-y-5 border-t border-border pt-8 lg:border-t-0 lg:pt-0 lg:pl-8">
+          <div className="border-b border-border-subtle pb-4">
+            <p className={eyebrowClass}>Security</p>
+            <h2 className="mt-1 text-[20px] font-semibold tracking-tight text-ink">Password</h2>
+            <p className="mt-1 text-sm text-muted">Update the password used for your KKB BULSU portal account.</p>
+          </div>
           <div>
-            <label htmlFor="acc-pw" className="block text-sm font-semibold">New password</label>
+            <label htmlFor="acc-pw" className="block text-sm font-medium text-ink">New password</label>
             <input id="acc-pw" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
             <p className="mt-1 text-xs text-muted">Use 8 or more characters, including a number.</p>
           </div>
           <div>
-            <label htmlFor="acc-pw2" className="block text-sm font-semibold">Confirm new password</label>
+            <label htmlFor="acc-pw2" className="block text-sm font-medium text-ink">Confirm new password</label>
             <input id="acc-pw2" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={inputClass} />
           </div>
           {pwMessage && (
-            <p role={pwMessage.ok ? 'status' : 'alert'} className={pwMessage.ok ? 'rounded-md bg-success-pale px-3 py-2.5 text-sm text-success-deep' : 'border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700'}>
+            <p role={pwMessage.ok ? 'status' : 'alert'} className={pwMessage.ok ? 'rounded-md bg-success-pale px-3 py-2.5 text-sm text-success-deep' : 'rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700'}>
               {pwMessage.text}
             </p>
           )}
-          <button type="submit" disabled={pwBusy} className={buttonClass + ' sm:w-auto'}>{pwBusy ? 'Saving…' : 'Change password'}</button>
+          <div className="pt-2">
+            <button type="submit" disabled={pwBusy} className={buttonClass + ' sm:w-auto'}>{pwBusy ? 'Saving…' : 'Change password'}</button>
+          </div>
         </form>
       </div>
     </div>

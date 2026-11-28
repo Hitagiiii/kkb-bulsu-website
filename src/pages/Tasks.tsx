@@ -69,7 +69,7 @@ export default function Tasks() {
           <p className={'font-medium break-words ' + (t.status === 'done' ? 'text-muted line-through' : '')}>{t.title}</p>
           <Chip tone={t.status === 'done' ? 'green' : t.status === 'doing' ? 'brand' : 'slate'}>{STATUS_LABEL[t.status]}</Chip>
         </div>
-        {t.description && <p className="mt-1 text-sm break-words whitespace-pre-wrap text-umber">{t.description}</p>}
+        {t.description && <p className="mt-1 text-sm break-words whitespace-pre-wrap text-muted">{t.description}</p>}
         <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
           <span>{t.assigned_to ? names[t.assigned_to] ?? 'Unknown' : 'Unassigned'}</span>
           {t.due_on && (
@@ -88,19 +88,19 @@ export default function Tasks() {
             <button onClick={() => void setStatus(t, 'done')} className="min-h-11 py-2 font-semibold text-brand-700 hover:underline">Mark done</button>
           )}
           {t.status === 'doing' && (
-            <button onClick={() => void setStatus(t, 'todo')} className="min-h-11 py-2 text-umber hover:underline">Back to to-do</button>
+            <button onClick={() => void setStatus(t, 'todo')} className="min-h-11 py-2 text-muted hover:underline">Back to to-do</button>
           )}
           {t.status === 'done' && (
-            <button onClick={() => void setStatus(t, 'todo')} className="min-h-11 py-2 text-umber hover:underline">Reopen</button>
+            <button onClick={() => void setStatus(t, 'todo')} className="min-h-11 py-2 text-muted hover:underline">Reopen</button>
           )}
           {deleting === t.id ? (
             <>
               <span className="text-ink">Delete this task?</span>
               <button onClick={() => void remove(t)} className="min-h-11 py-2 font-semibold text-brand-700 hover:underline">Yes, delete</button>
-              <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-umber hover:underline">Cancel</button>
+              <button onClick={() => setDeleting(null)} className="min-h-11 py-2 text-muted hover:underline">Cancel</button>
             </>
           ) : (
-            <button onClick={() => setDeleting(t.id)} className="min-h-11 py-2 text-umber hover:text-brand-700 hover:underline">Delete</button>
+            <button onClick={() => setDeleting(t.id)} className="min-h-11 py-2 text-muted hover:text-brand-700 hover:underline">Delete</button>
           )}
         </div>
       </li>
@@ -133,7 +133,7 @@ export default function Tasks() {
         />
       )}
 
-      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+      <div className="mt-4 flex min-h-11 flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
       <label className="flex items-center gap-2 py-1 text-sm text-ink">
         <input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
         Show only my tasks
@@ -146,7 +146,7 @@ export default function Tasks() {
       {!loading && (
         <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <section aria-label="Open tasks">
-            <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border pb-2">
               <div>
                 <h2 className="text-xl font-medium">Responsibilities <span className="font-normal text-muted">({open.length})</span></h2>
                 <p className="mt-1 text-xs text-muted">Grouped by owner so due dates and next actions stay together.</p>
@@ -154,7 +154,7 @@ export default function Tasks() {
             </div>
 
             {open.length === 0 ? (
-              <p className="mt-4 border border-line bg-white px-4 py-6 text-sm text-muted">Nothing open. Nice.</p>
+              <p className="mt-4 border border-border bg-surface px-4 py-6 text-sm text-muted">Nothing open. Nice.</p>
             ) : (
               <div className="mt-4 space-y-6">
                 {Object.entries(
@@ -165,11 +165,11 @@ export default function Tasks() {
                   }, {}),
                 ).map(([owner, items]) => (
                   <section key={owner} aria-label={`${owner} tasks`}>
-                    <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
+                    <div className="flex items-baseline justify-between gap-3 border-b border-border pb-2">
                       <h3 className="text-sm font-semibold text-ink">{owner}</h3>
                       <span className="text-xs text-muted">{items.length} {items.length === 1 ? 'task' : 'tasks'}</span>
                     </div>
-                    <ul className="divide-y divide-line border-b border-line bg-white">{items.map(renderTask)}</ul>
+                    <ul className="divide-y divide-border border-b border-border bg-surface">{items.map(renderTask)}</ul>
                   </section>
                 ))}
               </div>
@@ -177,10 +177,10 @@ export default function Tasks() {
           </section>
 
           <aside className="lg:sticky lg:top-6" aria-label="Task summary">
-            <section className="border border-line bg-white p-4">
+            <section className="border border-border bg-surface p-4">
               <p className={eyebrowClass}>Officer workspace</p>
               <p className="mt-1 text-lg font-medium">What’s next</p>
-              <dl className="mt-4 divide-y divide-line border-y border-line text-sm">
+              <dl className="mt-4 divide-y divide-border border-y border-border text-sm">
                 <div className="flex justify-between gap-3 py-3"><dt className="text-muted">Open</dt><dd className="font-semibold tabular-nums">{open.length}</dd></div>
                 <div className="flex justify-between gap-3 py-3"><dt className="text-muted">Completed</dt><dd className="font-semibold tabular-nums">{done.length}</dd></div>
                 <div className="flex justify-between gap-3 py-3"><dt className="text-muted">Overdue</dt><dd className="font-semibold tabular-nums text-brand-700">{open.filter((t) => t.due_on && t.due_on < today).length}</dd></div>
@@ -192,7 +192,7 @@ export default function Tasks() {
                 <button onClick={() => setShowDone((s) => !s)} aria-expanded={showDone} className="min-h-11 text-sm font-semibold text-brand-700 hover:underline">
                   {showDone ? 'Hide' : 'Show'} completed tasks ({done.length})
                 </button>
-                {showDone && <ul className="mt-3 divide-y divide-line border-y border-line bg-white">{done.map(renderTask)}</ul>}
+                {showDone && <ul className="mt-3 divide-y divide-border border-y border-border bg-surface">{done.map(renderTask)}</ul>}
               </section>
             )}
           </aside>
@@ -241,7 +241,7 @@ function TaskForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
+    <form onSubmit={submit} className="mt-5 rounded-md border border-border bg-surface p-4 sm:p-6">
       <h2 className="text-xl font-medium">New task</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -282,7 +282,7 @@ function TaskForm({
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Add task'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-muted hover:underline">Cancel</button>
       </div>
     </form>
   )

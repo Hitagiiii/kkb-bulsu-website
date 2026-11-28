@@ -141,11 +141,11 @@ export default function OrderRow({
             {buyer}
             {!order.user_id && <span className="ml-2 text-xs font-normal text-muted">(not a member)</span>}
           </p>
-          <p className="mt-0.5 text-sm text-umber">
+          <p className="mt-0.5 text-sm text-muted">
             {order.variant ? `${order.variant} · ` : ''}Qty {order.quantity}
           </p>
         </div>
-        <p className="text-sm tabular-nums text-umber md:text-right">
+        <p className="text-sm tabular-nums text-muted md:text-right">
           <span className="font-semibold text-ink">{peso(order.amount_paid)}</span> / {peso(orderTotal(order))}
         </p>
         <p className="flex flex-wrap items-center gap-1.5">
@@ -162,7 +162,7 @@ export default function OrderRow({
         <p role="alert" className="mt-2 text-sm text-brand-700">{error}</p>
       )}
 
-      <div className="mt-3 border-t border-line pt-2">
+      <div className="mt-3 border-t border-border pt-2">
         <button
           type="button"
           aria-expanded={expanded}
@@ -179,14 +179,14 @@ export default function OrderRow({
       )}
 
       {expanded && canEdit && mode === null && voidId === null && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-3 text-sm">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-3 text-sm">
           {!cancelled && !claimed && balance > 0 && (
             <button
               onClick={() => {
                 setAmount(String(balance))
                 setMode('pay')
               }}
-              className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-soft"
+              className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-surface-sunken"
             >
               Record payment
             </button>
@@ -195,7 +195,7 @@ export default function OrderRow({
             <button
               disabled={busy}
               onClick={() => void run(() => supabase.from('merch_orders').update({ claimed_at: new Date().toISOString() }).eq('id', order.id), 'Could not mark as claimed.')}
-              className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-soft"
+              className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-surface-sunken"
             >
               Mark as claimed
             </button>
@@ -204,29 +204,29 @@ export default function OrderRow({
             <button
               disabled={busy}
               onClick={() => void run(() => supabase.from('merch_orders').update({ claimed_at: null }).eq('id', order.id), 'Could not undo the claim.')}
-              className="min-h-11 rounded-md border border-line bg-white px-3 py-2 text-ink hover:bg-paper"
+              className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-ink hover:bg-surface-sunken"
             >
               Undo claim
             </button>
           )}
           {!cancelled && !claimed && (
-            <button onClick={() => setMode('cancel')} className="min-h-11 rounded-md border border-line bg-white px-3 py-2 text-ink hover:border-brand-700 hover:text-brand-700">
+            <button onClick={() => setMode('cancel')} className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-ink hover:border-brand-700 hover:text-brand-700">
               Cancel order
             </button>
           )}
           {payments.length > 0 && (
-            <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="min-h-11 rounded-md border border-line bg-white px-3 py-2 text-ink hover:bg-paper">
+            <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-ink hover:bg-surface-sunken">
               Payments ({payments.length}) {history ? '(hide)' : '(show)'}
             </button>
           )}
-          <button onClick={() => setMode('remove')} className="min-h-11 rounded-md border border-line bg-white px-3 py-2 text-muted hover:border-brand-700 hover:text-brand-700">
+          <button onClick={() => setMode('remove')} className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-muted hover:border-brand-700 hover:text-brand-700">
             Remove order
           </button>
         </div>
       )}
 
       {expanded && mode === 'remove' && (
-        <div className="mt-3 rounded-md border border-line bg-paper p-3 text-sm">
+        <div className="mt-3 rounded-md border border-border bg-bg p-3 text-sm">
           {order.amount_paid > 0 ? (
             <>
               <p className="text-ink">
@@ -248,13 +248,13 @@ export default function OrderRow({
       )}
 
       {expanded && !canEdit && payments.length > 0 && (
-        <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="mt-2 min-h-11 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink hover:bg-paper">
+        <button onClick={() => setHistory((h) => !h)} aria-expanded={history} className="mt-2 min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-sm text-ink hover:bg-surface-sunken">
           Payments ({payments.length}) {history ? '(hide)' : '(show)'}
         </button>
       )}
 
       {expanded && mode === 'pay' && (
-        <form onSubmit={pay} className="mt-3 grid gap-3 border border-line bg-paper p-3 sm:grid-cols-3">
+        <form onSubmit={pay} className="mt-3 grid gap-3 border border-border bg-bg p-3 sm:grid-cols-3">
           <div>
             <label htmlFor={`amt-${order.id}`} className="text-sm font-medium">Amount received</label>
             <input
@@ -284,22 +284,22 @@ export default function OrderRow({
             <div className="w-40">
               <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Saving…' : 'Save payment'}</button>
             </div>
-            <button type="button" onClick={() => setMode(null)} className="min-h-11 px-2 py-2 text-sm text-umber hover:underline">Cancel</button>
+            <button type="button" onClick={() => setMode(null)} className="min-h-11 px-2 py-2 text-sm text-muted hover:underline">Cancel</button>
           </div>
         </form>
       )}
 
       {expanded && mode === 'cancel' && (
-        <form onSubmit={cancel} className="mt-3 flex flex-wrap items-center gap-2 border border-line bg-paper p-3">
+        <form onSubmit={cancel} className="mt-3 flex flex-wrap items-center gap-2 border border-border bg-bg p-3">
           <input
             aria-label="Reason for cancelling"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason (optional)"
-            className="min-w-0 flex-1 rounded-md border border-line px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+            className="min-w-0 flex-1 rounded-md border border-border px-3 py-2.5 text-base sm:py-2 sm:text-sm"
           />
           <button type="submit" disabled={busy} className={subtleButtonClass}>Cancel the order</button>
-          <button type="button" onClick={() => setMode(null)} className="min-h-11 px-2 py-2 text-sm text-umber hover:underline">Keep it</button>
+          <button type="button" onClick={() => setMode(null)} className="min-h-11 px-2 py-2 text-sm text-muted hover:underline">Keep it</button>
           {order.amount_paid > 0 && (
             <p className="w-full text-xs text-accent-700">
               {peso(order.amount_paid)} was already paid. After cancelling, return the money and void the payment so the books match.
@@ -309,7 +309,7 @@ export default function OrderRow({
       )}
 
       {expanded && history && (
-        <ul className="mt-3 divide-y divide-line overflow-hidden rounded-md border border-line bg-white px-3 text-sm">
+        <ul className="mt-3 divide-y divide-border overflow-hidden rounded-md border border-border bg-surface px-3 text-sm">
           {payments.map((pay) => (
             <li key={pay.id} className="py-2">
               <p className={pay.voided_at ? 'text-muted line-through' : ''}>
@@ -321,7 +321,7 @@ export default function OrderRow({
               </p>
               {pay.voided_at && <p className="text-xs text-brand-700">Voided: {pay.void_reason}</p>}
               {canEdit && !pay.voided_at && !claimed && voidId !== pay.id && (
-                <button onClick={() => setVoidId(pay.id)} className="min-h-11 px-2 py-2 text-xs text-umber hover:text-brand-700 hover:underline">
+                <button onClick={() => setVoidId(pay.id)} className="min-h-11 px-2 py-2 text-xs text-muted hover:text-brand-700 hover:underline">
                   Void payment
                 </button>
               )}
@@ -332,10 +332,10 @@ export default function OrderRow({
                     value={voidReason}
                     onChange={(e) => setVoidReason(e.target.value)}
                     placeholder="Reason (required)"
-                    className="min-w-0 flex-1 rounded-md border border-line px-3 py-2.5 text-base sm:py-1.5 sm:text-sm"
+                    className="min-w-0 flex-1 rounded-md border border-border px-3 py-2.5 text-base sm:py-1.5 sm:text-sm"
                   />
                   <button type="submit" disabled={busy} className={subtleButtonClass}>Void</button>
-                  <button type="button" onClick={() => setVoidId(null)} className="min-h-11 px-2 py-2 text-xs text-umber hover:underline">Cancel</button>
+                  <button type="button" onClick={() => setVoidId(null)} className="min-h-11 px-2 py-2 text-xs text-muted hover:underline">Cancel</button>
                 </form>
               )}
             </li>
@@ -402,19 +402,19 @@ function ProofReview({
   return (
     <ul className="mt-3 space-y-2 text-sm">
       {proofs.map((p) => (
-        <li key={p.id} className={'border p-3 ' + (p.status === 'pending' ? 'rounded-md border-brand-700 bg-white' : 'rounded-md border-line bg-paper')}>
+        <li key={p.id} className={'border p-3 ' + (p.status === 'pending' ? 'rounded-md border-brand-700 bg-surface' : 'rounded-md border-border bg-bg')}>
           <div className="flex gap-3">
             {urls[p.image_path] ? (
               <a href={urls[p.image_path]} target="_blank" rel="noreferrer" title="Open full size" className="shrink-0">
-                <img src={urls[p.image_path]} alt="Payment screenshot" className="h-16 w-16 rounded-md border border-line bg-white object-cover" />
+                <img src={urls[p.image_path]} alt="Payment screenshot" className="h-16 w-16 rounded-md border border-border bg-surface object-cover" />
               </a>
             ) : (
-              <div className="h-16 w-16 shrink-0 rounded-md border border-line bg-paper" aria-hidden="true" />
+              <div className="h-16 w-16 shrink-0 rounded-md border border-border bg-bg" aria-hidden="true" />
             )}
             <div className="min-w-0">
               <p className="font-medium">
                 Member says {peso(p.amount)}
-                {p.reference && <span className="font-normal text-umber"> (ref {p.reference})</span>}
+                {p.reference && <span className="font-normal text-muted"> (ref {p.reference})</span>}
               </p>
               <p className="text-xs text-muted">Sent {formatDateTime(p.created_at)}</p>
               <p className="mt-1">
@@ -425,14 +425,14 @@ function ProofReview({
           </div>
 
           {canEdit && p.status === 'pending' && active?.id !== p.id && (
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-2">
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-2">
               <button
                 onClick={() => {
                   setAmount(String(Math.min(p.amount, balance)))
                   setActive({ id: p.id, mode: 'verify' })
                   setError(null)
                 }}
-                className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-soft"
+                className="min-h-11 rounded-md border border-brand-700 px-3 py-2 font-semibold text-brand-700 hover:bg-surface-sunken"
               >
                 Review proof
               </button>
@@ -441,7 +441,7 @@ function ProofReview({
                   setActive({ id: p.id, mode: 'reject' })
                   setError(null)
                 }}
-                className="min-h-11 rounded-md border border-line bg-white px-3 py-2 text-ink hover:border-brand-700 hover:text-brand-700"
+                className="min-h-11 rounded-md border border-border bg-surface px-3 py-2 text-ink hover:border-brand-700 hover:text-brand-700"
               >
                 Request a clearer proof
               </button>
@@ -450,7 +450,7 @@ function ProofReview({
 
           {active?.id === p.id && active.mode === 'verify' && (
             <form onSubmit={(e) => void verify(e, p)} className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-md bg-paper p-3 text-xs text-ink sm:col-span-2">
+              <div className="rounded-md bg-bg p-3 text-xs text-ink sm:col-span-2">
                 <p className="font-semibold">Check before you verify</p>
                 <ul className="mt-1 space-y-0.5 text-muted">
                   <li>☑ Exact amount matches the order</li>
@@ -475,7 +475,7 @@ function ProofReview({
                 <div className="w-full sm:w-auto sm:min-w-56">
                   <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Verifying…' : `Verify ${peso(Number(amount) > 0 ? Number(amount) : p.amount)} payment`}</button>
                 </div>
-                <button type="button" onClick={() => setActive(null)} className="min-h-11 px-2 py-2 text-sm text-umber hover:underline">Go back</button>
+                <button type="button" onClick={() => setActive(null)} className="min-h-11 px-2 py-2 text-sm text-muted hover:underline">Go back</button>
               </div>
             </form>
           )}
@@ -487,10 +487,10 @@ function ProofReview({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Reason (the member will see this)"
-                className="min-w-0 flex-1 rounded-md border border-line px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+                className="min-w-0 flex-1 rounded-md border border-border px-3 py-2.5 text-base sm:py-2 sm:text-sm"
               />
               <button type="submit" disabled={busy} className={subtleButtonClass}>Reject</button>
-              <button type="button" onClick={() => setActive(null)} className="min-h-11 px-2 py-2 text-sm text-umber hover:underline">Cancel</button>
+              <button type="button" onClick={() => setActive(null)} className="min-h-11 px-2 py-2 text-sm text-muted hover:underline">Cancel</button>
             </form>
           )}
           {error && active?.id === p.id && <p role="alert" className="mt-2 text-sm text-brand-700">{error}</p>}

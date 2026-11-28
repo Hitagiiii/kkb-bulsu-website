@@ -28,10 +28,10 @@ export default function BudgetFolderPicker({ budgetId }: { budgetId: string }) {
   }
 
   return (
-    <section aria-label="Budget folder" className="rounded-md border border-line bg-white p-4 sm:p-5">
+    <section aria-label="Budget folder" className="rounded-md border border-border bg-surface p-4 sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">Organization</p><label htmlFor="budget-folder" className="mt-1 block text-base font-semibold">Budget folder</label><p className="mt-1 text-xs text-muted">Keep related budgets grouped together.</p></div>
-        <select id="budget-folder" value={current} onChange={(e) => void move(e.target.value)} className="min-h-11 w-full rounded-md border border-line bg-paper px-3 py-2.5 text-base sm:w-56 sm:text-sm">
+        <select id="budget-folder" value={current} onChange={(e) => void move(e.target.value)} className="min-h-11 w-full rounded-md border border-border bg-bg px-3 py-2.5 text-base sm:w-56 sm:text-sm">
           <option value="">No folder</option>
           {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
         </select>

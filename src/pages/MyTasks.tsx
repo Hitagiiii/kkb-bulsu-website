@@ -134,7 +134,7 @@ export default function MyTasks() {
             <div><p className="text-sm font-semibold text-ink">Your progress</p><p className="mt-1 text-xs text-muted">Every small step counts.</p></div>
             <p className="text-sm font-semibold tabular-nums text-brand-700">{doneCount} of {totalCount} completed</p>
           </div>
-          <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-sand" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Task completion">
+          <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-surface-sunken" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Task completion">
             <div className="h-full rounded-full bg-brand-700 transition-[width] duration-200 motion-reduce:transition-none" style={{ width: `${progress}%` }} />
           </div>
           <div className="mt-2 flex justify-between text-xs text-muted"><span>{openCount} remaining</span><span>{progress}% complete</span></div>
@@ -151,9 +151,9 @@ export default function MyTasks() {
       )}
 
       {isAdmin && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-line bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-surface p-4">
           <div><p className="text-sm font-semibold text-ink">Member task overview</p><p className="mt-1 text-xs text-muted">Admin access is view-only. Members manage their own tasks.</p></div>
-          <select aria-label="Filter tasks by member" value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)} className="min-h-11 rounded-md border border-line bg-white px-3 text-sm text-ink"><option value="all">All members</option>{profiles.map((person) => <option key={person.id} value={person.id}>{person.full_name || 'Unnamed member'}</option>)}</select>
+          <select aria-label="Filter tasks by member" value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)} className="min-h-11 rounded-md border border-border bg-surface px-3 text-sm text-ink"><option value="all">All members</option>{profiles.map((person) => <option key={person.id} value={person.id}>{person.full_name || 'Unnamed member'}</option>)}</select>
         </div>
       )}
 
@@ -180,10 +180,10 @@ export default function MyTasks() {
               ) : <>
                 <div className="flex items-start gap-3">
                   <input type="checkbox" checked={task.is_completed} disabled={isAdmin} onChange={() => void toggleTask(task)} aria-label={`${task.is_completed ? 'Reopen' : 'Complete'} ${task.title}`} className="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-brand-700 disabled:cursor-default" />
-                  <div className="min-w-0 flex-1"><h3 className={'break-words text-base font-semibold leading-6 ' + (task.is_completed ? 'text-muted line-through' : 'text-ink')}>{task.title}</h3><span className={'mt-2 inline-flex rounded-sm px-2 py-1 text-[11px] font-semibold ' + (task.is_completed ? 'bg-emerald-50 text-emerald-800' : overdue ? 'bg-red-50 text-red-700' : 'bg-sand text-muted')}>{task.is_completed ? 'Completed' : overdue ? 'Overdue' : 'In progress'}</span></div>
+                  <div className="min-w-0 flex-1"><h3 className={'break-words text-base font-semibold leading-6 ' + (task.is_completed ? 'text-muted line-through' : 'text-ink')}>{task.title}</h3><span className={'mt-2 inline-flex rounded-sm px-2 py-1 text-[11px] font-semibold ' + (task.is_completed ? 'bg-emerald-50 text-emerald-800' : overdue ? 'bg-red-50 text-red-700' : 'bg-surface-sunken text-muted')}>{task.is_completed ? 'Completed' : overdue ? 'Overdue' : 'In progress'}</span></div>
                 </div>
                 {task.description && <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-muted">{task.description}</p>}
-                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 mt-4 text-xs text-muted">
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 mt-4 text-xs text-muted">
                   <span>{task.due_on ? `${overdue ? 'Overdue · ' : 'Due · '}${dateLabel(task.due_on)}` : 'No due date'}</span>
                   {isAdmin && <span className="font-medium text-ink">{ownerName}</span>}
                 </div>

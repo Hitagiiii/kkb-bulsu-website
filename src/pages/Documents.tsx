@@ -105,19 +105,19 @@ export default function Documents() {
         />
       )}
 
-      <div className="mt-4 flex flex-wrap gap-2 border-b border-line pb-3">
+      <div className="mt-4 flex flex-wrap gap-2 border-b border-border pb-3">
         <input
           aria-label="Search documents"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search"
-          className="min-h-11 min-w-0 flex-1 rounded-md border border-line bg-white px-3 py-2 text-base sm:text-sm"
+          className="min-h-11 min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-base sm:text-sm"
         />
         <select
           aria-label="Filter by category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="min-h-11 rounded-md border border-line bg-white px-2 py-2 text-base sm:text-sm"
+          className="min-h-11 rounded-md border border-border bg-surface px-2 py-2 text-base sm:text-sm"
         >
           <option value="all">All categories</option>
           {CATEGORIES.map((c) => (
@@ -128,12 +128,12 @@ export default function Documents() {
 
       {loading && <p className="mt-6 text-sm text-muted">Loading documents…</p>}
       {!loading && shown.length === 0 && (
-        <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">
+        <p className="mt-5 rounded-md border border-border bg-surface px-4 py-6 text-sm text-muted">
           {docs.length === 0 ? (canUpload ? 'No files yet. Upload the first one above.' : 'No files yet.') : 'No files match.'}
         </p>
       )}
 
-      <ul className="mt-5 divide-y divide-line border-y border-line bg-white" aria-label="Documents">
+      <ul className="mt-5 divide-y divide-border border-y border-border bg-surface" aria-label="Documents">
         {shown.map((d) => (
           <li key={d.id} className="px-4 py-4 sm:px-5">
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -143,7 +143,7 @@ export default function Documents() {
                   <Chip>{d.category}</Chip>
                   {d.min_role !== 'member' && <Chip tone="amber">{ROLE_LABEL[d.min_role]} and above</Chip>}
                 </div>
-                {d.description && <p className="mt-1 text-sm leading-5 break-words text-umber">{d.description}</p>}
+                {d.description && <p className="mt-1 text-sm leading-5 break-words text-muted">{d.description}</p>}
                 <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                   <span className="break-all">{d.file_name}</span>
                   {d.file_size ? <span>{formatSize(d.file_size)}</span> : null}
@@ -157,10 +157,10 @@ export default function Documents() {
                   <>
                     <span className="text-sm text-ink">Delete this file?</span>
                     <button onClick={() => void remove(d)} className="min-h-11 font-semibold text-brand-700 hover:underline">Yes</button>
-                    <button onClick={() => setDeleting(null)} className="min-h-11 text-umber hover:underline">Cancel</button>
+                    <button onClick={() => setDeleting(null)} className="min-h-11 text-muted hover:underline">Cancel</button>
                   </>
                 ) : (
-                  <button onClick={() => setDeleting(d.id)} className="min-h-11 text-sm text-umber hover:text-brand-700 hover:underline">Delete</button>
+                  <button onClick={() => setDeleting(d.id)} className="min-h-11 text-sm text-muted hover:text-brand-700 hover:underline">Delete</button>
                 ))}
               </div>
             </div>
@@ -213,7 +213,7 @@ function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCance
   }
 
   return (
-    <form onSubmit={submit} className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
+    <form onSubmit={submit} className="mt-5 rounded-md border border-border bg-surface p-4 sm:p-6">
       <h2 className="text-xl font-medium">Upload a file</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -222,7 +222,7 @@ function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCance
             id="d-file"
             type="file"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-paper file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-sand"
+            className="mt-1 block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-bg file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-surface-sunken"
           />
         </div>
         <div className="sm:col-span-2">
@@ -255,7 +255,7 @@ function UploadForm({ onDone, onCancel }: { onDone: () => Promise<void>; onCance
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>{busy ? 'Uploading…' : 'Upload'}</button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">Cancel</button>
+        <button type="button" onClick={onCancel} className="py-2 text-sm text-muted hover:underline">Cancel</button>
       </div>
     </form>
   )

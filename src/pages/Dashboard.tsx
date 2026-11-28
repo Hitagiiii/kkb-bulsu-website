@@ -13,7 +13,7 @@ import { buttonClass, cardClass, eyebrowClass } from '../components/ui'
 
 function SectionTitle({ title, to, action }: { title: string; to?: string; action?: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-line pb-2.5">
+    <div className="flex items-baseline justify-between gap-4 border-b border-border pb-2.5">
       <h2 className="flex items-center gap-2.5 text-[20px] font-medium leading-tight text-ink">
         <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
         {title}
@@ -122,7 +122,7 @@ export default function Dashboard() {
 
       <div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         {/* Main column */}
-        <div className="space-y-6">
+        <div className="space-y-7">
           <DashboardExtras pollsWaiting={pollsWaiting} />
 
           <section aria-label="Latest announcements">
@@ -135,7 +135,7 @@ export default function Dashboard() {
                   const photo = (a.image_paths ?? []).map((p) => urls[p]).find(Boolean)
                   return (
                     <li key={a.id}>
-                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-colors hover:bg-soft sm:flex'}>
+                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-colors hover:bg-surface-sunken sm:flex'}>
                         {photo && i === 0 && (
                           <img src={photo} alt="" className="aspect-[16/9] w-full object-cover sm:aspect-auto sm:w-56 sm:shrink-0" />
                         )}
@@ -156,18 +156,18 @@ export default function Dashboard() {
             )}
           </section>
 
-          <div className="grid items-start gap-6 xl:grid-cols-2">
+          <div className="grid items-start gap-7 xl:grid-cols-2">
             <section aria-label="Coming up">
               <SectionTitle title="Coming up" to="/events" action="See all" />
               {events === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
-              {events && events.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No upcoming events yet.</p>}
+              {events && events.length === 0 && <p className="mt-3 border-y border-border px-1 py-6 text-sm text-muted">No upcoming events yet.</p>}
               {events && events.length > 0 && (
-                <ul className={cardClass + ' mt-3 divide-y divide-line overflow-hidden'}>
+                <ul className="mt-3 divide-y divide-border border-y border-border">
                   {events.slice(0, 5).map((e) => {
                     const d = new Date(e.starts_at)
                     return (
                       <li key={e.id}>
-                        <Link to="/events" className="flex items-stretch hover:bg-paper">
+                        <Link to="/events" className="flex items-stretch transition-colors hover:bg-surface-sunken">
                           <span className="flex w-16 shrink-0 flex-col items-center justify-center bg-soft py-3">
                             <span className="text-[11px] font-semibold tracking-[0.08em] text-brand-700 uppercase">{d.toLocaleDateString('en-PH', { month: 'short' })}</span>
                             <span className="text-2xl leading-none font-medium text-ink">{d.getDate()}</span>
@@ -188,12 +188,12 @@ export default function Dashboard() {
             <section aria-label="Open polls">
               <SectionTitle title="Open polls" to="/polls" action="See all" />
               {openPolls === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
-              {openPolls && openPolls.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No polls are open right now.</p>}
+              {openPolls && openPolls.length === 0 && <p className="mt-3 border-y border-border px-1 py-6 text-sm text-muted">No polls are open right now.</p>}
               {openPolls && openPolls.length > 0 && (
-                <ul className={cardClass + ' mt-3 divide-y divide-line overflow-hidden'}>
+                <ul className="mt-3 divide-y divide-border border-y border-border">
                   {openPolls.map((p) => (
                     <li key={p.id}>
-                      <Link to="/polls" className="block px-4 py-3 hover:bg-paper">
+                      <Link to="/polls" className="block px-4 py-3 transition-colors hover:bg-surface-sunken">
                         <span className={eyebrowClass + ' block'}>Member poll</span>
                         <span className="mt-1 block text-sm font-semibold break-words text-ink">{p.question}</span>
                         <span className="block text-xs text-muted">
@@ -207,16 +207,16 @@ export default function Dashboard() {
             </section>
           </div>
 
-          {profile && ['officer', 'treasurer', 'admin'].includes(profile.role) && (
+          {canSeeDocuments && (
             <section aria-label="Recent documents">
               <SectionTitle title="Recent documents" to="/documents" action="See all" />
               {docs === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
               {docs && docs.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No documents have been shared yet.</p>}
               {docs && docs.length > 0 && (
-                <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+                <ul className="mt-3 divide-y divide-border border-y border-border sm:grid sm:grid-cols-2 sm:divide-y-0 sm:divide-x">
                   {docs.map((d) => (
                     <li key={d.id}>
-                      <Link to="/documents" className={cardClass + ' block p-4 hover:bg-paper'}>
+                      <Link to="/documents" className="block p-4 transition-colors hover:bg-surface-sunken sm:px-5">
                         <span className={eyebrowClass + ' block'}>{d.category}</span>
                         <span className="mt-1 block text-sm font-semibold break-words text-ink">{d.title}</span>
                         <span className="block text-xs text-muted">Added {formatDateTime(d.created_at).split(',')[0]}</span>
@@ -228,9 +228,9 @@ export default function Dashboard() {
             </section>
           )}
 
-          <section aria-label="At a glance" className={`${cardClass} p-4 sm:p-5`}>
+          <section aria-label="At a glance">
             <SectionTitle title="At a glance" />
-            <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-4">
+            <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {(
                 [
                   canSeeFinance ? { k: 'Money left', v: 'See finance' } : null,
@@ -241,7 +241,7 @@ export default function Dashboard() {
               )
                 .filter((s): s is { k: string; v: string } => s !== null)
                 .map((s) => (
-                  <div key={s.k} className="bg-white p-3 sm:p-4">
+                  <div key={s.k} className="rounded-md border border-border bg-surface p-3 sm:p-4">
                     <dt className="text-xs text-muted">{s.k}</dt>
                     <dd className="mt-1.5 font-num text-[18px] font-medium text-ink">{s.v}</dd>
                   </div>
@@ -252,7 +252,7 @@ export default function Dashboard() {
 
         {/* Right rail */}
         <aside className="space-y-6">
-          <section aria-label="Next event" className={cardClass + ' p-4'}>
+          <section aria-label="Next event" className="border-y border-border py-4">
             <p className={eyebrowClass}>Next up{next ? ` / ${timeUntil(next.starts_at)}` : ''}</p>
             {events === null && <p className="mt-2 text-sm text-muted">Loading…</p>}
             {events && !next && <p className="mt-2 text-sm text-muted">No upcoming events yet.</p>}
@@ -268,7 +268,7 @@ export default function Dashboard() {
             )}
           </section>
 
-          <section aria-label="Membership" className={cardClass + ' p-4'}>
+          <section aria-label="Membership" className="border-y border-border py-4">
             <p className="text-lg font-medium text-ink">You belong here.</p>
             <p className="mt-1 text-xs text-muted">
               {profile ? ROLE_LABEL[profile.role] : 'Member'} · AY 2026–2027
@@ -280,7 +280,7 @@ export default function Dashboard() {
                   {attendance.attended} of {attendance.past} events attended
                 </p>
                 <div
-                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-sand"
+                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-sunken"
                   role="progressbar"
                   aria-valuemin={0}
                   aria-valuemax={100}
@@ -301,9 +301,9 @@ export default function Dashboard() {
             </Link>
           </section>
 
-          <nav aria-label="Quick links" className={cardClass + ' p-4'}>
+          <nav aria-label="Quick links" className="border-y border-border py-4">
             <p className="text-sm font-semibold text-ink">Quick links</p>
-            <ul className="mt-2 divide-y divide-line">
+            <ul className="mt-2 divide-y divide-border">
               {links.slice(0, 6).map((item) => (
                 <li key={item.to}>
                   <Link to={item.to} className="flex items-center justify-between py-2 text-sm text-ink hover:text-brand-700">

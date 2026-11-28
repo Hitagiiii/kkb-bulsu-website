@@ -1,56 +1,71 @@
 @import "tailwindcss";
 
 /*
- * KKB BULSU members portal: UI foundations.
- * Inter only. 40 / 28 / 20 / 16 / 14 / 12 px. 8 px spacing rhythm. 6 px corners.
- * Maroon for action and selection. Gold for one tiny signal. No gradients, no heavy shadows.
+ * KKB BULSU members portal — unified visual system.
+ * Inter for UI, IBM Plex Mono for numbers. 8 px rhythm. 6 px radius.
+ * Light + dark mode via .light / .dark on <html>.
  */
+
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-num: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Exact KKB BULSU palette */
-  --color-paper: #F4EFE8;
-  --color-bg: #F4EFE8;
-  --color-canvas: #F4EFE8;
-  --color-white: #FFFFFF;
-  --color-card: #FFFFFF;
-  --color-sand: #EBE4DA;
-  --color-secondary: #EBE4DA;
-  --color-secondary-pressed: #DDD4C8;
-  --color-line: #DDD4C8;
-  --color-hairline: #DDD4C8;
-  --color-ink: #25191B;
-  --color-body: #25191B;
-  --color-muted: #6B5E5A;
-  --color-mute: #6B5E5A;
-  --color-umber: #6B5E5A;
-  --color-ash: #6B5E5A;
+  /* Semantic primitives — values switch with theme class */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-muted: var(--muted);
 
-  --color-brand-50: #F5DFE2;
-  --color-brand-100: #F5DFE2;
-  --color-brand-300: #F5DFE2; /* previously undefined; now resolves the dead hover classes */
-  --color-brand-600: #8A1C2E;
-  --color-brand-700: #8A1C2E;
-  --color-brand-800: #6F1625;
-  --color-brand-900: #4E0F1B;
-  --color-soft: #F5DFE2;
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-ink: var(--sidebar-ink);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-indicator: var(--sidebar-indicator);
 
-  --color-accent: #E8702A;
-  --color-orange: #E8702A;
-  --color-teal: #1F7A74;
-  --color-gold: #C9922B;
-  --color-plum: #7A3E6B;
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-300: var(--brand-300);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-soft: var(--soft);
 
-  /* Pre-existing support tints — kept so notices and status chips keep working */
-  --color-accent-50: #FFF4EA;
-  --color-accent-100: #FDE8D6;
-  --color-accent-500: #E8702A;
-  --color-accent-700: #B34A08;
-  --color-error: #9E0A0A;
-  --color-success-deep: #1D4D33;
-  --color-success-pale: #E3F1E8;
+  --color-accent: var(--accent);
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-500: var(--accent-500);
+  --color-accent-700: var(--accent-700);
+
+  --color-error: var(--error);
+  --color-success-deep: var(--success-deep);
+  --color-success-pale: var(--success-pale);
+  --color-teal: var(--teal);
+  --color-gold: var(--gold);
+  --color-plum: var(--plum);
+
+  /* Legacy aliases kept so existing JSX keeps working */
+  --color-paper: var(--bg);
+  --color-canvas: var(--bg);
+  --color-white: var(--surface);
+  --color-card: var(--surface);
+  --color-sand: var(--surface-sunken);
+  --color-secondary: var(--surface-sunken);
+  --color-secondary-pressed: var(--border);
+  --color-line: var(--border);
+  --color-hairline: var(--border-subtle);
+  --color-body: var(--ink);
+  --color-mute: var(--muted);
+  --color-umber: var(--muted);
+  --color-ash: var(--muted);
 
   --radius-xs: 6px;
   --radius-sm: 6px;
@@ -67,6 +82,93 @@
   --shadow-*: initial;
 }
 
+:root,
+.light {
+  --bg: #F4EFE8;
+  --surface: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #EBE4DA;
+  --border: #DDD4C8;
+  --border-subtle: #E8E0D4;
+  --ink: #25191B;
+  --ink-secondary: #4A3F3D;
+  --muted: #6B5E5A;
+
+  --brand-50: #FDF2F4;
+  --brand-100: #F5DFE2;
+  --brand-300: #E0A6AF;
+  --brand-600: #8A1C2E;
+  --brand-700: #8A1C2E;
+  --brand-800: #6F1625;
+  --brand-900: #4E0F1B;
+  --soft: #F5DFE2;
+
+  --accent: #E8702A;
+  --accent-50: #FFF4EA;
+  --accent-100: #FDE8D6;
+  --accent-500: #E8702A;
+  --accent-700: #B34A08;
+
+  --error: #9E0A0A;
+  --success-deep: #1D4D33;
+  --success-pale: #E3F1E8;
+  --teal: #1F7A74;
+  --gold: #C9922B;
+  --plum: #7A3E6B;
+
+  --sidebar-bg: #8A1C2E;
+  --sidebar-ink: #FFFFFF;
+  --sidebar-muted: rgba(255, 255, 255, 0.72);
+  --sidebar-hover: #6F1625;
+  --sidebar-active: #6F1625;
+  --sidebar-border: rgba(255, 255, 255, 0.18);
+  --sidebar-indicator: #F5DFE2;
+}
+
+.dark {
+  /* Deep blue foundation: surfaces and page backgrounds share one coherent dark environment. */
+  --bg: #0B1220;
+  --surface: #111B2D;
+  --surface-raised: #18263D;
+  --surface-sunken: #08101E;
+  --border: #334966;
+  --border-subtle: #263A55;
+  --ink: #F4F7FB;
+  --ink-secondary: #CBD6E5;
+  --muted: #93A4B8;
+
+  /* Keep the green identity as the interactive/brand accent over the blue foundation. */
+  --brand-50: #102A1D;
+  --brand-100: #163D29;
+  --brand-300: #72D89A;
+  --brand-600: #3FAF70;
+  --brand-700: #3FAF70;
+  --brand-800: #2F8F5B;
+  --brand-900: #1E6B43;
+  --soft: #163D29;
+
+  --accent: #E39A4A;
+  --accent-50: #2A2116;
+  --accent-100: #3A2B18;
+  --accent-500: #E39A4A;
+  --accent-700: #F0B66F;
+
+  --error: #F07A7A;
+  --success-deep: #65C98A;
+  --success-pale: #123020;
+  --teal: #55C9BE;
+  --gold: #E1C06A;
+  --plum: #C795B9;
+
+  --sidebar-bg: #0A1526;
+  --sidebar-ink: #F4F7FB;
+  --sidebar-muted: #A9B8CB;
+  --sidebar-hover: #142A46;
+  --sidebar-active: #17365D;
+  --sidebar-border: #2D4868;
+  --sidebar-indicator: #65C98A;
+}
+
 @layer base {
   html,
   body,
@@ -76,8 +178,8 @@
 
   body {
     margin: 0;
-    background: var(--color-bg);
-    color: var(--color-ink);
+    background: var(--bg);
+    color: var(--ink);
     font-family: var(--font-sans);
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
@@ -88,15 +190,15 @@
   h2,
   h3,
   h4 {
-    color: var(--color-ink);
+    color: var(--ink);
   }
 
   .font-display {
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand-700);
+    outline: 2px solid var(--brand-700);
     outline-offset: 2px;
   }
 
@@ -107,6 +209,54 @@
   }
 }
 
+/* Dark-mode readability fixes for legacy color utilities.
+ * These keep existing component logic intact while ensuring text that uses
+ * older brand/status utilities remains readable against dark surfaces.
+ */
+@layer utilities {
+  .dark .text-brand-700 { color: var(--brand-300); }
+  .dark .text-brand-800 { color: var(--brand-300); }
+  .dark .text-brand-900 { color: var(--brand-300); }
+
+  .dark .text-red-700 { color: #FF9B9B; }
+  .dark .text-red-800 { color: #FFB0B0; }
+  .dark .text-emerald-800 { color: #8FE0AE; }
+
+  .dark .bg-red-50 { background-color: #3A1719; }
+  .dark .bg-emerald-50 { background-color: #123020; }
+
+  .dark .border-red-200 { border-color: #6A2B2F; }
+
+  /* Keep print-oriented black text unchanged when printing. */
+  .dark .text-black:not(.print\:text-black) { color: var(--ink); }
+}
+
+@layer utilities {
+  /* Sidebar is a deliberate theme surface: maroon in light mode, deep blue in dark mode. */
+  .bg-sidebar-bg { background-color: var(--sidebar-bg); }
+  .text-sidebar-ink { color: var(--sidebar-ink); }
+  .text-sidebar-muted { color: var(--sidebar-muted); }
+  .border-sidebar-border { border-color: var(--sidebar-border); }
+  .bg-sidebar-hover { background-color: var(--sidebar-hover); }
+  .bg-sidebar-active { background-color: var(--sidebar-active); }
+  .bg-sidebar-indicator { background-color: var(--sidebar-indicator); }
+  .hover\:bg-sidebar-hover:hover { background-color: var(--sidebar-hover); }
+  .hover\:text-sidebar-ink:hover { color: var(--sidebar-ink); }
+  .ring-sidebar-ink { --tw-ring-color: var(--sidebar-ink); }
+
+  /* Keep legacy fixed-color controls readable against the blue dark theme. */
+  .dark .text-white\/80 { color: #DDE6F2; }
+  .dark .text-white\/75 { color: #D4DFED; }
+  .dark .text-white\/70 { color: #C9D6E5; }
+  .dark .text-white\/65 { color: #B9C8DA; }
+  .dark .text-white\/60 { color: #A9BAD0; }
+  .dark .border-white\/20 { border-color: #45617F; }
+  .dark .border-white\/15 { border-color: #344F6D; }
+  .dark .hover\:bg-surface\/10:hover { background-color: #1A2B45; }
+  .dark .hover\:text-white:hover { color: #F4F7FB; }
+  .dark .ring-white\/20 { --tw-ring-color: #45617F; }
+  .dark .ring-white\/70 { --tw-ring-color: #72D89A; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

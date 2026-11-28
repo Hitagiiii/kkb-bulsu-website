@@ -4,7 +4,7 @@ import { dayKey, formatTime, type EventRow } from '../lib/events'
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 const navButton =
-  'min-h-11 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink hover:bg-paper sm:min-h-10'
+  'min-h-11 rounded-md border border-border bg-surface px-3 text-sm font-semibold text-ink hover:bg-surface-sunken sm:min-h-10'
 
 export default function MonthCalendar({
   events,
@@ -46,8 +46,8 @@ export default function MonthCalendar({
   }
 
   return (
-    <div className="overflow-hidden rounded-md border border-line bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3 py-3 sm:px-4">
+    <div className="overflow-hidden rounded-md border border-border bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-3 py-3 sm:px-4">
         <h2 className="text-lg font-medium sm:text-xl">
           {cursor.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })}
         </h2>
@@ -72,7 +72,7 @@ export default function MonthCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 border-b border-line bg-paper text-center text-xs font-semibold text-muted">
+      <div className="grid grid-cols-7 border-b border-border bg-bg text-center text-xs font-semibold text-muted">
         {WEEKDAYS.map((d) => (
           <div key={d} className="py-2">
             <span className="sm:hidden">{d[0]}</span>
@@ -93,9 +93,9 @@ export default function MonthCalendar({
             <div
               key={key}
               className={
-                'min-h-14 border-b border-r border-line sm:min-h-24 ' +
+                'min-h-14 border-b border-r border-border sm:min-h-24 ' +
                 (isSelected ? 'bg-soft ' : '') +
-                (inMonth ? '' : 'bg-paper text-umber')
+                (inMonth ? '' : 'bg-bg text-muted')
               }
             >
               <button
@@ -123,7 +123,7 @@ export default function MonthCalendar({
                     key={e.id}
                     type="button"
                     onClick={() => onOpenEvent(e.id)}
-                    className="flex min-h-11 w-full items-center truncate rounded-md border border-line bg-white px-2 text-left text-xs font-medium text-ink hover:bg-soft"
+                    className="flex min-h-11 w-full items-center truncate rounded-md border border-border bg-surface px-2 text-left text-xs font-medium text-ink hover:bg-surface-sunken"
                   >
                     <span className="truncate">{formatTime(e.starts_at)} {e.title}</span>
                   </button>

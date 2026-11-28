@@ -81,7 +81,7 @@ export default function LocationPicker({
             }
           }}
           placeholder="Search a place, e.g. Malolos Cathedral"
-          className="min-w-0 flex-1 rounded-md border border-line px-3 py-2.5 text-base sm:py-2 sm:text-sm"
+          className="min-w-0 flex-1 rounded-md border border-border px-3 py-2.5 text-base sm:py-2 sm:text-sm"
         />
         <button type="button" onClick={() => void search()} disabled={searching} className={subtleButtonClass}>
           {searching ? 'Searching…' : 'Search'}
@@ -89,13 +89,13 @@ export default function LocationPicker({
       </div>
 
       {results.length > 0 && (
-        <ul className="mt-2 divide-y divide-line rounded-md border border-line bg-white text-sm">
+        <ul className="mt-2 divide-y divide-border rounded-md border border-border bg-surface text-sm">
           {results.map((p) => (
             <li key={p.place_id}>
               <button
                 type="button"
                 onClick={() => pickPlace(p)}
-                className="block w-full px-3 py-2.5 text-left break-words hover:bg-paper"
+                className="block w-full px-3 py-2.5 text-left break-words hover:bg-surface-sunken"
               >
                 {p.display_name}
               </button>
@@ -103,13 +103,13 @@ export default function LocationPicker({
           ))}
         </ul>
       )}
-      {note && <p className="mt-2 text-xs text-umber">{note}</p>}
+      {note && <p className="mt-2 text-xs text-muted">{note}</p>}
 
       <MapView
         lat={lat}
         lng={lng}
         onPick={(a, b) => onChange(a, b)}
-        className="mt-3 h-64 w-full rounded-lg border border-line"
+        className="mt-3 h-64 w-full rounded-lg border border-border"
       />
 
       <p className="mt-2 text-xs text-muted">

@@ -194,7 +194,7 @@ export default function Events() {
 
       <div className="mt-6 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_380px]">
         <main className="min-w-0">
-          <div role="group" aria-label="View" className="flex gap-5 border-b border-line text-sm">
+          <div role="group" aria-label="View" className="flex gap-5 border-b border-border text-sm">
             {(['list', 'calendar', 'rsvps'] as const).map((v) => (
               <button
                 key={v}
@@ -214,7 +214,7 @@ export default function Events() {
           {loading && (
             <div className="mt-6 space-y-3" aria-label="Loading events">
               {[0, 1, 2].map((n) => (
-                <div key={n} className="h-20 border border-line bg-card" />
+                <div key={n} className="h-20 border border-border bg-surface" />
               ))}
             </div>
           )}
@@ -230,7 +230,7 @@ export default function Events() {
                   onOpen={() => selectEvent(next.id)}
                 />
               ) : (
-                <div className="mt-5 rounded-md border border-dashed border-line bg-white px-4 py-6 text-center">
+                <div className="mt-5 rounded-md border border-dashed border-border bg-surface px-4 py-6 text-center">
                   <CalendarIcon size={36} className="mx-auto text-brand-700" />
                   <p className="mt-3 text-xl font-medium">Nothing coming up</p>
                   <p className="mt-1 text-sm text-muted">
@@ -242,14 +242,14 @@ export default function Events() {
               {groups.map((g) => (
                 <section key={g.key} className="mt-8" aria-label={dayLabel(g.key, now)}>
                   <h2 className={eyebrowClass + ' !text-muted'}>{dayLabel(g.key, now)}</h2>
-                  <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+                  <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
                     {g.items.map((e) => card(e))}
                   </ul>
                 </section>
               ))}
 
               {past.length > 0 && (
-                <section className="mt-8 border-t border-line pt-5">
+                <section className="mt-8 border-t border-border pt-5">
                   <button
                     type="button"
                     onClick={() => setShowPast((s) => !s)}
@@ -260,7 +260,7 @@ export default function Events() {
                     <span className="text-sm font-medium text-muted">{showPast ? 'Hide' : 'Show'}</span>
                   </button>
                   {showPast && (
-                    <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+                    <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
                       {past.slice(0, 30).map((e) => card(e))}
                     </ul>
                   )}
@@ -274,12 +274,12 @@ export default function Events() {
               {(() => {
                 const mine = upcoming.filter((e) => rsvps[e.id] === 'going')
                 return mine.length === 0 ? (
-                  <div className="rounded-md border border-dashed border-line bg-white px-4 py-6 text-center">
+                  <div className="rounded-md border border-dashed border-border bg-surface px-4 py-6 text-center">
                     <p className="text-xl font-medium">No RSVPs yet</p>
                     <p className="mt-1 text-sm text-muted">Open an event and press “I’m going” to save your seat.</p>
                   </div>
                 ) : (
-                  <ul className="divide-y divide-line overflow-hidden rounded-md border border-line bg-white">{mine.map((e) => card(e))}</ul>
+                  <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">{mine.map((e) => card(e))}</ul>
                 )
               })()}
             </section>
@@ -299,11 +299,11 @@ export default function Events() {
                   <span className="text-sm text-muted">{dayEvents.length} event{dayEvents.length === 1 ? '' : 's'}</span>
                 </div>
                 {dayEvents.length === 0 ? (
-                  <p className="mt-2 rounded-md border border-dashed border-line bg-white px-4 py-5 text-sm text-muted">
+                  <p className="mt-2 rounded-md border border-dashed border-border bg-surface px-4 py-5 text-sm text-muted">
                     No events on this day.
                   </p>
                 ) : (
-                  <ul className="mt-2 divide-y divide-line overflow-hidden rounded-md border border-line bg-white">
+                  <ul className="mt-2 divide-y divide-border overflow-hidden rounded-md border border-border bg-surface">
                     {dayEvents.map((e) => card(e))}
                   </ul>
                 )}
@@ -323,7 +323,7 @@ export default function Events() {
                 onDelete={() => void deleteEvent(selected.id)}
               />
             ) : (
-              <div className="rounded-md border border-line bg-white p-5">
+              <div className="rounded-md border border-border bg-surface p-5">
                 <p className="text-lg font-medium">Event details</p>
                 <p className="mt-2 text-sm text-muted">Select an event to see its time, place, links, RSVP and attendance information.</p>
               </div>
@@ -398,25 +398,25 @@ function NextUp({
 }) {
   const live = new Date(event.starts_at).getTime() <= now
   return (
-    <section aria-label="Next event" className="mt-6 overflow-hidden rounded-md border border-line bg-white">
+    <section aria-label="Next event" className="mt-6 overflow-hidden rounded-md border border-border bg-surface">
       <button
         type="button"
         onClick={onOpen}
         aria-pressed={selected}
-        className="flex min-h-20 w-full items-stretch text-left hover:bg-paper"
+        className="flex min-h-20 w-full items-stretch text-left hover:bg-surface-sunken"
       >
         <EventCover iso={event.starts_at} label={live ? 'Now' : `Next · ${timeUntil(event.starts_at, now)}`} />
         <span className="min-w-0 flex-1 p-3 sm:p-4">
           <span className={eyebrowClass + ' block'}>Next up</span>
           <span className="mt-0.5 block break-words text-base font-semibold sm:text-lg">{event.title}</span>
-          <span className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-umber sm:text-sm">
+          <span className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted sm:text-sm">
             <span>{formatRange(event.starts_at, event.ends_at)}</span>
             {event.location_name && <span>{event.location_name}</span>}
             {event.meeting_link && <span>Online</span>}
           </span>
         </span>
       </button>
-      {rsvp === 'going' && <p className="border-t border-line px-3 py-2 text-xs font-semibold text-brand-700 sm:px-4">You are going</p>}
+      {rsvp === 'going' && <p className="border-t border-border px-3 py-2 text-xs font-semibold text-brand-700 sm:px-4">You are going</p>}
     </section>
   )
 }
@@ -448,21 +448,21 @@ function EventCard({
       onClick={onOpen}
       aria-pressed={selected}
       className={
-        'flex min-h-20 w-full items-stretch text-left hover:bg-paper ' +
+        'flex min-h-20 w-full items-stretch text-left hover:bg-surface-sunken ' +
         (over ? 'opacity-70 ' : '') +
-        (selected ? 'bg-paper' : 'bg-white')
+        (selected ? 'bg-bg' : 'bg-surface')
       }
     >
       <EventCover iso={event.starts_at} label={timeLabel} />
       <span className="min-w-0 flex-1 p-3 sm:p-4">
         <span className="block break-words text-base font-semibold">{event.title}</span>
         {event.location_name && (
-          <span className="mt-1 block text-sm text-umber">
+          <span className="mt-1 block text-sm text-muted">
             <Meta icon={<MapPinIcon size={15} />}>{event.location_name}</Meta>
           </span>
         )}
         {(soon || attended || rsvp || event.meeting_link || hasPin) && (
-          <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-umber">
+          <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-muted">
             {soon && <span className="text-brand-700">Starts {timeUntil(event.starts_at, now)}</span>}
             {attended && <span>Checked in</span>}
             {!attended && rsvp === 'going' && <span className="text-brand-700">You are going</span>}
@@ -498,7 +498,7 @@ function EventDetail({
   const soon = !over && eventState(event.starts_at, now) === 'soon'
 
   return (
-    <div className="rounded-md border border-line bg-white p-4 sm:p-5">
+    <div className="rounded-md border border-border bg-surface p-4 sm:p-5">
       {onClose && (
         <div className="mb-4 flex justify-end md:hidden">
           <button type="button" onClick={onClose} className={subtleButtonClass + ' min-h-11'}>
@@ -507,7 +507,7 @@ function EventDetail({
         </div>
       )}
 
-      <div className="border-b border-line pb-4">
+      <div className="border-b border-border pb-4">
         <p className={eyebrowClass}>
           {soon ? `Starts ${timeUntil(event.starts_at, now)}` : over ? 'Already happened' : 'Event details'}
         </p>
@@ -530,7 +530,7 @@ function EventDetail({
         <div className="mt-5">
           {hasPin && (
             <>
-              <MapView lat={event.latitude} lng={event.longitude} className="h-52 w-full border border-line" />
+              <MapView lat={event.latitude} lng={event.longitude} className="h-52 w-full border border-border" />
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href={googleDirections(event.latitude!, event.longitude!)} target="_blank" rel="noopener noreferrer" className={subtleButtonClass + ' min-h-11'}>
                   Directions in Google Maps
@@ -558,14 +558,14 @@ function EventDetail({
       <EventExtras event={event} canEdit={canEdit} over={over} />
 
       {canEdit && (
-        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-4 text-sm">
+        <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-4 text-sm">
           {confirming ? (
             <>
               <span className="text-ink">Delete this event for good?</span>
               <button type="button" onClick={onDelete} className="min-h-11 px-2 font-semibold text-brand-700 hover:underline">
                 Yes, delete
               </button>
-              <button type="button" onClick={() => setConfirming(false)} className="min-h-11 px-2 text-umber hover:underline">
+              <button type="button" onClick={() => setConfirming(false)} className="min-h-11 px-2 text-muted hover:underline">
                 Cancel
               </button>
             </>
@@ -574,7 +574,7 @@ function EventDetail({
               <button type="button" onClick={onEdit} className="min-h-11 px-2 font-medium text-brand-700 hover:underline">
                 Edit
               </button>
-              <button type="button" onClick={() => setConfirming(true)} className="min-h-11 px-2 text-umber hover:text-brand-700 hover:underline">
+              <button type="button" onClick={() => setConfirming(true)} className="min-h-11 px-2 text-muted hover:text-brand-700 hover:underline">
                 Delete
               </button>
             </>

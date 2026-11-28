@@ -5,8 +5,9 @@ import { hasRole } from '../lib/types'
 import { errorMessage } from '../lib/finance'
 import { formatDateTime, timeUntil } from '../lib/announcements'
 import { isClosed, MAX_OPTIONS, MIN_OPTIONS, type Poll, type PollOption } from '../lib/polls'
-import { buttonClass, inputClass, subtleButtonClass } from '../components/ui'
+import { buttonClass, cardClass, eyebrowClass, inputClass, subtleButtonClass } from '../components/ui'
 import PageHeader from '../components/PageHeader'
+import Chip from '../components/Chip'
 
 function friendly(err: unknown, fallback: string): string {
   const message = errorMessage(err, fallback)
@@ -144,9 +145,9 @@ export default function Polls() {
 
   function renderList(list: Poll[]) {
     return (
-      <ul className="mt-4 divide-y divide-line border-y border-line bg-white">
+      <ul className="mt-4 divide-y divide-border border-y border-border">
         {list.map((p) => (
-          <li key={p.id} className="px-4 py-5 sm:px-5">
+          <li key={p.id} className="py-6">
             <PollCard
               poll={p}
               options={options[p.id] ?? []}
@@ -171,46 +172,53 @@ export default function Polls() {
         title="Let’s decide together."
         subtitle="Small votes help shape our community. Votes are anonymous."
         action={canManage && !creating ? (
-          <button onClick={() => setCreating(true)} className={subtleButtonClass + ' min-h-11'}>Create a poll</button>
+          <button onClick={() => setCreating(true)} className={subtleButtonClass}>Create a poll</button>
         ) : undefined}
       />
 
       {error && (
-        <p role="alert" className="mt-6 border-l-2 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
+        <p role="alert" className="mt-6 rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2.5 text-sm text-brand-700">
           {error}
         </p>
       )}
 
       {canManage && creating && (
-        <div className="mt-5 rounded-md border border-line bg-white p-4 sm:p-6">
-          <h2 className="text-xl font-medium">New poll</h2>
+        <div className={cardClass + ' mt-6 p-4 sm:p-6'}>
+          <p className={eyebrowClass}>Officer workspace</p>
+          <h2 className="mt-1 text-[20px] font-semibold tracking-tight text-ink">New poll</h2>
           <PollForm onSubmit={createPoll} onCancel={() => setCreating(false)} />
         </div>
       )}
 
-      <div className="mt-4">
-        <input aria-label="Search polls" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search polls" className="min-h-11 w-full rounded-md border border-line bg-white px-3 py-2 text-base sm:max-w-sm sm:text-sm" />
+      <div className="mt-6">
+        <input aria-label="Search polls" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search polls" className={inputClass + ' mt-0 sm:max-w-sm'} />
       </div>
       {loading && <p className="mt-6 text-sm text-muted">Loading polls…</p>}
 
       {!loading && polls.length === 0 && (
-        <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">
+        <p className={cardClass + ' mt-6 px-4 py-6 text-sm text-muted'}>
           {canManage ? 'No polls yet. Create the first one above.' : 'No polls yet.'}
         </p>
       )}
 
-      {!loading && matching.length === 0 && polls.length > 0 && <p className="mt-5 rounded-md border border-line bg-white px-4 py-6 text-sm text-muted">No polls match.</p>}
+      {!loading && matching.length === 0 && polls.length > 0 && <p className={cardClass + ' mt-6 px-4 py-6 text-sm text-muted'}>No polls match.</p>}
 
       {open.length > 0 && (
-        <section className="mt-6" aria-label="Open polls">
-          <h2 className="text-xl font-medium">Open polls <span className="font-normal text-muted">({open.length})</span></h2>
+        <section className="mt-8" aria-label="Open polls">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-[20px] font-semibold tracking-tight text-ink">Open polls</h2>
+            <Chip tone="green">{open.length}</Chip>
+          </div>
           {renderList(open)}
         </section>
       )}
 
       {closed.length > 0 && (
-        <section className="mt-7" aria-label="Closed polls">
-          <h2 className="text-xl font-medium">Closed polls <span className="font-normal text-muted">({closed.length})</span></h2>
+        <section className="mt-10" aria-label="Closed polls">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-[20px] font-semibold tracking-tight text-ink">Closed polls</h2>
+            <Chip tone="slate">{closed.length}</Chip>
+          </div>
           {renderList(closed)}
         </section>
       )}
@@ -265,7 +273,10 @@ function PollCard({
 
   return (
     <article>
-      <h3 className="text-xl font-medium break-words">{poll.question}</h3>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h3 className="text-[20px] font-semibold tracking-tight text-ink break-words">{poll.question}</h3>
+        <Chip tone={closed ? 'slate' : 'green'}>{closed ? 'Closed' : 'Open'}</Chip>
+      </div>
       <p className="mt-1 text-sm text-muted">
         Posted {formatDateTime(poll.created_at)}.{' '}
         {closed
@@ -285,17 +296,17 @@ function PollCard({
               return (
                 <li key={o.id}>
                   <div className="flex items-baseline justify-between gap-3 text-sm">
-                    <span className={'break-words ' + (winner ? 'font-semibold' : '')}>
+                    <span className={'break-words text-ink ' + (winner ? 'font-semibold' : '')}>
                       {o.label}
-                      {myVote === o.id && <span className="ml-2 text-xs font-semibold text-brand-700">Your vote</span>}
+                      {myVote === o.id && <span className="ml-2"><Chip tone="brand">Your vote</Chip></span>}
                     </span>
-                    <span className="shrink-0 tabular-nums text-umber">
+                    <span className="shrink-0 font-num text-muted">
                       {n} ({pct}%)
                     </span>
                   </div>
-                  <div className="mt-1 h-2 overflow-hidden bg-sand" aria-hidden="true">
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-md bg-surface-sunken" aria-hidden="true">
                     <div
-                      className={'h-full ' + (winner || !closed ? 'bg-brand-700' : 'bg-umber')}
+                      className={'h-full rounded-md ' + (winner || !closed ? 'bg-brand-700' : 'bg-muted')}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -313,7 +324,7 @@ function PollCard({
                 setChoice(myVote)
                 setChanging(true)
               }}
-              className="min-h-11 mt-2 py-2 text-sm font-medium text-brand-700 hover:underline"
+              className="mt-2 min-h-11 py-2 text-sm font-medium text-brand-700 hover:underline"
             >
               Change my vote
             </button>
@@ -323,13 +334,13 @@ function PollCard({
         <form onSubmit={submit} className="mt-4">
           <fieldset>
             <legend className="sr-only">{poll.question}</legend>
-            <div className="space-y-2">
+            <div className="divide-y divide-border-subtle border-y border-border-subtle">
               {options.map((o) => (
                 <label
                   key={o.id}
                   className={
-                    'flex min-h-11 cursor-pointer items-center gap-3 border-b border-line py-2 text-sm ' +
-                    (choice === o.id ? 'font-medium text-brand-800' : 'text-ink')
+                    'flex min-h-11 cursor-pointer items-center gap-3 px-2 py-2.5 text-sm transition-colors hover:bg-surface-sunken ' +
+                    (choice === o.id ? 'bg-soft font-semibold text-brand-700' : 'text-ink')
                   }
                 >
                   <input
@@ -338,6 +349,7 @@ function PollCard({
                     value={o.id}
                     checked={choice === o.id}
                     onChange={() => setChoice(o.id)}
+                    className="accent-brand-700"
                   />
                   <span className="break-words">{o.label}</span>
                 </label>
@@ -345,7 +357,7 @@ function PollCard({
             </div>
           </fieldset>
           {error && (
-            <p role="alert" className="mt-3 border-l-2 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
+            <p role="alert" className="mt-3 rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
               {error}
             </p>
           )}
@@ -356,7 +368,7 @@ function PollCard({
               </button>
             </div>
             {changing && (
-              <button type="button" onClick={() => setChanging(false)} className="py-2 text-sm text-umber hover:underline">
+              <button type="button" onClick={() => setChanging(false)} className="min-h-11 px-2 py-2 text-sm text-muted hover:text-ink hover:underline">
                 Cancel
               </button>
             )}
@@ -366,14 +378,14 @@ function PollCard({
       )}
 
       {canManage && (
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border-subtle pt-2 text-sm">
           {confirmingDelete ? (
             <>
               <span className="text-ink">Delete this poll and all its votes?</span>
               <button onClick={onDelete} className="min-h-11 py-2 font-semibold text-brand-700 hover:underline">
                 Yes, delete
               </button>
-              <button onClick={() => setConfirmingDelete(false)} className="min-h-11 py-2 text-umber hover:underline">
+              <button onClick={() => setConfirmingDelete(false)} className="min-h-11 py-2 text-muted hover:text-ink hover:underline">
                 Cancel
               </button>
             </>
@@ -389,7 +401,7 @@ function PollCard({
               >
                 Yes, close it
               </button>
-              <button onClick={() => setConfirmingClose(false)} className="min-h-11 py-2 text-umber hover:underline">
+              <button onClick={() => setConfirmingClose(false)} className="min-h-11 py-2 text-muted hover:text-ink hover:underline">
                 Cancel
               </button>
             </>
@@ -400,7 +412,7 @@ function PollCard({
                   Close poll now
                 </button>
               )}
-              <button onClick={() => setConfirmingDelete(true)} className="min-h-11 py-2 text-umber hover:text-brand-700 hover:underline">
+              <button onClick={() => setConfirmingDelete(true)} className="min-h-11 py-2 text-muted hover:text-brand-700 hover:underline">
                 Delete
               </button>
             </>
@@ -457,9 +469,9 @@ function PollForm({
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 space-y-3">
+    <form onSubmit={submit} className="mt-4 space-y-4">
       <div>
-        <label htmlFor={`${uid}-q`} className="text-sm font-medium">Question</label>
+        <label htmlFor={`${uid}-q`} className="block text-sm font-medium text-ink">Question</label>
         <input
           id={`${uid}-q`}
           value={question}
@@ -471,8 +483,8 @@ function PollForm({
       </div>
 
       <fieldset>
-        <legend className="text-sm font-medium">Options ({choices.length} of {MAX_OPTIONS})</legend>
-        <ul className="mt-1 space-y-2">
+        <legend className="text-sm font-medium text-ink">Options ({choices.length} of {MAX_OPTIONS})</legend>
+        <ul className="mt-1.5 space-y-2">
           {choices.map((c, i) => (
             <li key={c.id} className="flex items-center gap-2">
               <input
@@ -483,14 +495,14 @@ function PollForm({
                   setChoices((prev) => prev.map((x) => (x.id === c.id ? { ...x, text: e.target.value } : x)))
                 }
                 placeholder={`Option ${i + 1}`}
-                className="min-h-11 min-w-0 flex-1 rounded-md border border-line px-3 py-2 text-base sm:text-sm"
+                className={inputClass + ' mt-0 min-w-0 flex-1'}
               />
               {choices.length > MIN_OPTIONS && (
                 <button
                   type="button"
                   onClick={() => setChoices((prev) => prev.filter((x) => x.id !== c.id))}
                   aria-label={`Remove option ${i + 1}`}
-                  className="min-h-11 px-2 py-2 text-sm text-umber hover:text-brand-700"
+                  className="min-h-11 px-2 py-2 text-sm text-muted hover:text-brand-700"
                 >
                   Remove
                 </button>
@@ -502,7 +514,7 @@ function PollForm({
           <button
             type="button"
             onClick={() => setChoices((prev) => [...prev, { id: nextId.current++, text: '' }])}
-            className="min-h-11 mt-2 py-2 text-sm font-medium text-brand-700 hover:underline"
+            className="mt-2 min-h-11 py-2 text-sm font-medium text-brand-700 hover:underline"
           >
             Add another option
           </button>
@@ -510,7 +522,7 @@ function PollForm({
       </fieldset>
 
       <div>
-        <label htmlFor={`${uid}-close`} className="text-sm font-medium">Closes at (optional)</label>
+        <label htmlFor={`${uid}-close`} className="block text-sm font-medium text-ink">Closes at (optional)</label>
         <div className="flex items-center gap-3">
           <input
             id={`${uid}-close`}
@@ -520,7 +532,7 @@ function PollForm({
             className={inputClass + ' sm:max-w-xs'}
           />
           {closes && (
-            <button type="button" onClick={() => setCloses('')} className="mt-1 py-2 text-sm text-umber hover:underline">
+            <button type="button" onClick={() => setCloses('')} className="mt-1 min-h-11 px-2 py-2 text-sm text-muted hover:text-ink hover:underline">
               Clear
             </button>
           )}
@@ -529,18 +541,18 @@ function PollForm({
       </div>
 
       {error && (
-        <p role="alert" className="border-l-2 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
+        <p role="alert" className="rounded-md border-l-4 border-brand-700 bg-soft px-3 py-2 text-sm text-brand-700">
           {error}
         </p>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         <div className="w-full sm:w-auto sm:min-w-40">
           <button type="submit" disabled={busy} className={buttonClass}>
             {busy ? 'Creating…' : 'Create poll'}
           </button>
         </div>
-        <button type="button" onClick={onCancel} className="py-2 text-sm text-umber hover:underline">
+        <button type="button" onClick={onCancel} className="min-h-11 px-2 py-2 text-sm text-muted hover:text-ink hover:underline">
           Cancel
         </button>
       </div>

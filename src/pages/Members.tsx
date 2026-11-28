@@ -95,7 +95,7 @@ export default function Members() {
         </p>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-line">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-border">
         <div role="group" aria-label="Filter members" className="flex gap-5 text-sm">
           {TABS.map((t) => (
             <button
@@ -172,7 +172,7 @@ export default function Members() {
               <div className={cardClass + ' mt-3 overflow-x-auto'}>
                 <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
                   <thead>
-                    <tr className="border-b border-line text-[11px] tracking-[0.08em] text-muted uppercase">
+                    <tr className="border-b border-border text-[11px] tracking-[0.08em] text-muted uppercase">
                       <th className="px-4 py-3 font-semibold">Name / Student no.</th>
                       <th className="px-4 py-3 font-semibold">College / Year</th>
                       <th className="px-4 py-3 font-semibold">Role</th>
@@ -181,7 +181,7 @@ export default function Members() {
                   </thead>
                   <tbody>
                     {approved.map((p) => (
-                      <tr key={p.id} className="border-b border-line last:border-b-0">
+                      <tr key={p.id} className="border-b border-border last:border-b-0">
                         <td className="px-4 py-3">
                           <p className="font-semibold break-words">
                             {p.full_name || '(no name)'}
@@ -196,7 +196,7 @@ export default function Members() {
                             value={p.role}
                             disabled={p.id === me?.id}
                             onChange={(e) => void update(p.id, { role: e.target.value as Role })}
-                            className="min-h-10 rounded-md border border-line bg-white px-2 py-1.5 text-base disabled:opacity-60 sm:text-sm"
+                            className="min-h-10 rounded-md border border-border bg-surface px-2 py-1.5 text-base disabled:opacity-60 sm:text-sm"
                           >
                             {ROLES.map((r) => (
                               <option key={r} value={r}>
