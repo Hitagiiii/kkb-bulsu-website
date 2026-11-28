@@ -9,24 +9,23 @@ export interface NavItem {
   /** Exactly this role and no other */
   onlyRole?: Role
   end?: boolean
-  accent?: 'maroon' | 'orange' | 'teal' | 'gold' | 'plum'
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: '/', label: 'Home', description: 'Your overview', end: true, accent: 'maroon' },
-  { to: '/announcements', label: 'Announcements', description: 'News and notices from the officers', accent: 'maroon' },
-  { to: '/verse-of-the-day', label: 'Verse of the Day', description: 'Daily Scripture and KKB reflection', accent: 'maroon' },
-  { to: '/my-space', label: 'My Space', description: 'Your personal dashboard, goals and journal', accent: 'plum' },
-  { to: '/events', label: 'Events', description: 'Calendar, RSVP, meeting places and call links', accent: 'orange' },
-  { to: '/polls', label: 'Polls', description: 'Vote on organization decisions', accent: 'plum' },
-  { to: '/attendance', label: 'Attendance', description: 'Events you attended, and reports for officers', accent: 'teal' },
-  { to: '/merch', label: 'Merch', description: 'Order shirts, ID laces and pins, and track pickup', end: true, accent: 'gold' },
-  { to: '/documents', label: 'Documents', description: 'Forms, templates and organization files', minRole: 'officer', accent: 'teal' },
-  { to: '/minutes', label: 'Minutes', description: 'Meeting notes and decisions', minRole: 'officer', accent: 'teal' },
-  { to: '/tasks', label: 'Tasks', description: 'Action items for officers', minRole: 'officer', accent: 'orange' },
-  { to: '/finance', label: 'Finance', description: 'Budgets, expenses and receipts', onlyRole: 'treasurer', accent: 'gold' },
-  { to: '/merch/manage', label: 'Merch orders', description: 'Verify payments and hand over orders', onlyRole: 'treasurer', accent: 'gold' },
-  { to: '/members', label: 'Members', description: 'Approve sign-ups and set roles', minRole: 'admin', accent: 'maroon' },
+  { to: '/', label: 'Home', description: 'Your overview', end: true },
+  { to: '/announcements', label: 'Announcements', description: 'News and notices from the officers' },
+  { to: '/verse-of-the-day', label: 'Verse of the Day', description: 'Daily Scripture and KKB reflection' },
+  { to: '/my-space', label: 'My Space', description: 'Your personal dashboard, goals and journal' },
+  { to: '/events', label: 'Events', description: 'Calendar, RSVP, meeting places and call links' },
+  { to: '/polls', label: 'Polls', description: 'Vote on organization decisions' },
+  { to: '/attendance', label: 'Attendance', description: 'Events you attended, and reports for officers' },
+  { to: '/merch', label: 'Merch', description: 'Order shirts, ID laces and pins, and track pickup', end: true },
+  { to: '/documents', label: 'Documents', description: 'Forms, templates and organization files', minRole: 'officer' },
+  { to: '/minutes', label: 'Minutes', description: 'Meeting notes and decisions', minRole: 'officer' },
+  { to: '/tasks', label: 'Tasks', description: 'Action items for officers', minRole: 'officer' },
+  { to: '/finance', label: 'Finance', description: 'Budgets, expenses and receipts', onlyRole: 'treasurer' },
+  { to: '/merch/manage', label: 'Merch orders', description: 'Verify payments and hand over orders', onlyRole: 'treasurer' },
+  { to: '/members', label: 'Members', description: 'Approve sign-ups and set roles', minRole: 'admin' },
 ]
 
 export function canSeeNav(item: NavItem, role: Role | null | undefined): boolean {

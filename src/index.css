@@ -6,53 +6,54 @@
  * Maroon for action and selection. Gold for one tiny signal. No gradients, no heavy shadows.
  */
 @theme {
-  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-num: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-num: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Warm paper system */
-  --color-paper: #f4efe8;
-  --color-sand: #ebe4da;
-  --color-line: #ddd4c8;
-  --color-ink: #25191b;
-  --color-umber: #6b5e5a;
+  /* Exact KKB BULSU palette */
+  --color-paper: #F4EFE8;
+  --color-bg: #F4EFE8;
+  --color-canvas: #F4EFE8;
+  --color-white: #FFFFFF;
+  --color-card: #FFFFFF;
+  --color-sand: #EBE4DA;
+  --color-secondary: #EBE4DA;
+  --color-secondary-pressed: #DDD4C8;
+  --color-line: #DDD4C8;
+  --color-hairline: #DDD4C8;
+  --color-ink: #25191B;
+  --color-body: #25191B;
+  --color-muted: #6B5E5A;
+  --color-mute: #6B5E5A;
+  --color-umber: #6B5E5A;
+  --color-ash: #6B5E5A;
 
-  /* Compatibility aliases used throughout the existing pages */
-  --color-bg: #f4efe8;
-  --color-muted: #6b5e5a;
-  --color-accent: #e8702a;
-  --color-soft: #f5dfe2;
-  --color-canvas: #f4efe8;
-  --color-card: #ffffff;
-  --color-secondary: #ebe4da;
-  --color-secondary-pressed: #ddd4c8;
-  --color-hairline: #ddd4c8;
-  --color-body: #25191b;
-  --color-mute: #6b5e5a;
-  --color-ash: #8a7f78;
+  --color-brand-50: #F5DFE2;
+  --color-brand-100: #F5DFE2;
+  --color-brand-300: #F5DFE2; /* previously undefined; now resolves the dead hover classes */
+  --color-brand-600: #8A1C2E;
+  --color-brand-700: #8A1C2E;
+  --color-brand-800: #6F1625;
+  --color-brand-900: #4E0F1B;
+  --color-soft: #F5DFE2;
 
-  /* Maroon brand scale */
-  --color-brand-50: #fbf2f3;
-  --color-brand-100: #f5dfe2;
-  --color-brand-600: #a3263a;
-  --color-brand-700: #8a1c2e;
-  --color-brand-800: #6f1625;
-  --color-brand-900: #4e0f1b;
+  --color-accent: #E8702A;
+  --color-orange: #E8702A;
+  --color-teal: #1F7A74;
+  --color-gold: #C9922B;
+  --color-plum: #7A3E6B;
 
-  /* Orange highlight scale */
-  --color-accent-50: #fff4ea;
-  --color-accent-100: #fde8d6;
-  --color-accent-500: #e8702a;
-  --color-accent-700: #b34a08;
+  /* Pre-existing support tints — kept so notices and status chips keep working */
+  --color-accent-50: #FFF4EA;
+  --color-accent-100: #FDE8D6;
+  --color-accent-500: #E8702A;
+  --color-accent-700: #B34A08;
+  --color-error: #9E0A0A;
+  --color-success-deep: #1D4D33;
+  --color-success-pale: #E3F1E8;
 
-  --color-error: #9e0a0a;
-  --color-success-deep: #1d4d33;
-  --color-success-pale: #e3f1e8;
-
-  /* Existing slate utilities mapped to the warm neutral system */
-
-  --radius-xs: 4px;
-  --radius-sm: 4px;
+  --radius-xs: 6px;
+  --radius-sm: 6px;
   --radius-md: 6px;
   --radius-lg: 6px;
   --radius-xl: 6px;

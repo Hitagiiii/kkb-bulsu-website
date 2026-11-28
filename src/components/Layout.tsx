@@ -66,18 +66,13 @@ export default function Layout() {
     return () => document.removeEventListener('keydown', onKey)
   }, [drawerOpen])
 
-  const accentClasses: Record<NonNullable<(typeof NAV_ITEMS)[number]['accent']>, string> = {
-    maroon: 'text-white',
-    orange: 'text-[#F6B26B]',
-    teal: 'text-[#6FC8C1]',
-    gold: 'text-[#F0CB79]',
-    plum: 'text-[#D2A6C7]',
-  }
+  // B theming: one quiet icon colour on the deep-maroon rail, no arbitrary hues.
+  const iconClass = 'text-white/80'
 
   const navLinkClass = (isActive: boolean, rail: boolean) =>
-    'group relative flex items-center rounded-md text-sm transition-[transform,background-color,box-shadow,color] duration-200 motion-reduce:transition-none ' +
+    'group relative flex items-center rounded-md text-sm transition-colors ' +
     (rail ? 'md:justify-center md:px-0 md:py-2.5 ' : '') +
-    'gap-3 px-3 py-3 md:py-2 hover:-translate-y-0.5 hover:scale-[1.01] hover:bg-white/10 hover:text-white hover:shadow-[0_0_18px_rgba(255,255,255,0.08)] focus-visible:ring-2 focus-visible:ring-white/70 ' +
+    'gap-3 px-3 py-3 md:py-2 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 ' +
     (isActive ? 'bg-white/15 font-semibold text-white ring-1 ring-inset ring-white/20 before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:bg-white' : 'text-white/80')
 
   return (
@@ -101,7 +96,7 @@ export default function Layout() {
           <div className={'flex items-start justify-between gap-2 ' + (collapsed ? 'md:flex-col md:items-center' : '')}>
             <div className={collapsed ? 'md:text-center' : ''}>
               <p className="flex items-center gap-2 text-base font-bold tracking-tight text-white">
-                <img src="/logo.jpg" alt="KKB BULSU" className="h-7 w-7 shrink-0 rounded-md object-cover" />
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-brand-700 font-num text-[10px] font-semibold text-white">KKB</span>
                 <span className={collapsed ? 'md:hidden' : ''}>KKB BULSU</span>
               </p>
               <p className={'mt-1 text-[10px] tracking-[0.06em] text-white/80 uppercase underline decoration-white decoration-2 underline-offset-4 ' + (collapsed ? 'md:hidden' : '')}>
@@ -142,7 +137,7 @@ export default function Layout() {
               onClick={() => setDrawerOpen(false)}
               className={({ isActive }) => navLinkClass(isActive, collapsed)}
             >
-              <span className={'shrink-0 ' + (item.accent ? accentClasses[item.accent] : 'text-white/80')}>
+              <span className={'shrink-0 ' + iconClass}>
                 <NavIcon to={item.to} />
               </span>
               <span className={'flex-1 ' + (collapsed ? 'md:sr-only' : '') + ' ' + (!collapsed ? 'group-hover:underline group-hover:underline-offset-4' : '')}>{item.label}</span>
@@ -166,7 +161,7 @@ export default function Layout() {
           <button
             type="button"
             onClick={() => void signOut()}
-            className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-md px-2 py-2 text-sm text-white/75 transition-[transform,background-color,color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white hover:shadow-[0_0_18px_rgba(255,255,255,0.08)] focus-visible:ring-2 focus-visible:ring-white/70 motion-reduce:transition-none"
+            className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-md px-2 py-2 text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70"
           >
             <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5" /><path d="M15 12H3" /><path d="M21 19V5a2 2 0 0 0-2-2h-6" /></svg>
             <span className={collapsed ? 'md:sr-only' : ''}>Sign out</span>
@@ -186,7 +181,7 @@ export default function Layout() {
           >
             Menu
           </button>
-          <span className="flex items-center gap-2 text-base font-bold tracking-tight text-brand-900"><img src="/logo.jpg" alt="" className="h-6 w-6 rounded-md object-cover" />KKB BULSU</span>
+          <span className="flex items-center gap-2 text-base font-bold tracking-tight text-brand-900"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-brand-700 font-num text-[10px] font-semibold text-white">KKB</span>KKB BULSU</span>
           <NotificationsMenu data={notifications} permission={permission} enableAlerts={enableAlerts} />
         </header>
 
@@ -211,7 +206,7 @@ export default function Layout() {
             className="mt-0 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-line bg-white px-4 py-2.5 text-xs text-brand-700 sm:px-6 md:px-10 print:hidden"
           >
             <p className="min-w-0 break-words">
-              <span className="font-semibold tracking-[0.06em] uppercase">Up next</span>
+              <span className="font-semibold tracking-[0.06em] uppercase"><span aria-hidden="true" className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-gold align-middle" />Up next</span>
               <span className="mx-2">·</span>
               <span>
                 {next.title} starts {timeUntil(next.at)}

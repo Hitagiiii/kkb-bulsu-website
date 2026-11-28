@@ -244,7 +244,7 @@ export default function BudgetDetail() {
                           className="h-full min-w-[0.35rem] rounded-full"
                           style={{
                             width: `${Math.max(share, 3)}%`,
-                            background: `linear-gradient(90deg, rgb(78 15 27), rgb(138 28 46) 55%, rgb(232 112 42))`,
+                            background: '#8A1C2E',
                           }}
                         />
                       </div>

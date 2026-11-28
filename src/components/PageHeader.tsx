@@ -14,7 +14,7 @@ export default function PageHeader({
   action?: ReactNode
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-5 border-b border-line pb-5">
+    <header className="flex flex-wrap items-end justify-between gap-5 border-b border-line pb-4">
       <div className="min-w-0">
         {eyebrow && <p className={eyebrowClass}>{eyebrow}</p>}
         <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight text-ink sm:text-[40px]">

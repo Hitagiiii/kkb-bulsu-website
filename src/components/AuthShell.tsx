@@ -18,7 +18,7 @@ export default function AuthShell({
       <div className="flex min-h-[calc(100vh-2.5rem)] items-center justify-center sm:min-h-[calc(100vh-3rem)]">
         <main className="w-full max-w-md rounded-md border border-white/15 bg-white p-5 sm:p-6">
           <div className="mb-4 flex items-center gap-2">
-            <img src="/logo.jpg" alt="KKB BULSU" className="h-8 w-8 shrink-0 rounded-md object-cover" />
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-brand-700 font-num text-[11px] font-semibold text-white">KKB</span>
             <div>
               <p className="text-sm font-bold tracking-tight text-brand-900">KKB BULSU</p>
               <p className="text-[10px] uppercase tracking-[0.06em] text-muted">Bulacan State University</p>

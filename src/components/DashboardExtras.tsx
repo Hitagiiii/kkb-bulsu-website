@@ -126,11 +126,14 @@ export default function DashboardExtras({
     <section aria-label="Needs your attention" className={className}>
       {alerts.length > 0 && (
         <>
-          <h2 className="text-xl font-medium text-ink">Needs your attention</h2>
+          <h2 className="flex items-center gap-2.5 text-[20px] font-medium leading-tight text-ink">
+            <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
+            Needs your attention
+          </h2>
           <ul className="mt-3 space-y-3">
             {alerts.map((a) => (
               <li key={a.key}>
-                <Link to={a.to} className="block rounded-md border border-line bg-white p-4 transition-colors hover:bg-paper">
+                <Link to={a.to} className="block rounded-md border border-line bg-white p-4 transition-colors hover:bg-soft">
                   <p className={eyebrowClass}>{a.eyebrow}</p>
                   <p className="mt-1 text-base font-semibold break-words text-ink">{a.text}</p>
                   <p className="mt-1 flex items-center gap-1 text-xs text-muted">
@@ -146,16 +149,19 @@ export default function DashboardExtras({
 
       {showTasks && (
         <div className={alerts.length > 0 ? 'mt-8' : ''}>
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 className="text-xl font-medium text-ink">My tasks</h2>
-            <Link to="/tasks" className="py-1 text-sm font-semibold text-brand-700 hover:underline">
+          <div className="flex items-baseline justify-between gap-4 border-b border-line pb-2.5">
+            <h2 className="flex items-center gap-2.5 text-[20px] font-medium leading-tight text-ink">
+              <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
+              My tasks
+            </h2>
+            <Link to="/tasks" className="py-1 text-xs font-semibold text-brand-700 hover:underline">
               See all
             </Link>
           </div>
           <ul className="mt-3 divide-y divide-line rounded-md border border-line bg-white">
             {tasks.map((t) => (
               <li key={t.id}>
-                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-paper">
+                <Link to="/tasks" className="block px-4 py-3 transition-colors hover:bg-soft">
                   <p className="text-sm font-semibold break-words text-ink">{t.title}</p>
                   {t.due_on && (
                     <p className={'text-xs ' + (t.due_on < today ? 'font-semibold text-error' : 'text-muted')}>

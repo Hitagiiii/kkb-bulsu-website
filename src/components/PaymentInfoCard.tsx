@@ -202,7 +202,7 @@ function PaymentForm({
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="mt-1 block w-full min-h-11 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-sand file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-sand-pressed"
+          className="mt-1 block w-full min-h-11 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-sand file:px-3 file:py-2.5 file:text-sm file:font-medium hover:file:bg-secondary-pressed"
         />
         {settings?.qr_path && !file && (
           <label className="mt-2 flex min-h-11 items-center gap-2 py-1 text-sm">

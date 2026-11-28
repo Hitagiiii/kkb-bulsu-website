@@ -33,7 +33,7 @@ export default function CheckIn() {
       {state.status === 'working' && <p className="mt-6 text-sm text-muted">Checking you in…</p>}
 
       {state.status === 'done' && (
-        <div className="mt-6 rounded-xl border border-success-pale bg-success-pale p-5">
+        <div className="mt-6 rounded-md border border-success-pale bg-success-pale p-5">
           <p className="text-xl font-medium text-success-deep">
             {state.already ? 'You were already checked in' : 'You are checked in'}
           </p>

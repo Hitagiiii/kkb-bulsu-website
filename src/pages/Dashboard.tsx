@@ -11,6 +11,18 @@ import Chip from '../components/Chip'
 import DashboardExtras from '../components/DashboardExtras'
 import { buttonClass, cardClass, eyebrowClass } from '../components/ui'
 
+function SectionTitle({ title, to, action }: { title: string; to?: string; action?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-line pb-2.5">
+      <h2 className="flex items-center gap-2.5 text-[20px] font-medium leading-tight text-ink">
+        <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
+        {title}
+      </h2>
+      {to && <Link to={to} className="py-1 text-xs font-semibold text-brand-700 hover:underline">{action ?? 'View all'}</Link>}
+    </div>
+  )
+}
+
 type Latest = Pick<Announcement, 'id' | 'title' | 'body' | 'pinned' | 'created_at' | 'event_at' | 'image_paths'>
 
 const BUCKET = 'announcement-images'
@@ -93,12 +105,14 @@ export default function Dashboard() {
   const next = events && events.length > 0 ? events[0] : null
   const today = new Date().toLocaleDateString('en-PH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const rate = attendance && attendance.past > 0 ? attendance.attended / attendance.past : null
+  const canSeeFinance = profile?.role === 'treasurer'
+  const canSeeDocuments = profile && ['officer', 'treasurer', 'admin'].includes(profile.role)
 
   return (
     <div className="w-full">
       <header>
-        <p className={eyebrowClass}>{today}</p>
-        <h1 className="font-display mt-1 text-[28px] leading-tight font-medium tracking-tight sm:text-[40px]">
+        <p className="text-xs text-muted">{today}</p>
+        <h1 className="font-display mt-1.5 text-[28px] leading-tight font-medium tracking-tight text-ink sm:text-[40px]">
           Good day, {firstName}
         </h1>
         <p className="mt-2 text-sm text-muted">
@@ -106,18 +120,13 @@ export default function Dashboard() {
         </p>
       </header>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         {/* Main column */}
         <div className="space-y-6">
           <DashboardExtras pollsWaiting={pollsWaiting} />
 
           <section aria-label="Latest announcements">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-xl font-medium text-ink">Latest announcements</h2>
-              <Link to="/announcements" className="py-1 text-sm font-semibold text-brand-700 hover:underline">
-                See all
-              </Link>
-            </div>
+            <SectionTitle title="Latest announcements" to="/announcements" action="See all" />
             {latest === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
             {latest && latest.length === 0 && <p className="mt-3 text-sm text-muted">Nothing has been posted yet.</p>}
             {latest && latest.length > 0 && (
@@ -126,7 +135,7 @@ export default function Dashboard() {
                   const photo = (a.image_paths ?? []).map((p) => urls[p]).find(Boolean)
                   return (
                     <li key={a.id}>
-                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-[transform,background-color,border-color,box-shadow] duration-200 hover:scale-[1.02] hover:bg-brand-50 hover:border-l-brand-800 hover:shadow-[0_0_18px_rgba(138,28,46,0.16)] motion-reduce:transition-none sm:flex'}>
+                      <Link to="/announcements" className={cardClass + ' block overflow-hidden border-l-2 border-l-brand-700 transition-colors hover:bg-soft sm:flex'}>
                         {photo && i === 0 && (
                           <img src={photo} alt="" className="aspect-[16/9] w-full object-cover sm:aspect-auto sm:w-56 sm:shrink-0" />
                         )}
@@ -137,7 +146,7 @@ export default function Dashboard() {
                           </div>
                           <p className="mt-1 text-lg font-semibold break-words text-ink">{a.title}</p>
                           <p className="mt-1 line-clamp-2 text-sm break-words text-muted">{a.body}</p>
-                          <p className="mt-3 text-sm font-semibold text-brand-700">Read the story →</p>
+                          <p className="mt-3 text-sm font-semibold text-brand-700">Read the story</p>
                         </div>
                       </Link>
                     </li>
@@ -149,10 +158,7 @@ export default function Dashboard() {
 
           <div className="grid items-start gap-6 xl:grid-cols-2">
             <section aria-label="Coming up">
-              <div className="flex items-baseline justify-between gap-4">
-                <h2 className="text-xl font-medium text-ink">Coming up</h2>
-                <Link to="/events" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
-              </div>
+              <SectionTitle title="Coming up" to="/events" action="See all" />
               {events === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
               {events && events.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No upcoming events yet.</p>}
               {events && events.length > 0 && (
@@ -180,10 +186,7 @@ export default function Dashboard() {
             </section>
 
             <section aria-label="Open polls">
-              <div className="flex items-baseline justify-between gap-4">
-                <h2 className="text-xl font-medium text-ink">Open polls</h2>
-                <Link to="/polls" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
-              </div>
+              <SectionTitle title="Open polls" to="/polls" action="See all" />
               {openPolls === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
               {openPolls && openPolls.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No polls are open right now.</p>}
               {openPolls && openPolls.length > 0 && (
@@ -206,10 +209,7 @@ export default function Dashboard() {
 
           {profile && ['officer', 'treasurer', 'admin'].includes(profile.role) && (
             <section aria-label="Recent documents">
-              <div className="flex items-baseline justify-between gap-4">
-                <h2 className="text-xl font-medium text-ink">Recent documents</h2>
-                <Link to="/documents" className="py-1 text-sm font-semibold text-brand-700 hover:underline">See all</Link>
-              </div>
+              <SectionTitle title="Recent documents" to="/documents" action="See all" />
               {docs === null && <p className="mt-3 text-sm text-muted">Loading…</p>}
               {docs && docs.length === 0 && <p className={cardClass + ' mt-3 px-4 py-6 text-sm text-muted'}>No documents have been shared yet.</p>}
               {docs && docs.length > 0 && (
@@ -227,6 +227,27 @@ export default function Dashboard() {
               )}
             </section>
           )}
+
+          <section aria-label="At a glance" className={`${cardClass} p-4 sm:p-5`}>
+            <SectionTitle title="At a glance" />
+            <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-4">
+              {(
+                [
+                  canSeeFinance ? { k: 'Money left', v: 'See finance' } : null,
+                  { k: 'Attendance', v: rate === null ? '—' : `${Math.round(rate * 100)}%` },
+                  { k: 'Open polls', v: pollsWaiting === null ? '—' : String(pollsWaiting) },
+                  canSeeDocuments ? { k: 'Documents', v: docs ? String(docs.length) : '—' } : null,
+                ] as ({ k: string; v: string } | null)[]
+              )
+                .filter((s): s is { k: string; v: string } => s !== null)
+                .map((s) => (
+                  <div key={s.k} className="bg-white p-3 sm:p-4">
+                    <dt className="text-xs text-muted">{s.k}</dt>
+                    <dd className="mt-1.5 font-num text-[18px] font-medium text-ink">{s.v}</dd>
+                  </div>
+                ))}
+            </dl>
+          </section>
         </div>
 
         {/* Right rail */}
@@ -276,7 +297,7 @@ export default function Dashboard() {
               </>
             )}
             <Link to="/attendance" className="mt-3 inline-block py-1 text-sm font-semibold text-brand-700 hover:underline">
-              View my attendance →
+              View my attendance
             </Link>
           </section>
 

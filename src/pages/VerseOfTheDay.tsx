@@ -3,7 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import { hasRole } from '../lib/types'
 import { supabase } from '../lib/supabase'
 import { fetchDailyVerse } from '../lib/dailyVerse'
-import { cardClass, buttonClass, inputClass, subtleButtonClass, eyebrowClass } from '../components/ui'
+import { cardClass, buttonClass, inputClass } from '../components/ui'
 import PageHeader from '../components/PageHeader'
 
 interface DailyVerseRow {
@@ -141,45 +141,53 @@ export default function VerseOfTheDay() {
       {loading && <p className="mt-6 text-sm text-muted">Preparing today’s verse…</p>}
 
       {!loading && today && (
-        <div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-          <div className="space-y-7">
-            <article className={cardClass + ' overflow-hidden'}>
-              <div className="border-b border-line bg-soft px-5 py-4 sm:px-7">
-                <p className={eyebrowClass}>Today · {displayDate(today.date)}</p>
-                <p className="mt-1 text-xs text-muted">{today.translation} · Bible verse</p>
-              </div>
-              <div className="px-5 py-7 sm:px-8 sm:py-9">
-                <blockquote className="font-display max-w-3xl text-2xl leading-relaxed text-ink sm:text-4xl">
-                  “{today.verse_text}”
-                </blockquote>
-                <p className="mt-5 text-sm font-semibold text-brand-700">— {today.reference}</p>
-                <p className="mt-3 text-xs text-muted">Scripture source: Free Use Bible API · Berean Standard Bible</p>
-              </div>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+          <div className="space-y-8">
+            <article className="border-b border-line pb-8" aria-labelledby="verse-heading">
+              <header>
+                <p className="text-xs font-medium text-muted">{displayDate(today.date)} · {today.translation}</p>
+                <h2 id="verse-heading" className="sr-only">Today’s Scripture</h2>
+              </header>
+              <blockquote className="font-display mt-6 max-w-3xl text-[28px] leading-snug font-medium tracking-tight text-ink sm:text-[40px]">
+                “{today.verse_text}”
+              </blockquote>
+              <p className="mt-6 text-sm font-semibold text-brand-700">— {today.reference}</p>
+              <p className="mt-2 text-xs text-muted">Scripture source: Free Use Bible API · Berean Standard Bible</p>
             </article>
 
-            <section className={cardClass + ' p-5 sm:p-7'} aria-labelledby="reflection-heading">
-              <p className={eyebrowClass}>Today’s reflection</p>
-              <h2 id="reflection-heading" className="mt-1 text-2xl font-medium text-ink">Faith in the middle of university life.</h2>
+            <section className="border-b border-line pb-8" aria-labelledby="reflection-heading">
+              <div className="flex items-center gap-2.5">
+                <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
+                <p className="text-xs font-medium text-muted">KKB Reflection</p>
+              </div>
+              <h2 id="reflection-heading" className="mt-3 text-[20px] font-medium leading-tight text-ink">Faith in the middle of university life</h2>
               {today.reflection ? (
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-umber sm:text-base">{today.reflection}</p>
+                <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-umber sm:text-base">{today.reflection}</p>
               ) : (
-                <p className="mt-4 text-sm leading-6 text-muted">The KKB reflection is being prepared. The Scripture above is available to read and reflect on today.</p>
+                <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">The KKB reflection is being prepared. The Scripture above is available to read and reflect on today.</p>
               )}
             </section>
 
             {today.prayer && (
-              <section className={cardClass + ' border-brand-200 p-5 sm:p-7'} aria-labelledby="prayer-heading">
-                <p className={eyebrowClass}>Today’s prayer</p>
-                <h2 id="prayer-heading" className="mt-1 text-xl font-medium text-ink">A moment to pray.</h2>
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-umber sm:text-base">{today.prayer}</p>
+              <section className="border-b border-line pb-8" aria-labelledby="prayer-heading">
+                <div className="flex items-center gap-2.5">
+                  <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
+                  <p className="text-xs font-medium text-muted">Prayer</p>
+                </div>
+                <h2 id="prayer-heading" className="mt-3 text-[20px] font-medium leading-tight text-ink">A moment to pray</h2>
+                <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-umber sm:text-base">{today.prayer}</p>
               </section>
             )}
+
+            <a href="https://bible.helloao.org/" target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-700 hover:underline">
+              About the Bible source <span aria-hidden="true">↗</span>
+            </a>
           </div>
 
-          <aside className="space-y-5">
+          <aside className="space-y-6">
             {canManage && (
               <section className={cardClass + ' p-5'} aria-labelledby="manage-heading">
-                <p className={eyebrowClass}>Officer tools</p>
+                <p className="text-xs font-medium text-muted">Officer tools</p>
                 <h2 id="manage-heading" className="mt-1 text-lg font-semibold text-ink">Manage today’s reflection</h2>
                 <label className="mt-4 block text-sm font-medium text-ink">
                   Reflection
@@ -195,14 +203,17 @@ export default function VerseOfTheDay() {
               </section>
             )}
 
-            <section className={cardClass + ' p-5'} aria-label="Previous verses">
-              <p className={eyebrowClass}>Previous verses</p>
+            <section aria-label="Previous verses">
+              <div className="flex items-center gap-2.5 border-b border-line pb-2.5">
+                <span aria-hidden="true" className="h-[18px] w-[3px] bg-brand-700" />
+                <h2 className="text-[20px] font-medium leading-tight text-ink">Previous verses</h2>
+              </div>
               {archiveRows.length === 0 ? (
-                <p className="mt-3 text-sm text-muted">Previous devotionals will appear here as they are published.</p>
+                <p className="mt-4 text-sm text-muted">Previous devotionals will appear here as they are published.</p>
               ) : (
-                <ul className="mt-3 divide-y divide-line">
+                <ul className="mt-4 divide-y divide-line">
                   {archiveRows.map((row) => (
-                    <li key={row.date} className="py-3 first:pt-1">
+                    <li key={row.date} className="py-3 first:pt-0">
                       <p className="text-xs text-muted">{displayDate(row.date)}</p>
                       <p className="mt-1 text-sm font-semibold text-ink">{row.reference}</p>
                       {row.reflection && <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{row.reflection}</p>}
@@ -211,10 +222,6 @@ export default function VerseOfTheDay() {
                 </ul>
               )}
             </section>
-
-            <a href="https://bible.helloao.org/" target="_blank" rel="noreferrer" className={subtleButtonClass + ' min-h-11 w-full'}>
-              About the Bible source ↗
-            </a>
           </aside>
         </div>
       )}
